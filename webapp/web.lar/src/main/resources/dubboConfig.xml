@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+      http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- dubbo base config -->
+	<dubbo:application name="dubbo-consumer" />
+	<dubbo:registry protocol="zookeeper" address="${dubbo.zookeeper.ipAndPort}" />
+	
+	<dubbo:provider timeout="60000" retries="0" />
+	
+	<!-- <dubbo:application name="dubbo-consumer" />
+	<dubbo:registry protocol="zookeeper" address="${doubbo.zookeeper.ipAndPort}" />
+	<dubbo:consumer timeout="60000" retries="0"/> -->
+
+	<!-- <dubbo:reference id="larClientUserService" interface="com.sdcloud.api.lar.service.LarClientUserService"/> 
+		<dubbo:reference id="larClientUserAddressService" interface="com.sdcloud.api.lar.service.LarClientUserAddressService"/> 
+		<dubbo:reference id="larRegionService" interface="com.sdcloud.api.lar.service.LarRegionService"/> 
+		<dubbo:reference id="shipmentOrderTimeService" interface="com.sdcloud.api.lar.service.ShipmentOrderTimeService"/> 
+		<dubbo:reference id="shipmentAreaService" interface="com.sdcloud.api.lar.service.ShipmentAreaService"/> 
+		<dubbo:reference id="shipmentOperationService" interface="com.sdcloud.api.lar.service.ShipmentOperationService"/> 
+		<dubbo:reference id="adCustomerService" interface="com.sdcloud.api.lar.service.AdCustomerService"/> 
+		<dubbo:reference id="adPositionService" interface="com.sdcloud.api.lar.service.AdPositionService"/> -->
+	<!-- core -->
+	<dubbo:reference id="moduleService" interface="com.sdcloud.api.core.service.ModuleService" />
+	<dubbo:reference id="functionService" interface="com.sdcloud.api.core.service.FunctionService" timeout="8000"/>
+	<dubbo:reference id="rightService" interface="com.sdcloud.api.core.service.FunctionRightService" />
+	<dubbo:reference id="userService" interface="com.sdcloud.api.core.service.UserService" />
+	<dubbo:reference id="orgService" interface="com.sdcloud.api.core.service.OrgService" />
+	<dubbo:reference id="employeeService" interface="com.sdcloud.api.core.service.EmployeeService" />
+	<dubbo:reference id="tenantService" interface="com.sdcloud.api.core.service.TenantService" />
+	<dubbo:reference id="packageService" interface="com.sdcloud.api.core.service.SalesPackageService" />
+	<dubbo:reference id="roleService" interface="com.sdcloud.api.core.service.RoleService" />
+	<dubbo:reference id="userAuthorityService" interface="com.sdcloud.api.authority.service.UserAuthorityService" timeout="16000"/>
+	<dubbo:reference id="userLoginInfoService" interface="com.sdcloud.api.authority.service.UserLoginInfoService"/>
+	<dubbo:reference id="codeService" interface="com.sdcloud.api.authority.service.CodeService"/>
+	<dubbo:reference id="dicService" interface="com.sdcloud.api.core.service.DicService" />
+	<dubbo:reference id="tblService" interface="com.sdcloud.api.core.service.TableService" />
+	<dubbo:reference id="fieldService" interface="com.sdcloud.api.core.service.TableFieldService" />
+	<dubbo:reference id="formTplService" interface="com.sdcloud.api.core.service.FormTemplateService" />
+	<dubbo:reference id="propTpl" interface="com.sdcloud.api.core.service.PropertyTemplateService" />
+	<dubbo:reference id="orgRightService" interface="com.sdcloud.api.core.service.OrgRightService" />
+	<dubbo:reference id="groupRoleService" interface="com.sdcloud.api.core.service.GroupRoleService"/>
+	<dubbo:reference id="groupUserService" interface="com.sdcloud.api.core.service.GroupUserService"/>
+	<dubbo:reference id="userGroupService" interface="com.sdcloud.api.core.service.UserGroupService"/>
+	<dubbo:reference id="projectService" interface="com.sdcloud.api.core.service.ProjectService"/>
+	<dubbo:reference id="recordService"  interface="com.sdcloud.api.envmapdata.service.RecordService" timeout="10000"/>
+	<dubbo:reference id="eventService" interface="com.sdcloud.api.envsanitation.service.EventService"/>
+	<dubbo:reference id="captchaService" interface="com.sdcloud.api.authority.service.CaptchaService"/>
+	
+	<!-- dubbo redis service -->
+	<dubbo:reference id="valueOperationsService" interface="com.sdcloud.api.cache.redis.service.ValueOperationsService"/>
+	<dubbo:reference id="listOperationsService" interface="com.sdcloud.api.cache.redis.service.ListOperationsService"/>
+	<dubbo:reference id="setOperationsService" interface="com.sdcloud.api.cache.redis.service.SetOperationsService"/>
+	<dubbo:reference id="hashOperationsService" interface="com.sdcloud.api.cache.redis.service.HashOperationsService"/>
+	<dubbo:reference id="moduleDefineService" interface="com.sdcloud.api.cache.redis.service.ModuleDefineService" />
+</beans>

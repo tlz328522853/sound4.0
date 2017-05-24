@@ -1,0 +1,60 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="../config/ehcache.xsd">
+
+    <!-- Sets the path to the directory where cache .data files are created.
+
+         If the path is a Java System Property it is replaced by
+         its value in the running VM.
+
+         The following properties are translated:
+         user.home - User's home directory
+         user.dir - User's current working directory
+         java.io.tmpdir - Default temp file path -->
+    <!-- 二级缓存如果需要将数据保存到硬盘上时，使用的目录 -->
+    <!-- <diskStore path="java.io.tmpdir"/> -->
+    <diskStore path="C:\MyCache"/>
+
+
+    <!--maxElementsInMemory:在内存中缓存的element的最大数目
+        maxElementsOnDisk:在磁盘上缓存的element的最大数目，若是0表示无穷大
+        maxInMemory:在缓存中最多保持多少个对象
+        eternal:设定缓存的elements是否永远不过期，如果为true，则缓存的数据始终有效，如果为false那么还要根据timeToIdleSeconds,timeToLiveSeconds判断
+        overflowToDisk:设定当内存缓存溢出的时候是否将过期的element缓存到磁盘上
+                        以下属性是可选的：
+        timeToIdleSeconds：当缓存在Ehcache中的数据前后两次访问的时间超过timeToIdleSeconds的属性取值时，这些数据便会删除，默认值是0,也就是可闲置时间无穷大
+        timeToLiveSeconds：缓存element的有效生命期，默认是0，也就是element存活时间无穷大
+        diskSpoolBufferSizeMB:这个参数设置DiskStore(磁盘缓存的缓冲区大小，默认是30MB，每个Cache都应该有自己的一个缓冲区)
+        diskPersistent:在JVM重启的时候是否启用磁盘保存Ehcache中的数据，默认是false.
+        diskExpiryThreadIntervalSeconds:磁盘缓存的清理线程运行间隔，默认是120秒，每个120s，相应线程会进行一次Ehcache中数据的清理工作
+        memoryStoreEvictionPolicy:当内存缓存达到最大，有新的element加入的时候，移除缓存中element的策略，默认是LRU（移除最近最少使用）,可选的有LFU(最不常使用)和FIFO(先进先出)
+        -->
+    <defaultCache
+        maxElementsInMemory="10000" 
+        maxElementsOnDisk="10000000"
+        eternal="false"
+        timeToIdleSeconds="120"
+        timeToLiveSeconds="120"
+        overflowToDisk="true"
+        diskExpiryThreadIntervalSeconds="120"
+        memoryStoreEvictionPolicy="LRU"
+        />
+    <!-- 可以由用户定制的设置 -->
+    <!-- name属性可以用于指定一个类或集合等等。 -->
+    <!-- 类：全类名 name="com.atguigu.mapping.bean.Department" -->
+    <!-- 集合属性：全类名.属性名 name="com.atguigu.mapping.bean.Department.empSet" -->
+    <cache name="sampleCache1"
+        maxElementsInMemory="10000"
+        eternal="false"
+        timeToIdleSeconds="300"
+        timeToLiveSeconds="600"
+        overflowToDisk="true"
+        />
+
+    <cache name="sampleCache2"
+        maxElementsInMemory="1000"
+        eternal="true"
+        timeToIdleSeconds="0"
+        timeToLiveSeconds="0"
+        overflowToDisk="false"
+        />
+</ehcache>
