@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleChildOrderDao">
+
+	<insert id="saveList">
+		insert into lar_recycle_child_order
+		(
+		`id`,
+		`order_id`,
+		`number`,
+		`material_id`,
+		`create_user`,
+		`create_date`,
+		`update_user`,
+		`update_date`,
+		`spec_id`,
+		`paidTotalPrice`,
+		`price`,
+		`price_id`
+		)
+		values
+		<foreach item="order" index="index" collection="orders"  separator=",">
+           (
+            #{order.id},
+			#{order.orderId},
+			#{order.number},
+			#{order.material.id},
+			#{order.createUser},
+			#{order.createDate},
+			#{order.updateUser},
+			#{order.updateDate},
+			#{order.recyclingSpec.id},
+			#{order.paidTotalPrice},
+			#{order.recyclingSpec.price},
+			#{order.recyclingSpec.priceId}
+			)
+        </foreach>
+	</insert>
+
+</mapper>

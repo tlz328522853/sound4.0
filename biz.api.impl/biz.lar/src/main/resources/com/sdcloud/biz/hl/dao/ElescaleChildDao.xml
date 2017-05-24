@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2017-05-18
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.hl.dao.ElescaleChildDao">
+	
+	<sql id="Base_Column_List">
+		ec.id, ec.mchid, ec.nickname, ec.potx, ec.poty, ec.house_id,
+		ec.weight1, ec.weight2, ec.weight3, ec.weight4, ec.weight5,
+		ec.weight6, ec.weight7, ec.weight8, ec.weight9, ec.use_number,
+		ec.flush_time, ec.create_date
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, mchid, nickname, potx, poty, house_id,
+		weight1, weight2, weight3, weight4, weight5,
+		weight6, weight7, weight8, weight9, use_number,
+		flush_time, create_date
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{mchid,jdbcType=VARCHAR},
+		#{nickname,jdbcType=VARCHAR}, #{potx,jdbcType=VARCHAR},
+		#{poty,jdbcType=VARCHAR}, #{houseId},
+		#{weight1,jdbcType=INTEGER},
+		#{weight2,jdbcType=INTEGER}, #{weight3,jdbcType=INTEGER},
+		#{weight4,jdbcType=INTEGER}, #{weight5,jdbcType=INTEGER},
+		#{weight6,jdbcType=INTEGER}, #{weight7,jdbcType=INTEGER},
+		#{weight8,jdbcType=INTEGER}, #{weight9,jdbcType=INTEGER},
+		#{useNumber,jdbcType=INTEGER}, #{flushTime,jdbcType=TIMESTAMP},
+		#{createDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.mchid,jdbcType=VARCHAR},
+		#{item.nickname,jdbcType=VARCHAR}, #{item.potx,jdbcType=VARCHAR},
+		#{item.poty,jdbcType=VARCHAR},#{item.houseId},
+		 #{item.weight1,jdbcType=INTEGER},
+		#{item.weight2,jdbcType=INTEGER}, #{item.weight3,jdbcType=INTEGER},
+		#{item.weight4,jdbcType=INTEGER}, #{item.weight5,jdbcType=INTEGER},
+		#{item.weight6,jdbcType=INTEGER}, #{item.weight7,jdbcType=INTEGER},
+		#{item.weight8,jdbcType=INTEGER}, #{item.weight9,jdbcType=INTEGER},
+		#{item.useNumber,jdbcType=INTEGER}, #{item.flushTime,jdbcType=TIMESTAMP},
+		#{item.createDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="houseId!=null">
+				ec.house_id=#{houseId},
+			</if>
+			<if test="mchid!=null &amp;&amp; mchid!=''">
+				ec.mchid=#{mchid},
+			</if>
+			<if test="nickname!=null &amp;&amp; nickname!=''">
+				ec.nickname=#{nickname},
+			</if>
+			<if test="potx!=null &amp;&amp; potx!=''">
+				ec.potx=#{potx},
+			</if>
+			<if test="poty!=null &amp;&amp; poty!=''">
+				ec.poty=#{poty},
+			</if>
+			<if test="weight1!=null">
+				ec.weight1=#{weight1},
+			</if>
+			<if test="weight2!=null">
+				ec.weight2=#{weight2},
+			</if>
+			<if test="weight3!=null">
+				ec.weight3=#{weight3},
+			</if>
+			<if test="weight4!=null">
+				ec.weight4=#{weight4},
+			</if>
+			<if test="weight5!=null">
+				ec.weight5=#{weight5},
+			</if>
+			<if test="weight6!=null">
+				ec.weight6=#{weight6},
+			</if>
+			<if test="weight7!=null">
+				ec.weight7=#{weight7},
+			</if>
+			<if test="weight8!=null">
+				ec.weight8=#{weight8},
+			</if>
+			<if test="weight9!=null">
+				ec.weight9=#{weight9},
+			</if>
+			<if test="useNumber!=null">
+				ec.use_number=#{useNumber},
+			</if>
+			<if test="flushTime!=null">
+				ec.flush_time=#{flushTime},
+			</if>
+			<if test="createDate!=null">
+				ec.create_date=#{createDate},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="elescaleChild" type="com.sdcloud.api.hl.entity.ElescaleChild">
+        <id property="id" column="id"></id>
+		<result property="mchid" column="mchid"></result>
+		<result property="nickname" column="nickname"></result>
+		<result property="potx" column="potx"></result>
+		<result property="poty" column="poty"></result>
+		<result property="houseId" column="house_id"></result>
+		<result property="weight1" column="weight1"></result>
+		<result property="weight2" column="weight2"></result>
+		<result property="weight3" column="weight3"></result>
+		<result property="weight4" column="weight4"></result>
+		<result property="weight5" column="weight5"></result>
+		<result property="weight6" column="weight6"></result>
+		<result property="weight7" column="weight7"></result>
+		<result property="weight8" column="weight8"></result>
+		<result property="weight9" column="weight9"></result>
+		<result property="useNumber" column="use_number"></result>
+		<result property="flushTime" column="flush_time"></result>
+		<result property="createDate" column="create_date"></result>
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="elescaleChild">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_elescale_child ec
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ec.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(ec.id)
+		FROM hl_elescale_child ec
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ec.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO hl_elescale_child
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO hl_elescale_child
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM hl_elescale_child ec
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM hl_elescale_child ec
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ec.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	
+	<update id="update">
+		UPDATE hl_elescale_child ec
+		<include refid="Update_Column"></include>
+		WHERE ec.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE hl_elescale_child ec
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" ec.mchid = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.mchid}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.nickname = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.nickname}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.potx = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.potx}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.poty = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.poty}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight1 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight1}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight2 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight2}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight3 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight3}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight4 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight4}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight5 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight5}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight6 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight6}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight7 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight7}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight8 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight8}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.weight9 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.weight9}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.use_number = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.useNumber}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.flush_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.flushTime}
+               </foreach>
+            </trim>
+			<trim prefix=" ec.create_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ec.id=#{i.id} THEN #{i.createDate}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			ec.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="elescaleChild">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_elescale_child ec
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ec.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(ec.id) 
+		FROM hl_elescale_child ec
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND ec.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND ec.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="elescaleChild">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_elescale_child ec
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND ec.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND ec.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY updateDate DESC,createDate DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="elescaleChild">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_elescale_child ec
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ec.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="elescaleChild">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_elescale_child ec
+        <where>
+            ec.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ec.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+</mapper>

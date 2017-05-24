@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.TableFieldDao">
+	
+	<sql id="tableColumn">
+		fieldEnName,fieldChName,tblEnName,dataType,
+		isNull,isUnique,dicId,dicName,dicLevel,isDisplay,isExtField,extFieldName,
+		sequence,ownerCode,tenantId,creator,createTime,editor,editTime 
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="fieldEnName != null &amp;&amp; fieldEnName != ''">
+				fieldEnName like '%${fieldEnName}%' 
+			</if>
+			<if test="fieldChName != null &amp;&amp; fieldChName != ''">
+				fieldChName like '%${fieldChName}%' 
+			</if>
+			<if test="tblEnName != null &amp;&amp; tblEnName != ''">
+				tblEnName = #{tblEnName} 
+			</if>
+			<if test="isDisplay != null">
+				and isDisplay = #{isDisplay} 
+			</if>
+			<if test="isExtField != null">
+				and isExtField = #{isExtField} 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<insert id="insert" parameterType="TableField" >
+		insert into pf_field(
+			fieldId,<include refid="tableColumn"/>
+		)values(
+			#{fieldId},#{fieldEnName},#{fieldChName},#{tblEnName},#{dataType},
+			#{isNull},#{isUnique},#{dicId},#{dicName},#{dicLevel},#{isDisplay},#{isExtField},#{extFieldName},
+			#{sequence},#{ownerCode},#{tenantId},#{creator},#{createTime},#{editor},#{editTime}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from pf_field
+		<choose>
+			<when test="fieldIds != null &amp;&amp; fieldIds.size() != 0">
+				where fieldId in
+		      	<foreach item="item" index="index" collection="fieldIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="TableField">
+		update pf_field 
+		<set>
+			<if test="fieldEnName != null &amp;&amp; fieldEnName != ''">fieldEnName=#{fieldEnName},</if>
+			<if test="fieldChName != null &amp;&amp; fieldChName != ''">fieldChName=#{fieldChName},</if>
+			<if test="tblEnName != null &amp;&amp; tblEnName != ''">tblEnName=#{tblEnName},</if>
+			<if test="dataType != null &amp;&amp; dataType != ''">dataType=#{dataType},</if>
+			<if test="isNull != null">isNull=#{isNull},</if>
+			<if test="isUnique != null">isUnique=#{isUnique},</if>
+			<if test="dicId != null">dicId=#{dicId},</if>
+			<if test="dicName != null &amp;&amp; dicName != ''">dicName=#{dicName},</if>
+			<if test="dicLevel != null">dicLevel=#{dicLevel},</if>
+			<if test="isDisplay != null">isDisplay=#{isDisplay},</if>
+			<if test="isExtField != null">isExtField=#{isExtField},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+			<if test="ownerCode != null">ownerCode=#{ownerCode},</if>
+			<if test="tenantId != null">tenantId=#{tenantId},</if>
+			<if test="creator != null">creator=#{creator},</if>
+			<if test="createTime != null">createTime=#{createTime},</if>
+			<if test="editor != null">editor=#{editor},</if>
+			<if test="editTime != null">editTime=#{editTime},</if>
+		</set>
+		where fieldId = #{fieldId}
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="TableField">
+		select fieldId,<include refid="tableColumn"/>
+		from pf_field
+		where fieldId = #{fieldId}
+	</select>
+	
+	<select id="findAll" resultType="TableField">
+		select 
+			fieldId, <include refid="tableColumn"/>
+		from 
+			pf_field 
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(fieldId)
+		from 
+			pf_field
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findByPid" parameterType="long" resultType="TableField">
+		select fieldId, <include refid="tableColumn"/> 
+		from pf_field
+		where pid = #{pid}
+	</select>
+	
+	<select id="find" parameterType="map" resultType="String">
+		select extFieldName 
+		from pf_field 
+		<include refid="queryCondition"/>
+	</select>
+	
+</mapper>

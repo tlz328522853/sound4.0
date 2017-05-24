@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.FunctionRightDao">
+	
+	<sql id="moduleColumn">
+		ownerId,ownerType,ownerCode,funcId,funcCode,rightValue,tenantId 
+	</sql>
+	
+	<select id="findFuncIds" parameterType="long" resultType="long">
+		select funcId from pf_func_right 
+		where ownerId = #{ownerId}
+	</select>
+	
+	<insert id="insert" parameterType="list">
+		insert into pf_func_right(
+			funcRightId, <include refid="moduleColumn"/>
+		)values
+		<foreach item="item" index="index" collection="functionRights" separator=",">
+			(#{item.funcRightId}, #{item.ownerId}, #{item.ownerType}, #{item.ownerCode}, #{item.funcId},
+			 #{item.funcCode}, #{item.rightValue}, #{item.tenantId})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByOwnerId" parameterType="long" >
+		delete from 
+			pf_func_right
+		where 
+			ownerId = #{ownerId}
+	</delete>
+	
+	<delete id="deleteOwnerIdAndFunction" >
+		delete from  pf_func_right
+		<where>
+		    <if test="ownerIds != null">
+		      ownerId in
+				<foreach item="item" index="index" collection="ownerIds" open="(" separator="," close=")">
+			      	#{item}
+			    </foreach>
+		    </if>
+		   <if test="funIds != null">
+		     AND funcId in
+			  <foreach item="item" index="index" collection="funIds" open="(" separator="," close=")">
+		        #{item}
+		      </foreach>
+		   </if>
+		   <if test="ownerType != null">
+		     AND ownerType =#{ownerType}
+		   </if>
+		</where>
+	</delete>
+	<select id="findFunctionRight" parameterType="map" resultType="FunctionRight">
+		select * from pf_func_right
+		<where>
+			<if test="userId != null&amp;&amp; userId != -1">
+				( ownerType = 2
+				AND ownerId=#{userId})
+		    </if>
+		    <if test="roleIds != null">
+		       or (ownerType = 1
+				AND ownerId in
+				<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+			      		#{item}
+			    </foreach>
+				
+				)
+		    </if>
+		    <if test="roleId != null">
+		       or (ownerType = 1
+				AND  ownerId=#{roleId})
+		    </if>
+		     <if test="groupId != null &amp;&amp; groupId != -1">
+		       or (ownerType = 3
+				AND ownerId=#{groupId})
+		    </if>
+		</where>
+		GROUP BY funcRightId
+	</select>
+	<select id="checkGroupRoleAuthrity" resultType="FunctionRight">
+		select * from pf_func_right
+		<where>
+			<if test="ownerType != null&amp;&amp; ownerType != -1">
+				 ownerType = #{ownerType}
+		    </if>
+		    <if test="ownerIds != null">
+				AND ownerId in
+				<foreach item="item" index="index" collection="ownerIds" open="(" separator="," close=")">
+			      		#{item}
+			    </foreach>
+		    </if>
+		    <if test="funcId != null">
+				AND  funcId=#{funcId}
+		    </if>
+		     
+		</where>
+		GROUP BY funcRightId
+	</select>
+	<select id="hasFunctionRight" parameterType="map" resultType="FunctionRight">
+		select * from pf_func_right
+		<where>
+			<if test="userId != null&amp;&amp; userId != -1">
+				( ownerType = 2
+				AND ownerId=#{userId}
+				<if test="functionId != null">
+				AND funcId=#{functionId}
+				</if>
+				)
+		    </if>
+		    
+		    <if test="roleId != null">
+		       or (ownerType = 1
+				AND  ownerId=#{roleId}
+				<if test="functionId != null">
+				AND funcId=#{functionId}
+				</if>
+				)
+		    </if>
+		     <if test="groupId != null &amp;&amp; groupId != -1">
+		       or (ownerType = 3
+				AND ownerId=#{groupId}
+				<if test="functionId != null">
+				AND funcId=#{functionId}
+				</if>
+				)
+		    </if>
+		</where>
+		GROUP BY funcRightId
+	</select>
+	
+	<select id="needUpFunctionByPackage" parameterType="map" resultType="Long">
+		SELECT pf.funcId from pf_function pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		where  pspm.salesPackageId=#{packageId}
+		and pf.funcId not in (
+		SELECT pf.funcId from pf_function pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		INNER JOIN pf_tenant pt
+		on pt.salesPackageId=pspm.salesPackageId
+		INNER JOIN pf_user pu 
+		on pu.tenantId=pt.tenantId
+		where  pu.userId=#{userId}
+		GROUP BY pf.funcId
+		)
+		GROUP BY pf.funcId
+	</select>
+	<select id="needUpFunctionByRole" parameterType="map" resultType="Long">
+		SELECT pf.funcId from pf_function pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		where  pspm.salesPackageId=#{packageId}
+		and pf.funcId not in (
+		SELECT pfr.funcId from pf_func_right pfr
+		where pfr.ownerType=1 and pfr.ownerId=#{roleId}
+		GROUP BY pfr.funcId
+		)
+		GROUP BY pf.funcId
+	</select>
+	<select id="needUpFunctionByGroup" parameterType="map" resultType="Long">
+		SELECT pf.funcId from pf_function pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		where  pspm.salesPackageId=#{packageId}
+		and pf.funcId not in (
+		SELECT pfr.funcId from pf_func_right pfr
+		where pfr.ownerType=3 and pfr.ownerId=#{groupId}
+		GROUP BY pfr.funcId
+		)
+		GROUP BY pf.funcId
+	</select>
+</mapper>

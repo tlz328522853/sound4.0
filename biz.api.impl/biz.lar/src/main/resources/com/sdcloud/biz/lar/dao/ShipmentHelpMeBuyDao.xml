@@ -1,0 +1,1244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipmentHelpMeBuyDao">
+
+	<sql id="shipmentLarHelpMeBuyColumns">
+		a.id AS "id",
+		a.qr_code AS "qrCode",
+		a.order_no AS "orderNo",
+		a.biz_type AS "bizType",
+		a.order_time AS "orderTime",
+		a.order_state AS
+		"orderState",
+		a.org AS "org",
+		a.area AS "area",
+		a.source AS "source",
+		a.customer_id AS "customerId",
+		a.receiver AS "receiver",
+		a.goods_name AS
+		"goodsName",
+		a.buy_type AS "buyType",
+		a.shop AS "shop",
+		a.schedule_date
+		AS "scheduleDate",
+		a.schedule_time AS "scheduleTime",
+		a.estimate_cost AS
+		"estimateCost",
+		a.distance AS "distance",
+		a.service_cost AS
+		"serviceCost",
+		a.coupon AS "coupon",
+		a.save_money AS "saveMoney",
+		a.total_cost AS "totalCost",
+		a.pay_model AS "payModel",
+		a.pay_type AS  "payType",
+		a.charge_id AS "chargeId",
+		a.paid_status AS "paidStatus",
+		a.paid AS "paid",
+		a.paid_remark AS "paidRemark",
+		a.remark_text AS "remarkText",
+		a.remark_voice AS "remarkVoice",
+		a.sales_man AS "salesMan",
+		a.take_time AS "takeTime",
+		a.distribute_time
+		AS "distributeTime",
+		a.finish_time AS "finishTime",
+		a.cancel_time AS
+		"cancelTime",
+		a.save_money_one AS "saveMoneyOne",
+		a.receivable_service
+		AS "receivableService",
+		a.receivable_goods AS "receivableGoods",
+		a.different_cost AS "differentCost",
+		a.service_remark_text AS
+		"serviceRemarkText",
+		a.service_remark_voice AS "serviceRemarkVoice",
+		a.pic AS "pic",
+		a.create_user AS "createUser",
+		a.create_date AS
+		"createDate",
+		a.update_user AS "updateUser",
+		a.update_date AS
+		"updateDate",
+		a.cancel_user AS "cancelUser",
+		a.cancel_reason AS
+		"cancelReason",
+		a.take_user AS "takeUser",
+		a.distribute_user AS
+		"distributeUser",
+		a.task_explain AS "taskExplain",
+		a.province AS
+		"province",
+		a.evaluate AS "evaluate",
+		a.turn_order_time AS
+		"turnOrderTime",
+		a.turn_order_type AS "turnOrderType",
+		a.turn_order_user AS "turnOrderUser",
+		a.previous_sales_man AS
+		"previousSalesMan",
+		a.account_time AS "accountTime",
+		a.server_time AS
+		"serverTime",
+		a.time_type AS "timeType",
+		a.cancel_take_time as
+		"cancelTakeTime",
+		a.cancel_take_reason as "cancelTakeReason",
+		a.cancel_take_user as "cancelTakeUser",
+		a.cancel_distribute_time as
+		"cancelDistributeTime",
+		a.cancel_distribute_user as
+		"cancelDistributeUser",
+		a.cancel_distribute_reason as
+		"cancelDistributeReason",
+		a.finish_user as "finishUser",
+		a.turn_order_remarks as "turnOrderRemarks",
+		a.way_bill_no AS
+		"wayBillNo",
+		a.finish_remarks as "finishRemarks",
+		a.balance as
+		"balance",
+		a.account_state as "accountState",
+		a.account_user as
+		"accountUser",
+		a.account_remarks as "accountRemarks",
+		b.name as
+		"areaName",
+		c.userName as "userName",
+		c.contact as "contact",
+		c.address
+		as "address",
+		c.detail as "detail",
+		f.name as "shopName",
+		d.name as
+		"salesManName",
+		e.name as "previousSalesManName",
+		w.regionName as
+		"provinceName",
+		vc.name as "voucherName",
+		v.amount as "voucherMoney",
+		a.grab_order as "grabOrder",
+        a.grab_order_time as "grabOrderTime",
+        a.area_list as "areaList",
+        a.grab_order_min as "grabOrderMin"
+	</sql>
+
+	<sql id="shipmentLarHelpMeBuyJoins">
+		left join lar_shipmentArea b on a.area=b.id
+		left join
+		lar_address c on c.id=a.receiver
+		left join lar_operation d on
+		d.id=a.sales_man
+		left join lar_operation e on e.id=a.previous_sales_man
+		left join lar_shop f on f.id=a.shop
+		left join lar_region w on
+		w.regionId =a.province
+		left join lar_voucher v on v.id=a.coupon
+		left
+		join lar_voucher_condition vc on vc.id=v.condition
+	</sql>
+	<select id="getById" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		SELECT
+		<include refid="shipmentLarHelpMeBuyColumns" />
+		FROM lar_help_me_buy a
+		<include refid="shipmentLarHelpMeBuyJoins" />
+		<where>
+			a.id=#{id}
+			<if test="map!=null and map.size()>0">
+				<foreach collection="map.keys" item="item" index="key">
+					and
+					a.${item}=#{map[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="getByNo" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		SELECT
+		<include refid="shipmentLarHelpMeBuyColumns" />
+		FROM lar_help_me_buy a
+		<include refid="shipmentLarHelpMeBuyJoins" />
+		<where>
+			a.order_no=#{orderNo}
+		</where>
+	</select>
+	<select id="getByIds" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		SELECT
+		<include refid="shipmentLarHelpMeBuyColumns" />
+		FROM lar_help_me_buy a
+		<include refid="shipmentLarHelpMeBuyJoins" />
+		<where>
+			a.id in 
+			<foreach collection="list" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</select>
+	<select id="orderDetail" resultType="com.sdcloud.api.lar.entity.OrderDetailDTO">
+		select
+		a.id AS "id",
+		a.order_no AS "orderNo",
+		a.biz_type AS "bizType",
+		a.order_state AS "orderState",
+		a.receiver AS "addressee",
+		c.userName as
+		"addresseeUserName",
+		c.contact as "addresseeContact",
+		CONCAT(c.address,c.detail) as "addresseeAddress",
+		<!-- c.address as "addresseeAddress", -->
+		a.schedule_date AS "scheduleDate",
+		a.schedule_time
+		AS "scheduleTime",
+		a.task_explain as "taskExplain",
+		a.coupon AS
+		"coupon",
+		v.amount as "voucherMoney",
+		a.remark_text AS "remarkText",
+		a.distribute_time AS "distributeTime",
+		a.distribute_user AS
+		"distributeUser",
+		a.sales_man AS "salesMan",
+		d.name as "salesManName",
+		a.goods_name AS "goodsName",
+		a.distance AS "distance",
+		a.service_cost AS
+		"serviceCost",
+		a.pay_type AS "payType",
+		f.name as "shopName",
+		a.shop AS
+		"shop",
+		a.estimate_cost AS "estimateCost",
+		a.total_cost AS "totalCost",
+		a.buy_type AS "buyType",
+		a.province as "province",
+		w.regionName as
+		"provinceName",
+		a.way_bill_no as "wayBillNo",
+		a.service_remark_text as
+		"serviceRemarkText",
+		a.receivable_service as "receivableService",
+		a.receivable_goods as "receivableGoods",
+		a.different_cost as
+		"differentCost",
+		a.finish_remarks as "finishRemarks",
+		a.order_time as
+		"orderTime",
+		a.org as "org",
+		a.save_money as "saveMoney",
+		a.save_money_one as "saveMoneyOne",
+		a.evaluate as "evaluate",
+		a.finish_time as "finishTime"
+		from lar_help_me_buy a
+		left join
+		lar_address c on c.id=a.receiver
+		left join lar_shop f on f.id=a.shop
+		left join lar_operation d on d.id=a.sales_man
+		left join lar_voucher v
+		on v.id=a.coupon
+		left join lar_region w on w.regionId =a.province
+		<where>
+			a.order_no=#{id}
+			<if test="map!=null and map.size()>0">
+				<foreach collection="map.keys" item="item" index="key">
+					and
+					a.${item}=#{map[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="getEvaluation" resultType="com.sdcloud.api.lar.entity.OrderDetailDTO">
+		SELECT
+		a.evaluate AS "evaluate"
+		FROM
+		lar_help_me_buy a
+		<where>
+			a.evaluate IS NOT NULL
+			AND a.order_state = '已完成'
+			AND a.sales_man = #{id}
+		</where>
+	</select>
+	<select id="findAll" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		SELECT
+		<include refid="shipmentLarHelpMeBuyColumns" />
+		FROM lar_help_me_buy a
+		<include refid="shipmentLarHelpMeBuyJoins" />
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key">
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by a.update_date desc,a.create_date desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+	<insert id="save">
+		INSERT INTO lar_help_me_buy(
+		id,
+		qr_code,
+		order_no,
+		biz_type,
+		order_time,
+		order_state,
+		org,
+		area,
+		source,
+		customer_id,
+		receiver,
+		goods_name,
+		buy_type,
+		shop,
+		schedule_date,
+		schedule_time,
+		estimate_cost,
+		distance,
+		service_cost,
+		coupon,
+		save_money,
+		total_cost,
+		pay_model,
+		pay_type,
+		charge_id,
+		paid_remark,
+		paid_status,
+		paid,
+		remark_text,
+		remark_voice,
+		sales_man,
+		take_time,
+		distribute_time,
+		finish_time,
+		cancel_time,
+		save_money_one,
+		receivable_service,
+		receivable_goods,
+		different_cost,
+		service_remark_text,
+		service_remark_voice,
+		pic,
+		cancel_user,
+		cancel_reason,
+		take_user,
+		distribute_user,
+		task_explain,
+		province,
+		evaluate,
+		turn_order_time,
+		turn_order_type,
+		turn_order_user,
+		previous_sales_man,
+		account_time,
+		server_time,
+		time_type,
+		cancel_take_time ,
+		cancel_take_reason ,
+		cancel_take_user ,
+		cancel_distribute_time,
+		cancel_distribute_user,
+		cancel_distribute_reason,
+		turn_order_remarks,
+		finish_user,
+		create_user,
+		create_date,
+		update_user,
+		update_date,
+		finish_remarks,
+		balance,
+		account_state,
+		account_user,
+		account_remarks,
+		way_bill_no,
+		grab_order,
+		grab_order_time,
+		area_list,
+		grab_order_min
+		) VALUES (
+		#{id},
+		#{qrCode},
+		#{orderNo},
+		#{bizType},
+		#{orderTime},
+		#{orderState},
+		#{org},
+		#{area},
+		#{source},
+		#{customerId},
+		#{receiver},
+		#{goodsName},
+		#{buyType},
+		#{shop},
+		#{scheduleDate},
+		#{scheduleTime},
+		#{estimateCost},
+		#{distance},
+		#{serviceCost},
+		#{coupon},
+		#{saveMoney},
+		#{totalCost},
+		#{payModel},
+		#{payType},
+		#{chargeId},
+		#{paidRemark},
+		#{paidStatus},
+		#{paid},
+		#{remarkText},
+		#{remarkVoice},
+		#{salesMan},
+		#{takeTime},
+		#{distributeTime},
+		#{finishTime},
+		#{cancelTime},
+		#{saveMoneyOne},
+		#{receivableService},
+		#{receivableGoods},
+		#{differentCost},
+		#{serviceRemarkText},
+		#{serviceRemarkVoice},
+		#{pic},
+		#{cancelUser},
+		#{cancelReason},
+		#{takeUser},
+		#{distributeUser},
+		#{taskExplain},
+		#{province},
+		#{evaluate},
+		#{turnOrderTime},
+		#{turnOrderType},
+		#{turnOrderUser},
+		#{previousSalesMan},
+		#{accountTime},
+		#{serverTime},
+		#{timeType},
+		#{cancelTakeTime},
+		#{cancelTakeReason},
+		#{cancelTakeUser},
+		#{cancelDistributeTime},
+		#{cancelDistributeUser},
+		#{cancelDistributeReason},
+		#{turnOrderRemarks},
+		#{finishUser},
+		#{createUser},
+		#{createDate},
+		#{updateUser},
+		#{updateDate},
+		#{finishRemarks},
+		#{balance},
+		#{accountState},
+		#{accountUser},
+		#{accountRemarks},
+		#{wayBillNo},
+		#{grabOrder},
+		#{grabOrderTime},
+		#{areaList},
+		#{grabOrderMin}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE lar_help_me_buy
+		<set>
+			<if test="grabOrderTime!=null and grabOrderTime!=''">
+				grab_order_time = #{grabOrderTime},
+			</if>
+			<if test="qrCode!=null and qrCode!=''">
+				qr_code = #{qrCode},
+			</if>
+			<if test="orderNo!=null and orderNo!=''">
+				order_no = #{orderNo},
+			</if>
+			<if test="bizType!=null and bizType!=''">
+				biz_type = #{bizType},
+			</if>
+			<if test="orderTime!=null and orderTime!=''">
+				order_time = #{orderTime},
+			</if>
+			<if test="orderState!=null and orderState!=''">
+				order_state = #{orderState},
+			</if>
+			<if test="org!=null and org!=''">
+				org = #{org},
+			</if>
+			<if test="area!=null and area!=''">
+				area = #{area},
+			</if>
+			<if test="source!=null and source!=''">
+				source = #{source},
+			</if>
+			<if test="customerId!=null and customerId!=''">
+				customer_id = #{customerId},
+			</if>
+			<if test="receiver!=null and receiver!=''">
+				receiver = #{receiver},
+			</if>
+			<if test="goodsName!=null and goodsName!=''">
+				goods_name = #{goodsName},
+			</if>
+			<if test="buyType!=null and buyType!=''">
+				buy_type = #{buyType},
+			</if>
+			<if test="paidStatus!=null and paidStatus!=''">
+				paid_status = #{paidStatus},
+			</if>
+			<if test="paid!=null and paid!=''">
+				paid = #{paid},
+			</if>
+			<if test="shop!=null and shop!=''">
+				shop = #{shop},
+			</if>
+			<if test="scheduleDate!=null and scheduleDate!=''">
+				schedule_date = #{scheduleDate},
+			</if>
+			<if test="scheduleTime!=null and scheduleTime!=''">
+				schedule_time = #{scheduleTime},
+			</if>
+			<if test="estimateCost!=null and estimateCost!=''">
+				estimate_cost = #{estimateCost},
+			</if>
+			<if test="distance!=null and distance!=''">
+				distance = #{distance},
+			</if>
+			<if test="serviceCost!=null and serviceCost!=''">
+				service_cost = #{serviceCost},
+			</if>
+			<if test="coupon!=null and coupon!=''">
+				coupon = #{coupon},
+			</if>
+			<if test="saveMoney!=null and saveMoney!=''">
+				save_money = #{saveMoney},
+			</if>
+			<if test="totalCost!=null and totalCost!=''">
+				total_cost = #{totalCost},
+			</if>
+			<if test="payModel!=null and payModel!=''">
+				pay_model = #{payModel},
+			</if>
+			<if test="payType!=null and payType!=''">
+				pay_type = #{payType},
+			</if>
+			<if test="remarkText!=null and remarkText!=''">
+				remark_text = #{remarkText},
+			</if>
+			<if test="remarkVoice!=null and remarkVoice!=''">
+				remark_voice = #{remarkVoice},
+			</if>
+			<if test="salesMan!=null and salesMan!=''">
+				sales_man = #{salesMan},
+			</if>
+			<if test="takeTime!=null and takeTime!=''">
+				take_time = #{takeTime},
+			</if>
+			<if test="distributeTime!=null and distributeTime!=''">
+				distribute_time = #{distributeTime},
+			</if>
+			<if test="finishTime!=null and finishTime!=''">
+				finish_time = #{finishTime},
+			</if>
+			<if test="cancelTime!=null and cancelTime!=''">
+				cancel_time = #{cancelTime},
+			</if>
+			<if test="saveMoneyOne!=null and saveMoneyOne!=''">
+				save_money_one = #{saveMoneyOne},
+			</if>
+			<if test="receivableService!=null and receivableService!=''">
+				receivable_service = #{receivableService},
+			</if>
+			<if test="receivableGoods!=null and receivableGoods!=''">
+				receivable_goods = #{receivableGoods},
+			</if>
+			<if test="differentCost!=null and differentCost!=''">
+				different_cost = #{differentCost},
+			</if>
+			<if test="serviceRemarkText!=null and serviceRemarkText!=''">
+				service_remark_text = #{serviceRemarkText},
+			</if>
+			<if test="serviceRemarkVoice!=null and serviceRemarkVoice!=''">
+				service_remark_voice = #{serviceRemarkVoice},
+			</if>
+			<if test="pic!=null and pic!=''">
+				pic = #{pic},
+			</if>
+			<if test="createUser!=null and createUser!=''">
+				create_user = #{createUser},
+			</if>
+			<if test="updateUser!=null and updateUser!=''">
+				update_user = #{updateUser},
+			</if>
+			<if test="updateDate!=null and updateDate!=''">
+				update_date = #{updateDate},
+			</if>
+			<if test="cancelUser!=null and cancelUser!=''">
+				cancel_user = #{cancelUser},
+			</if>
+			<if test="cancelReason!=null and cancelReason!=''">
+				cancel_reason = #{cancelReason},
+			</if>
+			<if test="takeUser!=null and takeUser!=''">
+				take_user = #{takeUser},
+			</if>
+			<if test="distributeUser!=null and distributeUser!=''">
+				distribute_user = #{distributeUser},
+			</if>
+			<if test="taskExplain!=null and taskExplain!=''">
+				task_explain = #{taskExplain},
+			</if>
+			<if test="province!=null and province!=''">
+				province = #{province},
+			</if>
+			<if test="evaluate!=null and evaluate!=''">
+				evaluate = #{evaluate},
+			</if>
+			<if test="turnOrderTime!=null and turnOrderTime!=''">
+				turn_order_time = #{turnOrderTime},
+			</if>
+			<if test="turnOrderType!=null and turnOrderType!=''">
+				turn_order_type = #{turnOrderType},
+			</if>
+			<if test="turnOrderUser!=null and turnOrderUser!=''">
+				turn_order_user = #{turnOrderUser},
+			</if>
+			<if test="previousSalesMan!=null and previousSalesMan!=''">
+				previous_sales_man = #{previousSalesMan},
+			</if>
+			<if test="accountTime!=null and accountTime!=''">
+				account_time = #{accountTime},
+			</if>
+			<if test="serverTime!=null and serverTime!=''">
+				server_time = #{serverTime},
+			</if>
+			<if test="timeType!=null and timeType!=''">
+				time_type = #{timeType},
+			</if>
+			<if test="cancelTakeTime!=null and cancelTakeTime!=''">
+				cancel_take_time = #{cancelTakeTime},
+			</if>
+			<if test="cancelTakeReason!=null and cancelTakeReason!=''">
+				cancel_take_reason = #{cancelTakeReason},
+			</if>
+			<if test="cancelTakeUser!=null and cancelTakeUser!=''">
+				cancel_take_user = #{cancelTakeUser},
+			</if>
+			<if test="cancelDistributeTime!=null and cancelDistributeTime!=''">
+				cancel_distribute_time = #{cancelDistributeTime},
+			</if>
+			<if test="cancelDistributeUser!=null and cancelDistributeUser!=''">
+				cancel_distribute_user = #{cancelDistributeUser},
+			</if>
+			<if test="cancelDistributeReason!=null and cancelDistributeReason!=''">
+				cancel_distribute_reason = #{cancelDistributeReason},
+			</if>
+			<if test="finishUser!=null and finishUser!=''">
+				finish_user = #{finishUser},
+			</if>
+			<if test="turnOrderRemarks!=null and turnOrderRemarks!=''">
+				turn_order_remarks = #{turnOrderRemarks},
+			</if>
+			<if test="finishRemarks!=null and finishRemarks!=''">
+				finish_remarks = #{finishRemarks},
+			</if>
+			<if test="balance!=null and balance!=''">
+				balance = #{balance},
+			</if>
+			<if test="accountState!=null and accountState!=''">
+				account_state = #{accountState},
+			</if>
+			<if test="accountUser!=null and accountUser!=''">
+				account_user = #{accountUser},
+			</if>
+			<if test="accountRemarks!=null and accountRemarks!=''">
+				account_remarks = #{accountRemarks},
+			</if>
+			<if test="wayBillNo!=null and wayBillNo!=''">
+				way_bill_no = #{wayBillNo},
+			</if>
+			<if test="grabOrder!=null and grabOrder!=''">
+				grab_order = #{grabOrder},
+			</if>
+			<if test="chargeId!=null and chargeId!=''">
+				charge_id = #{chargeId}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM lar_help_me_buy
+		WHERE id = #{id}
+	</update>
+
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id) from lar_help_me_buy
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key" separator="and">
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select count(id) from lar_help_me_buy a
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key">
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="larPager.extendList!=null and larPager.extendList.size()>0">
+				<foreach collection="larPager.extendList" item="item">
+					<if
+						test="item.key=='order_start_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='order_end_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='take_start_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='take_end_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='distribute_start_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='distribute_end_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if test="item.key=='order_no' and item.value!=null and item.value!=''">
+						and a.order_no = #{item.value}
+					</if>
+					<if test="item.key=='area' and item.value!=null and item.value!=''">
+						and a.area = #{item.value}
+					</if>
+					<if test="item.key=='evaluate' and item.value!=null and item.value!=''">
+						and a.evaluate = #{item.value}
+					</if>
+					<if
+						test="item.key=='order_state' and item.value!=null and item.value!=''">
+						and a.order_state = #{item.value}
+					</if>
+					<if test="item.key=='sales_man' and item.value!=null and item.value!=''">
+						and a.sales_man = #{item.value}
+					</if>
+					<if test="item.key=='time_type' and item.value!=null and item.value!=''">
+						and a.time_type = #{item.value}
+					</if>
+					<if test="item.key=='biz_type' and item.value!=null and item.value!=''">
+						and a.biz_type = #{item.value}
+					</if>
+					<if test="item.key=='account_state' and item.value=='已完'">
+                        and a.account_state = '已完'
+                    </if>
+                    <if test="item.key=='account_state' and item.value=='未完'">
+                        and (a.account_state = '未完' or a.account_state is null)
+                    </if>
+					<if
+						test="item.key=='account_user' and item.value!=null and item.value!=''">
+						and a.account_user = #{item.value}
+					</if>
+					<if
+						test="item.key=='account_start_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='account_end_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="("
+					separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		select
+		<include refid="shipmentLarHelpMeBuyColumns" />
+		from lar_help_me_buy a
+		<include refid="shipmentLarHelpMeBuyJoins" />
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key">
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="larPager.extendList!=null and larPager.extendList.size()>0">
+				<foreach collection="larPager.extendList" item="item">
+					<if
+						test="item.key=='order_start_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='order_end_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='take_start_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='take_end_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='distribute_start_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='distribute_end_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if test="item.key=='order_no' and item.value!=null and item.value!=''">
+						and a.order_no = #{item.value}
+					</if>
+					<if test="item.key=='area' and item.value!=null and item.value!=''">
+						and a.area = #{item.value}
+					</if>
+					<if test="item.key=='evaluate' and item.value!=null and item.value!=''">
+						and a.evaluate = #{item.value}
+					</if>
+					<if
+						test="item.key=='order_state' and item.value!=null and item.value!=''">
+						and a.order_state = #{item.value}
+					</if>
+					<if test="item.key=='sales_man' and item.value!=null and item.value!=''">
+						and a.sales_man = #{item.value}
+					</if>
+					<if test="item.key=='time_type' and item.value!=null and item.value!=''">
+						and a.time_type = #{item.value}
+					</if>
+					<if test="item.key=='biz_type' and item.value!=null and item.value!=''">
+						and a.biz_type = #{item.value}
+					</if>
+					<if test="item.key=='account_state' and item.value=='已完'">
+                        and a.account_state = '已完'
+                    </if>
+                    <if test="item.key=='account_state' and item.value=='未完'">
+                        and (a.account_state = '未完' or a.account_state is null)
+                    </if>
+					<if
+						test="item.key=='account_user' and item.value!=null and item.value!=''">
+						and a.account_user = #{item.value}
+					</if>
+					<if
+						test="item.key=='account_start_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+					<if
+						test="item.key=='account_end_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d %T')
+					</if>
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="("
+					separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by a.order_time desc,a.create_date desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<select id="countByOrgIdsOne" resultType="java.lang.Long">
+		select count(id) from lar_help_me_buy a
+		<where>
+			((a.order_state='等待接单' and a.grab_order=10) or
+			(a.order_state='等待接单' and a.grab_order=22) or
+			(a.order_state='等待接单' and a.grab_order=33))
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+						 index="key">
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="larPager.extendList!=null and larPager.extendList.size()>0">
+				<foreach collection="larPager.extendList" item="item">
+					<if
+							test="item.key=='order_start_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[>=]]>
+						#{item.value}
+					</if>
+					<if
+							test="item.key=='order_end_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='take_start_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='take_end_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='distribute_start_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='distribute_end_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if test="item.key=='order_no' and item.value!=null and item.value!=''">
+						and a.order_no = #{item.value}
+					</if>
+					<if test="item.key=='area' and item.value!=null and item.value!=''">
+						and a.area = #{item.value}
+					</if>
+					<if test="item.key=='evaluate' and item.value!=null and item.value!=''">
+						and a.evaluate = #{item.value}
+					</if>
+					<if
+							test="item.key=='order_state' and item.value!=null and item.value!=''">
+						and a.order_state = #{item.value}
+					</if>
+					<if test="item.key=='sales_man' and item.value!=null and item.value!=''">
+						and a.sales_man = #{item.value}
+					</if>
+					<if test="item.key=='time_type' and item.value!=null and item.value!=''">
+						and a.time_type = #{item.value}
+					</if>
+					<if test="item.key=='biz_type' and item.value!=null and item.value!=''">
+						and a.biz_type = #{item.value}
+					</if>
+					<if
+							test="item.key=='account_state' and item.value!=null and item.value!=''">
+						and a.account_state = #{item.value}
+					</if>
+					<if
+							test="item.key=='account_user' and item.value!=null and item.value!=''">
+						and a.account_user = #{item.value}
+					</if>
+					<if
+							test="item.key=='account_start_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='account_end_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="("
+						 separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="findByOrgIdsOne" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		select
+		<include refid="shipmentLarHelpMeBuyColumns" />
+		from lar_help_me_buy a
+		<include refid="shipmentLarHelpMeBuyJoins" />
+		<where>
+			((a.order_state='等待接单' and a.grab_order=10) or
+			(a.order_state='等待接单' and a.grab_order=22) or
+			(a.order_state='等待接单' and a.grab_order=33))
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+						 index="key">
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="larPager.extendList!=null and larPager.extendList.size()>0">
+				<foreach collection="larPager.extendList" item="item">
+					<if
+							test="item.key=='order_start_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='order_end_time' and item.value!=null and item.value!=''">
+						and a.order_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='take_start_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='take_end_time' and item.value!=null and item.value!=''">
+						and a.take_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='distribute_start_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='distribute_end_time' and item.value!=null and item.value!=''">
+						and a.distribute_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if test="item.key=='order_no' and item.value!=null and item.value!=''">
+						and a.order_no = #{item.value}
+					</if>
+					<if test="item.key=='area' and item.value!=null and item.value!=''">
+						and a.area = #{item.value}
+					</if>
+					<if test="item.key=='evaluate' and item.value!=null and item.value!=''">
+						and a.evaluate = #{item.value}
+					</if>
+					<if
+							test="item.key=='order_state' and item.value!=null and item.value!=''">
+						and a.order_state = #{item.value}
+					</if>
+					<if test="item.key=='sales_man' and item.value!=null and item.value!=''">
+						and a.sales_man = #{item.value}
+					</if>
+					<if test="item.key=='time_type' and item.value!=null and item.value!=''">
+						and a.time_type = #{item.value}
+					</if>
+					<if test="item.key=='biz_type' and item.value!=null and item.value!=''">
+						and a.biz_type = #{item.value}
+					</if>
+					<if
+							test="item.key=='account_state' and item.value!=null and item.value!=''">
+						and a.account_state = #{item.value}
+					</if>
+					<if
+							test="item.key=='account_user' and item.value!=null and item.value!=''">
+						and a.account_user = #{item.value}
+					</if>
+					<if
+							test="item.key=='account_start_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[>=]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+					<if
+							test="item.key=='account_end_time' and item.value!=null and item.value!=''">
+						and a.account_time <![CDATA[<]]>
+						DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+					</if>
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="("
+						 separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by a.update_date desc,a.create_date desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<update id="updateState">
+		update lar_help_me_buy
+		set
+		<foreach collection="params.keys" item="item" index="key"
+			separator=",">
+			${item}=#{params[${item}]}
+		</foreach>
+		where id IN
+		<foreach collection="ids" item="id" close=")" open="("
+			separator=",">
+			#{id}
+		</foreach>
+	</update>
+	
+	<update id="updateGrab">
+        update lar_help_me_buy
+        set
+        <foreach collection="result.keys" item="item" index="key" separator=",">
+            ${item}=#{result[${item}]}
+        </foreach>
+        where id IN
+        <foreach collection="list" item="id" close=")" open="(" separator=",">
+            #{id}
+        </foreach>
+        
+        <foreach collection="condition.keys" item="item" index="key">
+            and ${item}=#{condition[${item}]}
+        </foreach>
+        
+    </update>
+	
+	
+	<select id="findByIds" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		select
+		<include refid="shipmentLarHelpMeBuyColumns" />
+		from lar_help_me_buy a
+		<include refid="shipmentLarHelpMeBuyJoins" />
+		<where>
+			a.id in
+			<foreach collection="ids" close=")" open="(" separator=","
+				item="id">
+				#{id}
+			</foreach>
+		</where>
+	</select>
+	<select id="getBalance" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		SELECT
+		sum(a.balance) as
+		balance,
+		a.customer_id as customerId
+		FROM
+		lar_help_me_buy AS a
+		LEFT JOIN lar_clientuser AS c ON a.customer_id=c.customerId
+		WHERE
+		a.order_state = '已完成'
+		and c.`enable`=0
+		and balance >0
+		GROUP BY
+		a.customer_id
+	</select>
+	<select id="getCount" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		SELECT
+		count(*) as "count",
+		a.customer_id as "customerId"
+		FROM
+		lar_help_me_buy AS a
+		LEFT JOIN  `lar_clientuser` b ON a.customer_id = b.customerId 
+		WHERE
+		a.order_state = '已完成'
+		and b.enable=0	
+		GROUP BY
+		a.customer_id
+	</select>
+	<!-- 返回优惠券 -->
+    <update id="backCoupon">
+        UPDATE lar_help_me_buy s,lar_voucher v 
+        SET v.use_type = "可用" 
+        <where>
+        	 s.coupon=v.id AND
+        	 s.id in 
+			 <foreach collection="ids" item="id" open="(" close=")" separator=",">
+			 	#{id}
+			 </foreach>
+        </where>
+    </update>
+    <!-- 自动派单 -->
+    <select id="findInvalidOrder" resultType="com.sdcloud.api.lar.entity.ShipmentHelpMeBuy">
+		select 
+		 orderNo,grabOrder,orderState,area,distributeUser,salesMan
+		FROM
+		(
+			SELECT 
+			s.order_no as orderNo,
+			s.grab_order as grabOrder,
+			s.order_State as orderState,
+			o.area,o.sysUser as distributeUser,o.id as salesMan
+			FROM lar_help_me_buy s 
+			LEFT JOIN lar_operation o
+			ON (o.`enable` = 0 AND FIND_IN_SET(o.area,s.area_list) )
+			WHERE 
+			s.grab_order=31 and s.paid_status='已付款' and s.order_State='等待接单' and 
+			UNIX_TIMESTAMP(s.order_time) + ${time} &lt; UNIX_TIMESTAMP(#{date})
+			ORDER BY RAND()
+		) as ship
+		GROUP BY orderNo
+	</select>
+	<update id="batchUpdate">
+		update lar_help_me_buy
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" grab_order = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   when order_no=#{i.orderNo} then #{i.grabOrder}
+               </foreach>
+            </trim>
+            <trim prefix=" order_State = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   when order_no=#{i.orderNo} then #{i.orderState}
+               </foreach>
+            </trim>
+            <trim prefix=" area = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   when order_no=#{i.orderNo} then #{i.area}
+               </foreach>
+            </trim>
+            <trim prefix=" distribute_user = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   when order_no=#{i.orderNo} then #{i.distributeUser}
+               </foreach>
+            </trim>
+            <trim prefix=" sales_man = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   when order_no=#{i.orderNo} then #{i.salesMan}
+               </foreach>
+            </trim>
+            <trim prefix=" distribute_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   when order_no=#{i.orderNo} then #{i.distributeTime}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			order_no in 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.orderNo}
+          </foreach>
+		</where>
+	</update>
+</mapper>

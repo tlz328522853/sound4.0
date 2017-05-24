@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.AssetCarDao">
+
+	<sql id="assetCarColumn">
+		assetTypeId,carNumber,carType,carCode,carName,cardNumber,
+		brandModel,manufacturer,stopSign,productionDate,engineNumber,
+		chassisNumber,carFrameNumber,tankSize,tankVolume,oilType,maxSpeed,
+		dtu,carModel,carConcreteModel,seats,ratedPower,displacement,
+		kerbMass,ratedCarryingCapacity,firstKilometers,commonKilometers,
+		state,measureUnit,priceUnit,model,remark 
+	</sql>
+	
+	<insert id="insert" parameterType="AssetCar">
+		insert into so_asset_car(
+			assetId, <include refid="assetCarColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			#{item.assetId}, #{item.assetTypeId}, #{item.carNumber}, #{item.carType}, #{item.carCode}, #{item.carName}, #{item.cardNumber},
+			#{item.brandModel}, #{item.manufacturer}, #{item.stopSign}, #{item.productionDate}, #{item.engineNumber},
+			#{item.chassisNumber}, #{item.carFrameNumber}, #{item.tankSize}, #{item.tankVolume}, #{item.oilType}, #{item.maxSpeed},
+			#{item.dtu}, #{item.carModel}, #{item.carConcreteModel}, #{item.seats}, #{item.ratedPower}, #{item.displacement},
+			#{item.kerbMass}, #{item.ratedCarryingCapacity}, #{item.firstKilometers}, #{item.commonKilometers},
+			#{item.state}, #{item.measureUnit}, #{item.priceUnit}, #{item.model}, #{item.remark}
+		)
+		</foreach>
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from so_asset_car
+		<choose>
+			<when test="assetIds != null &amp;&amp; assetIds.size() != 0">
+				where assetId in
+		      	<foreach item="item" index="index" collection="assetIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="AssetCar">
+		update so_asset_car
+		<set>
+			<if test="carNumber != null &amp;&amp; carNumber != ''">carNumber = #{carNumber},</if>
+			<if test="carType != null">carType = #{carType},</if>
+			<if test="carCode != null &amp;&amp; carCode != ''">carCode = #{carCode},</if>
+			<if test="carName != null &amp;&amp; carName != ''">carName = #{carName},</if>
+			cardNumber = #{cardNumber},
+			<if test="brandModel != null &amp;&amp; brandModel != ''">brandModel = #{brandModel},</if>
+			<if test="manufacturer != null">manufacturer = #{manufacturer},</if>
+			<if test="stopSign != null">stopSign = #{stopSign},</if>
+			<if test="productionDate != null">productionDate = #{productionDate},</if>
+			<if test="engineNumber != null &amp;&amp; engineNumber != ''">engineNumber = #{engineNumber},</if>
+			<if test="chassisNumber != null &amp;&amp; chassisNumber != ''">chassisNumber = #{chassisNumber},</if>
+			<if test="carFrameNumber != null &amp;&amp; carFrameNumber != ''">carFrameNumber = #{carFrameNumber},</if>
+			<if test="tankSize != null &amp;&amp; tankSize != ''">tankSize = #{tankSize},</if>
+			<if test="tankVolume != null &amp;&amp; tankVolume != ''">tankVolume = #{tankVolume},</if>
+			<if test="oilType != null">oilType = #{oilType},</if>
+			<if test="maxSpeed != null">maxSpeed = #{maxSpeed},</if>
+			<if test="dtu != null &amp;&amp; dtu != ''">dtu = #{dtu},</if>
+			<if test="carModel != null &amp;&amp; carModel != ''">carModel = #{carModel},</if>
+			<if test="carConcreteModel != null &amp;&amp; carConcreteModel != ''">carConcreteModel = #{carConcreteModel},</if>
+			<if test="seats != null">seats = #{seats},</if>
+			<if test="ratedPower != null">ratedPower = #{ratedPower},</if>
+			<if test="displacement != null &amp;&amp; displacement != ''">displacement = #{displacement},</if>
+			<if test="kerbMass != null">kerbMass = #{kerbMass},</if>
+			<if test="ratedCarryingCapacity != null">ratedCarryingCapacity = #{ratedCarryingCapacity},</if>
+			<if test="firstKilometers != null">firstKilometers = #{firstKilometers},</if>
+			<if test="commonKilometers != null">commonKilometers = #{commonKilometers},</if>
+			<if test="state != null">state = #{state},</if>
+			<if test="measureUnit != null">measureUnit = #{measureUnit},</if>
+			<if test="priceUnit != null &amp;&amp; priceUnit != ''">priceUnit = #{priceUnit},</if>
+			<if test="model != null &amp;&amp; model != ''">model = #{model},</if>
+			<if test="remark != null &amp;&amp; remark != ''">remark = #{remark},</if>
+		</set>
+		where assetId = #{assetId}
+	</update>
+	
+	<sql id="assetCarCondition">
+		<where>
+			
+			<if test="includeSub == 'true' &amp;&amp; newOrgId != null">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<!-- <if test="includeSub == 'false' &amp;&amp; newOrgId != null">
+	   			and newOrgId = #{newOrgId} 
+	   		</if> -->
+	   		<!-- 华丽的分割线 -->
+			
+			<if test="newOrgId != null &amp;&amp; (includeSub == null || includeSub == 'false')">
+				and newOrgId = #{newOrgId}
+			</if>
+			<if test="newOrgIds != null &amp;&amp; (includeSub == null || includeSub == 'false')">
+				and newOrgId in
+				<foreach item="item" index="index" collection="newOrgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="carType != null ">
+				and carType = #{carType}
+			</if>
+			<if test="carNumber != null &amp;&amp; carNumber != ''">
+				and carNumber LIKE '%${carNumber}%'
+			</if>
+			<if test="cardNumber != null &amp;&amp; cardNumber != ''">
+				and cardNumber LIKE '%${cardNumber}%'
+			</if>
+			<if test="stopSign != null">
+				and stopSign = #{stopSign}
+			</if>
+			<if test="(Monitor != null &amp;&amp; Monitor == 'true') || equipFlag == 1">
+				and cardNumber is not null and cardNumber != ''
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.assetId)
+		from so_asset_car c
+	    left outer join so_asset_object o
+	    on c.assetId = o.assetId
+		<include refid="assetCarCondition"></include>
+		<!-- <where>
+	   		<if test="includeSub == 'true' &amp;&amp; newOrgId != null">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false' &amp;&amp; newOrgId != null">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+	   	</where> -->
+	</select>
+	
+	<select id="findAllBy" resultType="AssetCar">
+	    select 	
+	    	o.assetId,o.assetTypeId,o.assetName,o.assetCode,o.oldOrgId,
+			o.newOrgId,o.changeTime,o.produceDate,o.leaseOrganization,
+			o.leasePerson,o.leasePhone,o.tenantOrganization,o.tenantPerson,
+			o.tenantPhone,o.leaseBeginTime,o.leaseEndTime,o.leaseDays,
+			o.useOrganization,o.useBeginDate,o.useEndDate,o.oldOwnerCode,
+			o.ownerCode,o.tenantId,
+	    	
+	    	carNumber,carType,carCode,carName,cardNumber,
+			brandModel,manufacturer,stopSign,productionDate,engineNumber,
+			chassisNumber,carFrameNumber,tankSize,tankVolume,oilType,maxSpeed,
+			dtu,carModel,carConcreteModel,seats,ratedPower,displacement,
+			kerbMass,ratedCarryingCapacity,firstKilometers,commonKilometers,
+			state,measureUnit,priceUnit,model,remark,
+			
+			org.name as orgName
+	    from so_asset_car c
+	    left join so_asset_object o
+	    on c.assetId = o.assetId
+	    left outer join pf_org org
+	    on o.newOrgId = org.orgId
+	    <include refid="assetCarCondition"></include>
+	    <!-- <where>
+	   		<if test="includeSub == 'true'">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false'">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+	   	</where> -->
+		<if test="pager != null">
+			order by 
+			<choose>
+				<when test="Monitor != null &amp;&amp; Monitor == 'true'">
+					${pager.orderSql} 
+				</when>
+				<otherwise>
+					o.${pager.orderSql} 
+				</otherwise>
+			</choose>
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+		<select id="findAllCarChassisNumber" resultType="Map">
+	     select 	cardNumber,chassisNumber
+	    from so_asset_car  where cardNumber is NOT null  and chassisNumber is NOT null
+	</select>
+	 
+	<select id="findById" parameterType="long" resultType="AssetCar">
+	    select 	
+	    	o.assetId,o.assetTypeId,o.assetName,o.assetCode,o.oldOrgId,
+			o.newOrgId,o.changeTime,o.produceDate,o.leaseOrganization,
+			o.leasePerson,o.leasePhone,o.tenantOrganization,o.tenantPerson,
+			o.tenantPhone,o.leaseBeginTime,o.leaseEndTime,o.leaseDays,
+			o.useOrganization,o.useBeginDate,o.useEndDate,o.oldOwnerCode,
+			o.ownerCode,o.tenantId,
+	    	
+	    	carNumber,carType,carCode,carName,cardNumber,
+			brandModel,manufacturer,stopSign,productionDate,engineNumber,
+			chassisNumber,carFrameNumber,tankSize,tankVolume,oilType,maxSpeed,
+			dtu,carModel,carConcreteModel,seats,ratedPower,displacement,
+			kerbMass,ratedCarryingCapacity,firstKilometers,commonKilometers,
+			state,measureUnit,priceUnit,model,remark ,
+			
+			org.name as orgName
+	    from so_asset_car d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+	    left outer join pf_org org
+	    on o.newOrgId = org.orgId
+	    where o.assetId = #{assetId}
+	</select>
+	<select id="findAssetCarByCarNo" parameterType="String" resultType="AssetCar">
+	    select 	
+	    	o.assetId,o.assetTypeId,o.assetName,o.assetCode,o.oldOrgId,
+			o.newOrgId,o.changeTime,o.produceDate,o.leaseOrganization,
+			o.leasePerson,o.leasePhone,o.tenantOrganization,o.tenantPerson,
+			o.tenantPhone,o.leaseBeginTime,o.leaseEndTime,o.leaseDays,
+			o.useOrganization,o.useBeginDate,o.useEndDate,o.oldOwnerCode,
+			o.ownerCode,o.tenantId,
+	    	
+	    	carNumber,carType,carCode,carName,cardNumber,
+			brandModel,manufacturer,stopSign,productionDate,engineNumber,
+			chassisNumber,carFrameNumber,tankSize,tankVolume,oilType,maxSpeed,
+			dtu,carModel,carConcreteModel,seats,ratedPower,displacement,
+			kerbMass,ratedCarryingCapacity,firstKilometers,commonKilometers,
+			state,measureUnit,priceUnit,model,remark ,
+			
+			org.name as orgName
+	    from so_asset_car d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+	    left outer join pf_org org
+	    on o.newOrgId = org.orgId
+	    where carNumber = #{carNumber}
+	</select>
+	<select id="findAssetCarByCarNos" parameterType="Map" resultType="AssetCar">
+	    select 	
+	    	o.assetId,carNumber
+	    from so_asset_car d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+	    left outer join pf_org org
+	    on o.newOrgId = org.orgId
+	    <where>
+			
+	   		<!-- 华丽的分割线 -->
+	   		<if test="carNumber != null &amp;&amp; carNumber != ''">
+			   carNumber = #{carNumber}
+			</if>
+			<if test="carNumbers != null &amp;&amp; carNumbers != ''">
+				and carNumber in
+				<foreach item="item" index="index" collection="carNumbers" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="newOrgId != null &amp;&amp; newOrgId > 0">
+				and newOrgId = #{newOrgId}
+			</if>
+		</where>	
+	</select>
+	<select id="findAssetCarByCompanyIds" parameterType="Map" resultType="AssetCar">
+	    select 	
+	    	o.assetId, d.carNumber, d.carName, d.cardNumber
+	    from so_asset_car d
+	    left join so_asset_object o on d.assetId = o.assetId
+	    left join pf_org org on o.newOrgId = org.orgId
+	    <where>
+			<if test="companyIds != null &amp;&amp; companyIds != ''">
+				and org.companyId in
+				<foreach item="item" index="index" collection="companyIds" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		order by d.carNumber
+	</select>
+	
+	<select id="findAssetCarByParam" parameterType="map" resultType="AssetCar">
+		select assetId, assetTypeId, carNumber, cardNumber
+		from so_asset_car
+		<where>
+			<if test="assetId != null">
+				and assetId != #{assetId}
+			</if>
+			<if test="cardNumber != null &amp;&amp; cardNumber != ''">
+				and cardNumber = #{cardNumber}
+			</if>
+		</where>
+	</select>
+	
+</mapper>

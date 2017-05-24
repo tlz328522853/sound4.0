@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.PlatformLogDao">
+
+	<sql id="platformLogColumn">
+		methodName,
+		paramJson,
+		resultJson,
+		relatedId,
+		relatedChar,
+		optionUser,
+		optionIp,
+		dataCode,
+		optionTime,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="PlatformLog" useGeneratedKeys="true" keyProperty="id">
+		insert into pf_platform_log(
+			 <include refid="platformLogColumn"/>		
+		)values(
+		    #{methodName},
+			#{paramJson},#{resultJson},#{relatedId},#{relatedChar},
+			#{optionUser},#{optionIp},#{dataCode},
+			#{optionTime},#{tenantId})
+		
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from pf_platform_log
+		<choose>
+			<when test="platformLogIds != null &amp;&amp; platformLogIds.size() != 0">
+				where platformLogId in
+		      	<foreach item="item" index="index" collection="platformLogIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="platformLog">
+		update pf_platform_log
+		<set>
+		    <if test="methodName != null &amp;&amp; methodName !=''">
+				 methodName = #{methodName},
+			</if>
+			<if test="paramJson != null &amp;&amp; paramJson != ''">paramJson = #{paramJson},</if>
+			<if test="resultJson != null &amp;&amp; resultJson != ''">resultJson = #{resultJson},</if>
+			<if test="optionUser != null &amp;&amp; optionUser != ''">optionUser = #{optionUser},</if>
+			<if test="dataCode != null &amp;&amp; dataCode != ''">dataCode = #{dataCode},</if>
+			<if test="optionTime != null &amp;&amp; optionTime != ''">optionTime = #{optionTime},</if>
+			<if test="tenantId != null &amp;&amp; tenantId != ''">tenantId = #{tenantId},</if>
+		</set>
+		where platformLogId = #{platformLogId}
+	</update>
+	
+	<sql id="platformLogCondition">
+		<where>
+			<if test="id != null ">
+				o.id = #{id}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.id)
+		from pf_platform_log c
+		INNER JOIN pf_group_user pgu
+		on pgu.userId=c.optionUser
+		INNER JOIN pf_user_group pug
+		on pug.groupId=pgu.groupId
+		INNER JOIN pf_user pu 
+		on pu.userId=c.optionUser
+	   <where>
+			<if test="optionUser != null &amp;&amp; optionUser !=0">
+				c.optionUser = #{optionUser}
+			</if>
+			<if test="relatedId != null &amp;&amp; relatedId !=0">
+				and c.relatedId = #{relatedId}
+			</if>
+			<if test="relatedChar != null &amp;&amp; relatedChar !=''">
+				and c.relatedChar like '%${relatedChar}%'
+			</if>
+			<if test="optionIp != null &amp;&amp; optionIp !=''">
+				and c.optionIp like '%${optionIp}%'
+			</if>
+			<if test="optionUserName != null &amp;&amp; optionUserName !=''">
+				and pu.name like '%${optionUserName}%'
+			</if>
+			<if test="optionUserGroupName != null &amp;&amp; optionUserGroupName !=''">
+				and pug.name like '%${optionUserGroupName}%'
+			</if>
+			<if test="methodName != null &amp;&amp; methodName !=''">
+				and c.methodName like '%${methodName}%'
+			</if>
+			<if test="dataCode != null &amp;&amp; dataCode !=''">
+				and c.dataCode like '%${dataCode}%'
+			</if>
+			<if test="startOptionTime != null &amp;&amp; endOptionTime !=null">
+				and c.optionTime between #{startOptionTime} and #{endOptionTime}
+			</if>
+			
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="PlatformLog">
+	    select id,pu.name as optionUserName ,pug.name as optionUserGroupName,
+	    methodName,
+		paramJson,
+		resultJson,
+		relatedId,
+		relatedChar,
+		optionUser,
+		optionIp,
+		dataCode,
+		optionTime,
+		c.tenantId
+	    from pf_platform_log c
+	    INNER JOIN pf_group_user pgu
+		on pgu.userId=c.optionUser
+		INNER JOIN pf_user_group pug
+		on pug.groupId=pgu.groupId
+		INNER JOIN pf_user pu 
+		on pu.userId=c.optionUser
+	   <where>
+			<if test="optionUser != null &amp;&amp; optionUser !=0">
+				c.optionUser = #{optionUser}
+			</if>
+			<if test="relatedId != null &amp;&amp; relatedId !=0">
+				and c.relatedId = #{relatedId}
+			</if>
+			<if test="relatedChar != null &amp;&amp; relatedChar !=''">
+				and c.relatedChar like '%${relatedChar}%'
+			</if>
+			<if test="optionIp != null &amp;&amp; optionIp !=''">
+				and c.optionIp like '%${optionIp}%'
+			</if>
+			<if test="optionUserName != null &amp;&amp; optionUserName !=''">
+				and pu.name like '%${optionUserName}%'
+			</if>
+			<if test="optionUserGroupName != null &amp;&amp; optionUserGroupName !=''">
+				and pug.name like '%${optionUserGroupName}%'
+			</if>
+			<if test="methodName != null &amp;&amp; methodName !=''">
+				and c.methodName like '%${methodName}%'
+			</if>
+			<if test="dataCode != null &amp;&amp; dataCode !=''">
+				and c.dataCode like '%${dataCode}%'
+			</if>
+			
+			<if test="startOptionTime != null &amp;&amp; endOptionTime !=null">
+				and c.optionTime between #{startOptionTime} and #{endOptionTime}
+			</if>
+			
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+		</where>
+		<if test="pager != null">
+			<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

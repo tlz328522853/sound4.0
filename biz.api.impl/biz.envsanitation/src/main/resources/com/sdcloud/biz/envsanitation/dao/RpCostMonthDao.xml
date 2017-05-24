@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.RpCostMonthDao">
+
+	<sql id="rpCostMonthColumn">
+		id,companyId,month,salary,socialSecurity,personInsurance,welfare,
+		overtimePay,rental,carDepreciation,oilFee,
+		carRepair,carWater,carElectric,carInsurance,carTax,yearInspect,
+		stationLease,stationDepreciation,stationRepair,
+		stationWater,stationElectric,stationMaintain,stationOther,toiletLease,
+		toiletDepreciation,toiletRepair,toiletWater,toiletElectric,toiletOther,
+		sparePart,taskConsume,labourProtect,hardware,platformCommunicate,
+		managerSalary,manageCar,fieldFee,projectCommunicate,projectRent,projectWaterElectric,
+		projectOffice,projectEntertain,projectTravel,projectStationManage,projectToiletManage,
+		platformOther,facilitiesDepreciation,facilitiesLease,facilitiesRepair,
+		projectOther,headquarters,marketFee,outsourceFee,injuryFee,tax,
+		
+		logisticsSalary,logisticsSocialSecurity,logisticsPersonInsurance,logisticsWelfare,logisticsOvertimePay,
+		logisticsCarRental,logisticsCarDepreciation,logisticsCarOilFee,logisticsCarRepair,logisticsCarWater,
+		logisticsCarElectric,logisticsCarInsurance,logisticsCarTax,logisticsCarYearInspect,logisticsFieldRental,
+		logisticsFieldDepreciation,logisticsFieldRepair,logisticsFieldWater,logisticsFieldElectric,logisticsFieldOther,
+		logisticsTaskConsume,logisticsLabourProtect,logisticsManagerSalary,logisticsProjectSecurity,logisticsProjectInsurance,
+		logisticsProjectWelfare,logisticsProjectOvertimePay,logisticsProjectCommunicate,logisticsProjectWaterElectric,
+		logisticsProjectOffice,logisticsProjectElectrical,logisticsProjectFurniture,logisticsProjectEntertain,
+		logisticsProjectTravel,logisticsProjectHeadquarters,logisticsProjectOther,
+		
+		adOperateFee,adPasteFee,adTwoPrintingCost,adSupplementCost,adStaffPostingFee,adMaterialFee,adBreachAmount,adOperateOther,
+		adManagerSalary,adManageSpecialist,adManageSecurity,adManageInsurance,adManageWelfare,adManageOvertimePay,adManageTraffic,
+		adManageCommunicate,adManageTravel,adManageOther,adSaleFee,adSaleCommission,adTax,
+		
+		resourceSalary,resourcePersonSecurity,resourceInsurance,resourceWelfare,resourceOvertimePay,resourceLease,resourceDepreciation,
+		resourceOilFee,resourceRepair,resourceWater,resourceElectric,resourceSecurity,resourceCarTax,resourceYearInspect,resourceTaskConsume,
+		resourceLabourProtect,resourceProjectSalary,resourceProjectSecurity,resourceProjectInsurance,resourceProjectWelfare,resourceProjectOvertimePay,
+		resourceProjectCommunicate,resourceProjectWaterElectric,resourceProjectOffice,resourceProjectElectrical,resourceProjectFurniture,
+		resourceProjectEntertain,resourceProjectTravel,resourceHeadquarters,resourceProjectOther,resourceTax,
+		
+		isSame,notSameReason,remarks,isFile,tenantId,createUser,createTime,updateUser,updateTime
+	</sql>
+	
+	<insert id="insert" parameterType="RpCostMonth">
+		insert into rp_cost_month (
+			<include refid="rpCostMonthColumn"/>		
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+		#{item.id},#{item.companyId},#{item.month},#{item.salary},#{item.socialSecurity},#{item.personInsurance},#{item.welfare},
+		#{item.overtimePay},#{item.rental},#{item.carDepreciation},#{item.oilFee},#{item.carRepair},
+		#{item.carWater},#{item.carElectric},#{item.carInsurance},#{item.carTax},#{item.yearInspect},#{item.stationLease},
+		#{item.stationDepreciation},#{item.stationRepair},#{item.stationWater},#{item.stationElectric},#{item.stationMaintain},
+		#{item.stationOther},#{item.toiletLease},#{item.toiletDepreciation},#{item.toiletRepair},#{item.toiletWater},
+		#{item.toiletElectric},#{item.toiletOther},#{item.sparePart},#{item.taskConsume},#{item.labourProtect},#{item.hardware},
+		#{item.platformCommunicate},#{item.managerSalary},#{item.manageCar},#{item.fieldFee},#{item.projectCommunicate},
+		#{item.projectRent},#{item.projectWaterElectric},#{item.projectOffice},#{item.projectEntertain},#{item.projectTravel},
+		#{item.projectStationManage},#{item.projectToiletManage},#{item.platformOther},#{item.facilitiesDepreciation},
+		#{item.facilitiesLease},#{item.facilitiesRepair},#{item.projectOther},#{item.headquarters},#{item.marketFee},
+		#{item.outsourceFee},#{item.injuryFee},#{item.tax},
+		
+		#{item.logisticsSalary},#{item.logisticsSocialSecurity},#{item.logisticsPersonInsurance},#{item.logisticsWelfare},#{item.logisticsOvertimePay},
+		#{item.logisticsCarRental},#{item.logisticsCarDepreciation},#{item.logisticsCarOilFee},#{item.logisticsCarRepair},#{item.logisticsCarWater},
+		#{item.logisticsCarElectric},#{item.logisticsCarInsurance},#{item.logisticsCarTax},#{item.logisticsCarYearInspect},#{item.logisticsFieldRental},
+		#{item.logisticsFieldDepreciation},#{item.logisticsFieldRepair},#{item.logisticsFieldWater},#{item.logisticsFieldElectric},
+		#{item.logisticsFieldOther},#{item.logisticsTaskConsume},#{item.logisticsLabourProtect},#{item.logisticsManagerSalary},
+		#{item.logisticsProjectSecurity},#{item.logisticsProjectInsurance},#{item.logisticsProjectWelfare},#{item.logisticsProjectOvertimePay},
+		#{item.logisticsProjectCommunicate},#{item.logisticsProjectWaterElectric},#{item.logisticsProjectOffice},#{item.logisticsProjectElectrical},
+		#{item.logisticsProjectFurniture},#{item.logisticsProjectEntertain},#{item.logisticsProjectTravel},#{item.logisticsProjectHeadquarters},
+		#{item.logisticsProjectOther},
+		
+		#{item.adOperateFee},#{item.adPasteFee},#{item.adTwoPrintingCost},#{item.adSupplementCost},#{item.adStaffPostingFee},
+		#{item.adMaterialFee},#{item.adBreachAmount},#{item.adOperateOther},#{item.adManagerSalary},#{item.adManageSpecialist},
+		#{item.adManageSecurity},#{item.adManageInsurance},#{item.adManageWelfare},#{item.adManageOvertimePay},#{item.adManageTraffic},
+		#{item.adManageCommunicate},#{item.adManageTravel},#{item.adManageOther},#{item.adSaleFee},#{item.adSaleCommission},#{item.adTax},
+		
+		#{item.resourceSalary},#{item.resourcePersonSecurity},#{item.resourceInsurance},#{item.resourceWelfare},#{item.resourceOvertimePay},
+		#{item.resourceLease},#{item.resourceDepreciation},#{item.resourceOilFee},#{item.resourceRepair},#{item.resourceWater},
+		#{item.resourceElectric},#{item.resourceSecurity},#{item.resourceCarTax},#{item.resourceYearInspect},#{item.resourceTaskConsume},
+		#{item.resourceLabourProtect},#{item.resourceProjectSalary},#{item.resourceProjectSecurity},#{item.resourceProjectInsurance},
+		#{item.resourceProjectWelfare},#{item.resourceProjectOvertimePay},#{item.resourceProjectCommunicate},
+		#{item.resourceProjectWaterElectric},#{item.resourceProjectOffice},#{item.resourceProjectElectrical},
+		#{item.resourceProjectFurniture},#{item.resourceProjectEntertain},#{item.resourceProjectTravel},
+		#{item.resourceHeadquarters},#{item.resourceProjectOther},#{item.resourceTax},
+		
+		#{item.isSame},#{item.notSameReason},#{item.remarks},#{item.isFile},#{item.tenantId},#{item.createUser},now(),#{item.updateUser},
+		now()
+		)
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="RpCostMonth">
+		update rp_cost_month
+		<set>
+		month = #{month},salary = #{salary},socialSecurity = #{socialSecurity},personInsurance = #{personInsurance},welfare = #{welfare},
+		overtimePay = #{overtimePay},rental = #{rental},carDepreciation = #{carDepreciation},oilFee = #{oilFee},carRepair = #{carRepair},
+		carWater = #{carWater},carElectric = #{carElectric},carInsurance = #{carInsurance},carTax = #{carTax},yearInspect = #{yearInspect},
+		stationLease = #{stationLease},stationDepreciation = #{stationDepreciation},stationRepair = #{stationRepair},stationWater= #{stationWater},
+		stationElectric = #{stationElectric},stationMaintain = #{stationMaintain},stationOther = #{stationOther},toiletLease = #{toiletLease},
+		toiletDepreciation = #{toiletDepreciation},toiletRepair = #{toiletRepair},toiletWater = #{toiletWater},toiletElectric = #{toiletElectric},
+		toiletOther = #{toiletOther},sparePart = #{sparePart},taskConsume = #{taskConsume},labourProtect = #{labourProtect},hardware = #{hardware},
+		platformCommunicate = #{platformCommunicate},managerSalary = #{managerSalary},manageCar = #{manageCar},fieldFee = #{fieldFee},
+		projectCommunicate = #{projectCommunicate},projectRent = #{projectRent},projectWaterElectric = #{projectWaterElectric},
+		projectOffice = #{projectOffice},projectEntertain = #{projectEntertain},projectTravel = #{projectTravel},
+		projectStationManage = #{projectStationManage},projectToiletManage = #{projectToiletManage},platformOther = #{platformOther},
+		facilitiesDepreciation = #{facilitiesDepreciation},facilitiesLease = #{facilitiesLease},facilitiesRepair = #{facilitiesRepair},
+		projectOther = #{projectOther},headquarters = #{headquarters},marketFee = #{marketFee},outsourceFee = #{outsourceFee},injuryFee= #{injuryFee},tax = #{tax},
+		
+		logisticsSalary = #{logisticsSalary},logisticsSocialSecurity = #{logisticsSocialSecurity},logisticsPersonInsurance = #{logisticsPersonInsurance},
+		logisticsWelfare = #{logisticsWelfare},logisticsOvertimePay = #{logisticsOvertimePay},logisticsCarRental = #{logisticsCarRental},
+		logisticsCarDepreciation = #{logisticsCarDepreciation},logisticsCarOilFee = #{logisticsCarOilFee},logisticsCarRepair = #{logisticsCarRepair},
+		logisticsCarWater = #{logisticsCarWater},logisticsCarElectric = #{logisticsCarElectric},logisticsCarInsurance = #{logisticsCarInsurance},
+		logisticsCarTax = #{logisticsCarTax},logisticsCarYearInspect = #{logisticsCarYearInspect},logisticsFieldRental = #{logisticsFieldRental},
+		logisticsFieldDepreciation = #{logisticsFieldDepreciation},logisticsFieldRepair = #{logisticsFieldRepair},logisticsFieldWater = #{logisticsFieldWater},
+		logisticsFieldElectric = #{logisticsFieldElectric},logisticsFieldOther = #{logisticsFieldOther},logisticsTaskConsume = #{logisticsTaskConsume},
+		logisticsLabourProtect = #{logisticsLabourProtect},logisticsManagerSalary = #{logisticsManagerSalary},logisticsProjectSecurity = #{logisticsProjectSecurity},
+		logisticsProjectInsurance = #{logisticsProjectInsurance},logisticsProjectWelfare = #{logisticsProjectWelfare},
+		logisticsProjectOvertimePay = #{logisticsProjectOvertimePay},logisticsProjectCommunicate = #{logisticsProjectCommunicate},
+		logisticsProjectWaterElectric= #{logisticsProjectWaterElectric},logisticsProjectOffice = #{logisticsProjectOffice},
+		logisticsProjectElectrical= #{logisticsProjectElectrical},logisticsProjectFurniture = #{logisticsProjectFurniture},
+		logisticsProjectEntertain = #{logisticsProjectEntertain},logisticsProjectTravel = #{logisticsProjectTravel},
+		logisticsProjectHeadquarters = #{logisticsProjectHeadquarters},logisticsProjectOther= #{logisticsProjectOther},
+		
+		adOperateFee = #{adOperateFee},adPasteFee = #{adPasteFee},adTwoPrintingCost = #{adTwoPrintingCost},adSupplementCost = #{adSupplementCost},
+		adStaffPostingFee = #{adStaffPostingFee},adMaterialFee = #{adMaterialFee},adBreachAmount = #{adBreachAmount},adOperateOther = #{adOperateOther},
+		adManagerSalary = #{adManagerSalary},adManageSpecialist = #{adManageSpecialist},adManageSecurity = #{adManageSecurity},
+		adManageInsurance = #{adManageInsurance},adManageWelfare = #{adManageWelfare},adManageOvertimePay = #{adManageOvertimePay},
+		adManageTraffic = #{adManageTraffic},adManageCommunicate = #{adManageCommunicate},adManageTravel = #{adManageTravel},adManageOther = #{adManageOther},
+		adSaleFee = #{adSaleFee},adSaleCommission = #{adSaleCommission},adTax = #{adTax},
+		
+		resourceSalary = #{resourceSalary},resourcePersonSecurity = #{resourcePersonSecurity},resourceInsurance = #{resourceInsurance},
+		resourceWelfare = #{resourceWelfare},resourceOvertimePay = #{resourceOvertimePay},resourceLease = #{resourceLease},
+		resourceDepreciation = #{resourceDepreciation},resourceOilFee = #{resourceOilFee},resourceRepair = #{resourceRepair},
+		resourceWater = #{resourceWater},resourceElectric = #{resourceElectric},resourceSecurity = #{resourceSecurity},
+		resourceCarTax = #{resourceCarTax},resourceYearInspect = #{resourceYearInspect},resourceTaskConsume = #{resourceTaskConsume},
+		resourceLabourProtect = #{resourceLabourProtect},resourceProjectSalary = #{resourceProjectSalary},resourceProjectSecurity = #{resourceProjectSecurity},
+		resourceProjectInsurance = #{resourceProjectInsurance},resourceProjectWelfare = #{resourceProjectWelfare},
+		resourceProjectOvertimePay = #{resourceProjectOvertimePay},resourceProjectCommunicate = #{resourceProjectCommunicate},
+		resourceProjectWaterElectric = #{resourceProjectWaterElectric},resourceProjectOffice = #{resourceProjectOffice},
+		resourceProjectElectrical = #{resourceProjectElectrical},resourceProjectFurniture = #{resourceProjectFurniture},
+		resourceProjectEntertain = #{resourceProjectEntertain},resourceProjectTravel = #{resourceProjectTravel},resourceHeadquarters = #{resourceHeadquarters},
+		resourceProjectOther = #{resourceProjectOther},resourceTax = #{resourceTax},
+		
+		isSame = #{isSame},notSameReason = #{notSameReason},remarks = #{remarks},updateUser = #{updateUser},updateTime = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(r.id) from rp_cost_month r
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findAllBy" parameterType="map" resultType="RpCostMonth">
+		select r.*,
+		  (
+			IFNULL(r.salary ,0 ) + IFNULL(r.socialSecurity ,0 ) + IFNULL(r.personInsurance ,0 ) + IFNULL(r.welfare ,0 ) + IFNULL(r.overtimePay ,0 ) + IFNULL(r.rental ,0 ) + IFNULL(r.carDepreciation ,0 ) 
+			+ IFNULL(r.oilFee ,0 ) + IFNULL(r.carRepair ,0 ) + IFNULL(r.carWater ,0 ) + IFNULL(r.carElectric ,0 ) + IFNULL(r.carInsurance ,0 ) + IFNULL(r.carTax ,0 ) + IFNULL(r.yearInspect ,0 ) 
+			+ IFNULL(r.facilitiesDepreciation ,0 ) + IFNULL(r.facilitiesLease ,0 ) + IFNULL(r.facilitiesRepair ,0 ) + IFNULL(r.stationLease ,0 ) + IFNULL(r.stationDepreciation ,0 ) + IFNULL(r.stationRepair ,0 ) 
+			+ IFNULL(r.stationWater,0 ) + IFNULL(r.stationElectric ,0 ) + IFNULL(r.stationMaintain ,0 ) + IFNULL(r.stationOther ,0 ) + IFNULL(r.toiletLease ,0 ) + IFNULL(r.toiletDepreciation ,0 ) + IFNULL(r.toiletRepair ,0 ) 
+			+ IFNULL(r.toiletWater ,0 ) + IFNULL(r.toiletElectric ,0 ) + IFNULL(r.toiletOther ,0 ) + IFNULL(r.hardware ,0 ) + IFNULL(r.platformCommunicate ,0 ) + IFNULL(r.sparePart ,0 ) + IFNULL(r.taskConsume ,0 )
+			+ IFNULL(r.labourProtect ,0 ) + IFNULL(r.managerSalary ,0 ) + IFNULL(r.manageCar ,0 ) + IFNULL(r.fieldFee ,0 ) + IFNULL(r.projectCommunicate ,0 ) + IFNULL(r.projectRent ,0 ) + IFNULL(r.projectWaterElectric ,0 )
+			+ IFNULL(r.projectOffice,0 ) + IFNULL(r.projectEntertain ,0 ) + IFNULL(r.projectTravel ,0 ) + IFNULL(r.projectStationManage ,0 ) + IFNULL(r.projectToiletManage ,0 ) + IFNULL(r.headquarters ,0 ) 
+			+ IFNULL(r.projectOther ,0 ) + IFNULL(r.marketFee ,0 ) + IFNULL(r.outsourceFee ,0 ) + IFNULL(r.injuryFee ,0 ) + IFNULL(r.tax ,0 ) + IFNULL(r.platformOther,0)
+		 ) costSumBySanitation,
+		(
+			IFNULL(r.logisticsSalary ,0 ) + IFNULL(r.logisticsSocialSecurity ,0 ) + IFNULL(r.logisticsPersonInsurance ,0 ) + IFNULL(r.logisticsWelfare ,0 ) + IFNULL(r.logisticsOvertimePay ,0 ) 
+			+ IFNULL(r.logisticsCarRental,0 ) + IFNULL(r.logisticsCarDepreciation ,0 ) + IFNULL(r.logisticsCarOilFee ,0 ) + IFNULL(r.logisticsCarRepair ,0 ) + IFNULL(r.logisticsCarWater ,0 ) 
+			+ IFNULL(r.logisticsCarElectric,0 ) + IFNULL(r.logisticsCarInsurance ,0 ) + IFNULL(r.logisticsCarTax ,0 ) + IFNULL(r.logisticsCarYearInspect ,0 ) + IFNULL(r.logisticsFieldRental ,0 ) 
+			+ IFNULL(r.logisticsFieldDepreciation ,0 ) + IFNULL(r.logisticsFieldRepair ,0 ) + IFNULL(r.logisticsFieldWater ,0 ) + IFNULL(r.logisticsFieldElectric ,0 ) + IFNULL(r.logisticsFieldOther ,0 ) 
+			+ IFNULL(r.logisticsTaskConsume ,0 ) + IFNULL(r.logisticsLabourProtect ,0 ) + IFNULL(r.logisticsManagerSalary ,0 ) + IFNULL(r.logisticsProjectSecurity ,0 ) + IFNULL(r.logisticsProjectInsurance ,0 ) 
+			+ IFNULL(r.logisticsProjectWelfare ,0 ) + IFNULL(r.logisticsProjectOvertimePay ,0 ) + IFNULL(r.logisticsProjectCommunicate ,0 ) + IFNULL(r.logisticsProjectWaterElectric ,0 ) 
+			+ IFNULL(r.logisticsProjectOffice ,0 ) + IFNULL(r.logisticsProjectElectrical ,0 ) + IFNULL(r.logisticsProjectFurniture ,0 ) + IFNULL(r.logisticsProjectEntertain ,0 ) 
+			+ IFNULL(r.logisticsProjectTravel ,0 ) + IFNULL(r.logisticsProjectHeadquarters ,0 ) + IFNULL(r.logisticsProjectOther,0)
+		) costSumByLogistics,
+		(
+			IFNULL(r.adOperateFee ,0 ) + IFNULL(r.adPasteFee ,0 ) + IFNULL(r.adTwoPrintingCost ,0 ) + IFNULL(r.adSupplementCost ,0 ) + IFNULL(r.adStaffPostingFee ,0 ) + IFNULL(r.adMaterialFee ,0 ) + IFNULL(r.adBreachAmount ,0 ) 
+			+ IFNULL(r.adOperateOther ,0 ) + IFNULL(r.adManagerSalary ,0 ) + IFNULL(r.adManageSpecialist ,0 ) + IFNULL(r.adManageSecurity ,0 ) + IFNULL(r.adManageInsurance ,0 ) + IFNULL(r.adManageWelfare ,0 ) + IFNULL(r.adManageOvertimePay ,0 )
+			+ IFNULL(r.adManageTraffic ,0 ) + IFNULL(r.adManageCommunicate ,0 ) + IFNULL(r.adManageTravel ,0 ) + IFNULL(r.adManageOther ,0 ) + IFNULL(r.adSaleFee ,0 ) + IFNULL(r.adSaleCommission ,0 ) + IFNULL(r.adTax,0)
+		) costSumByAdManage,
+		(
+			IFNULL(r.resourceSalary ,0 ) + IFNULL(r.resourcePersonSecurity ,0 ) + IFNULL(r.resourceInsurance ,0 ) + IFNULL(r.resourceWelfare ,0 ) + IFNULL(r.resourceOvertimePay ,0 ) + IFNULL(r.resourceLease ,0 ) + IFNULL(r.resourceDepreciation ,0 )  
+			+ IFNULL(r.resourceOilFee ,0 ) + IFNULL(r.resourceRepair ,0 ) + IFNULL(r.resourceWater ,0 ) + IFNULL(r.resourceElectric ,0 ) + IFNULL(r.resourceSecurity ,0 ) + IFNULL(r.resourceCarTax ,0 ) + IFNULL(r.resourceYearInspect ,0 ) 
+			+ IFNULL(r.resourceTaskConsume ,0 ) + IFNULL(r.resourceLabourProtect ,0 ) + IFNULL(r.resourceProjectSalary ,0 ) + IFNULL(r.resourceProjectSecurity ,0 ) + IFNULL(r.resourceProjectInsurance ,0 ) + IFNULL(r.resourceProjectWelfare ,0 )  
+			+ IFNULL(r.resourceProjectOvertimePay ,0 ) + IFNULL(r.resourceProjectCommunicate ,0 ) + IFNULL(r.resourceProjectWaterElectric ,0 ) + IFNULL(r.resourceProjectOffice ,0 ) + IFNULL(r.resourceProjectElectrical ,0 )  
+			+ IFNULL(r.resourceProjectFurniture ,0 ) + IFNULL(r.resourceProjectEntertain ,0 ) + IFNULL(r.resourceProjectTravel,0 ) + IFNULL(r.resourceHeadquarters ,0 ) + IFNULL(r.resourceProjectOther ,0 ) + IFNULL(r.resourceTax,0)
+		) costSumByResource ,
+		(
+			IFNULL(r.salary ,0 ) + IFNULL(r.socialSecurity ,0 ) + IFNULL(r.personInsurance ,0 ) + IFNULL(r.welfare ,0 ) + IFNULL(r.overtimePay ,0 ) + IFNULL(r.rental ,0 ) + IFNULL(r.carDepreciation ,0 ) + IFNULL(r.oilFee ,0 ) 
+			+ IFNULL(r.carRepair ,0 ) + IFNULL(r.carWater ,0 ) + IFNULL(r.carElectric ,0 ) + IFNULL(r.carInsurance ,0 ) + IFNULL(r.carTax ,0 ) + IFNULL(r.yearInspect ,0 ) + IFNULL(r.facilitiesDepreciation ,0 ) 
+			+ IFNULL(r.facilitiesLease ,0 ) + IFNULL(r.facilitiesRepair ,0 ) + IFNULL(r.stationLease ,0 ) + IFNULL(r.stationDepreciation ,0 ) + IFNULL(r.stationRepair ,0 ) + IFNULL(r.stationWater,0 ) 
+			+ IFNULL(r.stationElectric ,0 ) + IFNULL(r.stationMaintain ,0 ) + IFNULL(r.stationOther ,0 ) + IFNULL(r.toiletLease ,0 ) + IFNULL(r.toiletDepreciation ,0 ) + IFNULL(r.toiletRepair ,0 ) + IFNULL(r.toiletWater,0 ) 
+			+ IFNULL(r.toiletElectric ,0 ) + IFNULL(r.toiletOther ,0 ) + IFNULL(r.hardware ,0 ) + IFNULL(r.platformCommunicate ,0 ) + IFNULL(r.sparePart ,0 ) + IFNULL(r.taskConsume ,0 ) + IFNULL(r.labourProtect,0 ) 
+			+ IFNULL(r.managerSalary ,0 ) + IFNULL(r.manageCar ,0 ) + IFNULL(r.fieldFee ,0 ) + IFNULL(r.projectCommunicate ,0 ) + IFNULL(r.projectRent ,0 ) + IFNULL(r.projectWaterElectric ,0 ) + IFNULL(r.projectOffice,0 ) 
+			+ IFNULL(r.projectEntertain ,0 ) + IFNULL(r.projectTravel ,0 ) + IFNULL(r.projectStationManage ,0 ) + IFNULL(r.projectToiletManage ,0 ) + IFNULL(r.headquarters ,0 ) + IFNULL(r.projectOther,0 ) 
+			+ IFNULL(r.marketFee ,0 ) + IFNULL(r.outsourceFee ,0 ) + IFNULL(r.injuryFee ,0 ) + IFNULL(r.tax ,0 ) + IFNULL(r.platformOther ,0 ) + IFNULL(r.logisticsSalary ,0 ) + IFNULL(r.logisticsSocialSecurity ,0 ) 
+			+ IFNULL(r.logisticsPersonInsurance ,0 ) + IFNULL(r.logisticsWelfare ,0 ) + IFNULL(r.logisticsOvertimePay ,0 ) + IFNULL(r.logisticsCarRental,0 ) + IFNULL(r.logisticsCarDepreciation ,0 ) 
+			+ IFNULL(r.logisticsCarOilFee ,0 ) + IFNULL(r.logisticsCarRepair ,0 ) + IFNULL(r.logisticsCarWater ,0 ) + IFNULL(r.logisticsCarElectric,0 ) + IFNULL(r.logisticsCarInsurance ,0 ) 
+			+ IFNULL(r.logisticsCarTax ,0 ) + IFNULL(r.logisticsCarYearInspect ,0 ) + IFNULL(r.logisticsFieldRental ,0 ) + IFNULL(r.logisticsFieldDepreciation,0 ) + IFNULL(r.logisticsFieldRepair ,0 ) 
+			+ IFNULL(r.logisticsFieldWater ,0 ) + IFNULL(r.logisticsFieldElectric ,0 ) + IFNULL(r.logisticsFieldOther ,0 ) + IFNULL(r.logisticsTaskConsume,0 ) 
+			+ IFNULL(r.logisticsLabourProtect ,0 ) + IFNULL(r.logisticsManagerSalary ,0 ) + IFNULL(r.logisticsProjectSecurity ,0 ) + IFNULL(r.logisticsProjectInsurance ,0 ) + IFNULL(r.logisticsProjectWelfare,0 ) 
+			+ IFNULL(r.logisticsProjectOvertimePay ,0 ) + IFNULL(r.logisticsProjectCommunicate ,0 ) + IFNULL(r.logisticsProjectWaterElectric ,0 ) + IFNULL(r.logisticsProjectOffice,0 ) 
+			+ IFNULL(r.logisticsProjectElectrical ,0 ) + IFNULL(r.logisticsProjectFurniture ,0 ) + IFNULL(r.logisticsProjectEntertain ,0 ) + IFNULL(r.logisticsProjectTravel,0 ) 
+			+ IFNULL(r.logisticsProjectHeadquarters ,0 ) + IFNULL(r.logisticsProjectOther ,0 ) + IFNULL(r.adOperateFee ,0 ) + IFNULL(r.adPasteFee ,0 ) + IFNULL(r.adTwoPrintingCost ,0 ) 
+			+ IFNULL(r.adSupplementCost ,0 ) + IFNULL(r.adStaffPostingFee ,0 ) + IFNULL(r.adMaterialFee ,0 ) + IFNULL(r.adBreachAmount ,0 ) + IFNULL(r.adOperateOther ,0 ) 
+			+ IFNULL(r.adManagerSalary ,0 ) + IFNULL(r.adManageSpecialist ,0 ) + IFNULL(r.adManageSecurity ,0 ) + IFNULL(r.adManageInsurance ,0 ) + IFNULL(r.adManageWelfare ,0 ) 
+			+ IFNULL(r.adManageOvertimePay ,0 ) + IFNULL(r.adManageTraffic ,0 ) + IFNULL(r.adManageCommunicate ,0 ) + IFNULL(r.adManageTravel ,0 ) + IFNULL(r.adManageOther ,0 ) 
+			+ IFNULL(r.adSaleFee ,0 ) + IFNULL(r.adSaleCommission ,0 ) + IFNULL(r.adTax ,0 ) + IFNULL(r.resourceSalary ,0 ) + IFNULL(r.resourcePersonSecurity ,0 ) + IFNULL(r.resourceInsurance ,0 ) 
+			+ IFNULL(r.resourceWelfare ,0 ) + IFNULL(r.resourceOvertimePay ,0 ) + IFNULL(r.resourceLease ,0 ) + IFNULL(r.resourceDepreciation ,0 ) + IFNULL(r.resourceOilFee ,0 ) 
+			+ IFNULL(r.resourceRepair ,0 ) + IFNULL(r.resourceWater ,0 ) + IFNULL(r.resourceElectric ,0 ) + IFNULL(r.resourceSecurity ,0 ) + IFNULL(r.resourceCarTax ,0 ) + IFNULL(r.resourceYearInspect ,0 ) 
+			+ IFNULL(r.resourceTaskConsume ,0 ) + IFNULL(r.resourceLabourProtect ,0 ) + IFNULL(r.resourceProjectSalary ,0 ) + IFNULL(r.resourceProjectSecurity ,0 ) + IFNULL(r.resourceProjectInsurance ,0 ) 
+			+ IFNULL(r.resourceProjectWelfare ,0 ) + IFNULL(r.resourceProjectOvertimePay ,0 ) + IFNULL(r.resourceProjectCommunicate ,0 ) + IFNULL(r.resourceProjectWaterElectric ,0 ) 
+			+ IFNULL(r.resourceProjectOffice ,0 ) + IFNULL(r.resourceProjectElectrical ,0 ) + IFNULL(r.resourceProjectFurniture ,0 ) + IFNULL(r.resourceProjectEntertain ,0 ) + IFNULL(r.resourceProjectTravel ,0 ) 
+			+ IFNULL(r.resourceHeadquarters,0 ) + IFNULL(r.resourceProjectOther ,0 ) + IFNULL(r.resourceTax,0) 
+		 ) costSum,  
+		ce.name createUserName, ue.name updateUserName, fe.name filePeopleName, p.name companyName
+		from rp_cost_month r
+		left join pf_employee ce on r.createUser = ce.employeeId
+		left join pf_employee ue on r.updateUser = ue.employeeId
+		left join pf_employee fe on r.filePeople = fe.employeeId
+		left join pf_org p on r.companyId = p.orgId
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+		 	<if test="pager.orderBy != null &amp;&amp; pager.orderBy != ''">
+				order by ${pager.orderBy}
+				<if test="pager.order != null &amp;&amp; pager.order!=''">
+				  ${pager.order}
+				</if>
+			</if>
+			<if test="for_method_exportData == null">
+				limit #{pager.first}, #{pager.pageSize}
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+		 	<if test="companyIds != null &amp;&amp; companyIds.size() != 0">
+				and r.companyId in
+		      	<foreach item="item" index="index" collection="companyIds" open="(" separator="," close=")">
+		      		${item}
+		      	</foreach>
+	      	</if>
+	      	<if test="month != null &amp;&amp; month != ''">
+	      		and r.month like concat('%', #{month}, '%')
+	      	</if>
+	      	<if test="remarks != null &amp;&amp; remarks != ''">
+	      		and r.remarks like concat('%', #{remarks}, '%')
+	      	</if>
+	      	<if test="isFile != null &amp;&amp; isFile !=''">
+	      		and r.isFile = #{isFile}
+	      	</if>
+		</where>	
+	</sql>
+	
+	<delete id="delete">
+		delete from rp_cost_month
+		<choose>
+			<when test="ids != null &amp;&amp; ids.size() != 0">
+				where id in
+		      	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="file" parameterType="RpCostMonth">
+		update rp_cost_month
+		<set>
+			isFile = #{isFile},filePeople = #{filePeople},fileTime = #{fileTime},
+			updateUser = #{updateUser}, updateTime = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+	<select id="findRpCostMonthByParam" parameterType="map" resultType="RpCostMonth">
+		select companyId, month from rp_cost_month
+		<where>
+			<if test="companyId != null">
+				and companyId = #{companyId}
+			</if>
+			<if test="month != null &amp;&amp; month != ''">
+				and month = #{month}
+			</if>
+		</where>
+	</select>
+	
+</mapper>

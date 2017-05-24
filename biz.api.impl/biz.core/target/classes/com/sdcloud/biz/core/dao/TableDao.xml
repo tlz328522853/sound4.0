@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.TableDao">
+	
+	<sql id="tableColumn">
+		tblEnName,tblChName,type,pid,isDisplay,
+		sequence,ownerCode,tenantId,creator,createTime,editor,editTime 
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="tblEnName != null &amp;&amp; tblEnName != ''">
+				tblEnName like '%${tblEnName}%' 
+			</if>
+			<if test="tblChName != null &amp;&amp; tblChName != ''">
+				tblChName like '%${tblChName}%' 
+			</if>
+			<if test="pid != null">
+				and pid = #{pid} 
+			</if>
+			<if test="type != null">
+				and type = #{type} 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<select id="findAll" resultType="Table">
+		select 
+			tblId, <include refid="tableColumn"/>
+		from 
+			pf_table 
+		<include refid="queryCondition"/>
+	</select>
+	
+	
+	<select id="findByPid" parameterType="long" resultType="Table">
+		select tblId, <include refid="tableColumn"/> 
+		from pf_table
+		where pid = #{pid}
+	</select>
+	
+</mapper>

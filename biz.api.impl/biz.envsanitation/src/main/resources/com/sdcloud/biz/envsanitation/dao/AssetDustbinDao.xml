@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.AssetDustbinDao">
+
+	<sql id="assetDustbinColumn">
+		assetTypeId,dustbinNumber,dustbinType,position,admin,
+		cardCode,state,stopSign,cleanTimes,measureUnit,priceUnit,model,remark 
+	</sql>
+	
+	<insert id="insert" parameterType="AssetDustbin">
+		insert into so_asset_dustbin(
+			assetId, <include refid="assetDustbinColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			#{item.assetId}, #{item.assetTypeId}, #{item.dustbinNumber}, #{item.dustbinType}, #{item.position}, #{item.admin},
+			#{item.cardCode}, #{item.state}, #{item.stopSign},#{item.cleanTimes}, #{item.measureUnit}, #{item.priceUnit}, #{item.model}, #{item.remark}
+		)
+		</foreach>
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from so_asset_dustbin
+		<choose>
+			<when test="assetIds != null &amp;&amp; assetIds.size() != 0">
+				where assetId in
+		      	<foreach item="item" index="index" collection="assetIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="AssetDustbin">
+		update so_asset_dustbin
+		<set>
+			<if test="dustbinNumber != null &amp;&amp; dustbinNumber != ''">dustbinNumber = #{dustbinNumber},</if>
+			<if test="dustbinType != null">dustbinType = #{dustbinType},</if>
+			<if test="position != null &amp;&amp; position != ''">position = #{position},</if>
+			<if test="admin != null">admin = #{admin},</if>
+			<if test="cardCode != null &amp;&amp; cardCode != ''">cardCode = #{cardCode},</if>
+			<if test="state != null">state = #{state},</if>
+			<if test="stopSign != null">stopSign = #{stopSign},</if>
+			<if test="cleanTimes != null">cleanTimes = #{cleanTimes},</if>
+			<if test="measureUnit != null">measureUnit = #{measureUnit},</if>
+			<if test="priceUnit != null &amp;&amp; priceUnit != ''">priceUnit = #{priceUnit},</if>
+			<if test="model != null &amp;&amp; model != ''">model = #{model},</if>
+			<if test="remark != null &amp;&amp; remark != ''">remark = #{remark},</if>
+		</set>
+		where assetId = #{assetId}
+	</update>
+	
+	<sql id="assetDustbinCondition">
+		<where>
+		
+			<if test="includeSub == 'true' &amp;&amp; newOrgId != null">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false' &amp;&amp; newOrgId != null">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+			
+			<if test="position != null &amp;&amp; position != ''">
+				and position LIKE '%${position}%'
+			</if>
+			<if test="newOrgIds != null &amp;&amp; Monitor != null &amp;&amp; (includeSub == null || includeSub == 'false')">
+				and newOrgId in
+				<foreach item="item" index="index" collection="newOrgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="newOrgId != null &amp;&amp; Monitor == null &amp;&amp; (includeSub == null || includeSub == 'false')">
+				and newOrgId = #{newOrgId}
+			</if>
+			
+			<if test="dustbinNumber != null &amp;&amp; dustbinNumber != ''">
+				and dustbinNumber LIKE '%${dustbinNumber}%'
+			</if>
+			
+			<if test="dustbinType != null">
+				and dustbinType = #{dustbinType}
+			</if>
+			
+			<if test="stopSign != null ">
+				and stopSign = #{stopSign}
+			</if>
+			<if test="admin != null ">
+				and admin = #{admin}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(d.assetId)
+		from so_asset_dustbin d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+		<include refid="assetDustbinCondition"></include>
+		<!-- <where>
+	   		<if test="includeSub == 'true'">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false'">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+	   	</where> -->
+	</select>
+	
+	<select id="findAllBy" resultType="AssetDustbin">
+	    select 	
+	    	o.assetId,o.assetTypeId,o.assetName,o.assetCode,p.bd_lon as longitude,p.bd_lat as latitude,o.oldOrgId,
+			o.newOrgId,o.changeTime,o.produceDate,o.leaseOrganization,
+			o.leasePerson,o.leasePhone,o.tenantOrganization,o.tenantPerson,
+			o.tenantPhone,o.leaseBeginTime,o.leaseEndTime,o.leaseDays,
+			o.useOrganization,o.useBeginDate,o.useEndDate,o.oldOwnerCode,
+			o.ownerCode,o.tenantId,
+	    	
+	    	dustbinNumber,dustbinType,position,admin,
+			cardCode,state,stopSign,cleanTimes,measureUnit,priceUnit,model,remark ,
+			
+			org.name as orgName,
+			
+			emp.name as adminName, emp.mobile as adminMobile			
+	    from so_asset_dustbin d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+	    left outer join pf_org org
+	    on o.newOrgId = org.orgId
+	    left outer join pf_employee emp
+	    on d.admin = emp.employeeId 
+	    left outer join so_asset_dustbin_pos p
+	    on d.cardCode = p.trashcan
+	    <include refid="assetDustbinCondition"></include>
+	   	<!-- <where>
+	   		<if test="includeSub == 'true'">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false'">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+	   	</where> -->
+		<if test="pager != null">
+			order by o.${pager.orderSql} 
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="findById" parameterType="long" resultType="AssetDustbin">
+	    select 	
+	    	o.assetId,o.assetTypeId,o.assetName,o.assetCode,p.bd_lon as longitude,p.bd_lat as latitude,o.oldOrgId,
+			o.newOrgId,o.changeTime,o.produceDate,o.leaseOrganization,
+			o.leasePerson,o.leasePhone,o.tenantOrganization,o.tenantPerson,
+			o.tenantPhone,o.leaseBeginTime,o.leaseEndTime,o.leaseDays,
+			o.useOrganization,o.useBeginDate,o.useEndDate,o.oldOwnerCode,
+			o.ownerCode,o.tenantId,
+	    	
+	    	dustbinNumber,dustbinType,position,admin,
+			cardCode,state,stopSign,cleanTimes,measureUnit,priceUnit,model,remark ,
+			
+			org.name as orgName,
+			
+			emp.name as adminName, emp.telephone as adminMobile	
+	    from so_asset_dustbin d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+	    left outer join pf_org org
+	    on o.newOrgId = org.orgId
+	    left outer join pf_employee emp
+	    on d.admin = emp.employeeId
+	    left outer join so_asset_dustbin_pos p
+	    on d.cardCode = p.trashcan
+	    where o.assetId = #{assetId}
+	</select>
+	
+	
+	
+</mapper>

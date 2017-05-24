@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.SalesPackageModuleDao">
+	
+	<sql id="salesPackageModuleColumn">
+		salesPackageId,moduleId,moduleCode,creator,createTime,editor,editTime 
+	</sql>
+	
+	<insert id="insert" parameterType="list">
+		<if test="salesPackageModules != null &amp;&amp; salesPackageModules.size() != 0">
+			insert into pf_sales_package_module(
+				salesPackageModuleId, <include refid="salesPackageModuleColumn"/>
+			)values
+			<foreach item="item" index="index" collection="salesPackageModules" separator=",">
+				(#{item.salesPackageModuleId}, #{item.salesPackageId}, #{item.moduleId}, #{item.moduleCode},
+				 #{item.creator}, now(), #{item.editor}, now())
+			</foreach>
+		</if>
+	</insert>
+
+	<delete id="deleteBySalesPackageId" parameterType="long" >
+		delete from 
+			pf_sales_package_module 
+		where 
+			salesPackageId = #{salesPackageId}
+	</delete>
+
+	<select id="findSalesPackageIdByModelId" resultType="Long">
+		select 
+			salesPackageId
+		from 
+			pf_sales_package_module
+		<where>
+			<if test="moduleId != null">
+				 moduleId = #{moduleId} 
+			</if>
+
+		</where>	 
+	</select>
+	<delete id="deleteSalesPackageIdAndModelId">
+		delete from pf_sales_package_module
+		<where>
+			<if test="salesPackageId != null">
+				salesPackageId = #{salesPackageId} 
+			</if>
+			<if test="moduleIds != null">
+				and  moduleId in 
+			    <foreach item="item" collection="moduleIds" open="(" separator="," close=")">
+			        #{item}
+			    </foreach>
+			</if>
+		</where>
+	</delete>
+</mapper> 

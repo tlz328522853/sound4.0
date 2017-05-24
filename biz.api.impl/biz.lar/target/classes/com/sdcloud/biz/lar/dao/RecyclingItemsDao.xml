@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.RecyclingItemsDao">
+	<sql id="Base_Column_List">
+		r.`id`,`goodsId`,`goodsName`,`goodsDescribe`,`meteringCompany`,`imgUrl`,`startUsing`,
+		`startUsingForApp`,r.`enable`,r.`createDate`,n.`id` AS "recyclingTypeId.id",
+		`typeName` AS "recyclingTypeId.typeName",n.`enable` AS "recyclingTypeId.enable",
+		n.`createDate` AS "recyclingTypeId.createDate" 
+	</sql>
+	<sql id="Type_Column_List">
+		`id`,`typeName`,`enable`,`createDate` 
+	</sql>
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.RecyclingMaterial">
+		insert into lar_recyclingmaterial
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="goodsId != null">
+				goodsId,
+			</if>
+			<if test="recyclingTypeId != null and recyclingTypeId.id!=null">
+				recyclingTypeId,
+			</if>
+			<if test="goodsName != null">
+				goodsName,
+			</if>
+			<if test="goodsDescribe != null">
+				goodsDescribe,
+			</if>
+			<if test="meteringCompany != null">
+				meteringCompany,
+			</if>
+			<if test="imgUrl != null">
+				imgUrl,
+			</if>
+			<if test="startUsing != null">
+				startUsing,
+			</if>
+			<if test="startUsingForApp != null">
+				startUsingForApp,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="goodsId != null">
+				#{goodsId},
+			</if>
+			<if test="recyclingTypeId != null and recyclingTypeId.id!=null">
+				#{recyclingTypeId.id},
+			</if>
+			<if test="goodsName != null">
+				#{goodsName},
+			</if>
+			<if test="goodsDescribe != null">
+				#{goodsDescribe},
+			</if>
+			<if test="meteringCompany != null">
+				#{meteringCompany},
+			</if>
+			<if test="imgUrl != null">
+				#{imgUrl},
+			</if>
+			<if test="startUsing != null">
+				#{startUsing},
+			</if>
+			<if test="startUsingForApp != null">
+				#{startUsingForApp},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+		</trim>
+	</insert>
+	
+	<insert id="insertSelectiveType" parameterType="com.sdcloud.api.lar.entity.RecyclingType">
+		insert into lar_recyclingtype
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="typeName != null">
+				typeName,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="typeName != null">
+				#{typeName},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+		</trim>
+	</insert>
+	
+	<select id="selectByExample" resultType="com.sdcloud.api.lar.entity.RecyclingMaterial" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		FROM `lar_recyclingmaterial` r LEFT OUTER JOIN `lar_recyclingtype` n ON(r.recyclingTypeId=n.id) 
+		<where>
+			r.enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.id!=null">
+					and id=#{larPager.params.id}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="selectTypeByExample" resultType="com.sdcloud.api.lar.entity.RecyclingType" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Type_Column_List" /> 
+		FROM lar_recyclingtype 
+		<where>
+			enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.id!=null">
+					and id=#{larPager.params.id}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+	<update id="updateByExampleSelective" parameterType="map">
+		update lar_recyclingmaterial 
+		<set>
+			<if test="params.recyclingMaterial.recyclingTypeId != null and params.recyclingMaterial.recyclingTypeId.id !=null">
+				recyclingTypeId = #{params.recyclingMaterial.recyclingTypeId.id},
+			</if>
+			<if test="params.recyclingMaterial.goodsId != null">
+				goodsId = #{params.recyclingMaterial.goodsId},
+			</if>
+			<if test="params.recyclingMaterial.goodsName != null">
+				goodsName = #{params.recyclingMaterial.goodsName},
+			</if>
+			<if test="params.recyclingMaterial.goodsDescribe != null">
+				goodsDescribe = #{params.recyclingMaterial.goodsDescribe},
+			</if>
+			<if test="params.recyclingMaterial.meteringCompany != null">
+				meteringCompany = #{params.recyclingMaterial.meteringCompany},
+			</if>
+			<if test="params.recyclingMaterial.imgUrl != null">
+				imgUrl = #{params.recyclingMaterial.imgUrl},
+			</if>
+			<if test="params.recyclingMaterial.startUsing != null">
+				startUsing = #{params.recyclingMaterial.startUsing},
+			</if>
+			<if test="params.recyclingMaterial.startUsingForApp!= null">
+				startUsingForApp = #{params.recyclingMaterial.startUsingForApp},
+			</if>
+			<if test="params.recyclingMaterial.enable!= null">
+				enable = #{params.recyclingMaterial.enable},
+			</if>
+			<if test="params.recyclingMaterial.createDate!= null">
+				createDate = #{params.recyclingMaterial.createDate},
+			</if>
+		</set>
+		<where>
+			<if test="params.recyclingMaterial.id !=null">
+				id=#{params.recyclingMaterial.id}
+			</if>
+		</where>
+	</update>
+	
+	<update id="updateTypeByExampleSelective" parameterType="map">
+		update lar_recyclingtype 
+		<set>
+			<if test="params.recyclingType.typeName != null">
+				typeName = #{params.recyclingType.typeName},
+			</if>
+			<if test="params.recyclingType.enable != null">
+				enable = #{params.recyclingType.enable},
+			</if>
+			<if test="params.recyclingType.createDate != null">
+				createDate = #{params.recyclingType.createDate},
+			</if>
+		</set>
+		<where>
+			<if test="params.recyclingType.id !=null">
+				id=#{params.recyclingType.id}
+			</if>
+		</where>
+	</update>
+	
+	<select id="getRecyclingList" resultMap="queryRecycling">
+		SELECT t.id AS "t_id",typeName,t.createDate AS "t_createDate",m.`id` AS "m_id",`recyclingTypeId`,
+		`goodsId`,`goodsName`,`goodsDescribe`,`meteringCompany`,`imgUrl`,m.`createDate` AS "m_createDate" 
+		FROM `lar_recyclingtype` t LEFT OUTER JOIN `lar_recyclingmaterial` m ON(t.`id`=m.`recyclingTypeId`) 
+		WHERE t.`enable`=0 AND m.`enable`=0 AND `startUsing`=1 AND `startUsingForApp`=1 order by t_id,m_id,goodsId
+	</select>
+	<resultMap type="com.sdcloud.api.lar.entity.RecyclingList" id="queryRecycling">
+		<id property="id" column="t_id"/>
+		<result property="typeName" column="typeName" />
+		<result property="createDate" column="t_createDate" />
+		<collection property="recyclingMaterials" javaType="java.util.ArrayList" ofType="com.sdcloud.api.lar.entity.RecyclingMaterial">
+			<id property="id" column="m_id" />
+			<result property="recyclingTypeId.id" column="recyclingTypeId" />
+			<result property="recyclingTypeId.typeName" column="typeName" />
+			<result property="goodsId" column="goodsId" />
+			<result property="goodsName" column="goodsName" />
+			<result property="goodsDescribe" column="goodsDescribe" />
+			<result property="meteringCompany" column="meteringCompany" />
+			<result property="imgUrl" column="imgUrl" />
+			<result property="createDate" column="m_createDate" />
+		</collection>
+	</resultMap>
+	
+	<!-- 回收蓝批量删除 -->
+	<delete id="deleteRecoveryBluesByIds">
+		delete from lar_recoveryblue where 
+		<choose>
+			<when test="ids !=null and ids.size>0">
+				id in 
+				<foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+		            #{item}
+	        	</foreach>
+			</when>
+			<otherwise>
+				1=0
+			</otherwise>
+		</choose>
+	</delete>
+	<!-- 回收蓝批量添加 -->
+	<insert id="saveRecoveryBlue" parameterType="com.sdcloud.api.lar.entity.RecoveryBlue">
+		insert into lar_recoveryblue 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				`id`,
+			</if>
+			<if test="recyclingMaterial != null and recyclingMaterial.id!=null">
+				`recyclingMaterial`,
+			</if>
+			<if test="number != null">
+				number,
+			</if>
+			<if test="appUserId != null">
+				appUserId,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="recyclingMaterial != null and recyclingMaterial.id!=null">
+				#{recyclingMaterial.id},
+			</if>
+			<if test="number != null">
+				#{number},
+			</if>
+			<if test="appUserId != null">
+				#{appUserId},
+			</if>
+		</trim>
+	</insert>
+	
+	<select id="getCityRecyclingList" resultMap="queryRecycling">
+		SELECT
+			t.id AS "t_id",
+			typeName,
+			t.createDate AS "t_createDate",
+			m.`id` AS "m_id",
+			`recyclingTypeId`,
+			`goodsId`,
+			`goodsName`,
+			`goodsDescribe`,
+			`meteringCompany`,
+			`imgUrl`,
+			m.`createDate` AS "m_createDate"
+		
+		FROM
+			`lar_recyclingtype` t
+		LEFT OUTER JOIN `lar_recyclingmaterial` m ON (t.`id` = m.`recyclingTypeId`)
+		LEFT OUTER JOIN `lar_recyclingspec` r ON(m.goodsId = r.goods_id)
+		LEFT OUTER JOIN `lar_recyclingprice` p ON(r.id = p.`spec_id`)
+		
+		<where>
+				t.`enable` = 0
+			AND m.`enable` = 0
+			AND `startUsing` = 1
+			AND `startUsingForApp` = 1
+			AND p.`enable` = 1
+			AND p.org = #{orgId}	
+		</where>
+		ORDER BY
+			t_id,
+			m_id,
+			goodsId
+	</select>
+	
+	<select id="getOrgRecyclingTypes" resultType="com.sdcloud.api.lar.entity.RecyclingType">
+		SELECT
+		distinct
+				t.id AS "id",
+				typeName,
+				t.createDate AS "t_createDate",
+				t.sequence			
+			FROM
+				`lar_recyclingtype` t
+			LEFT OUTER JOIN `lar_recyclingmaterial` m ON (t.`id` = m.`recyclingTypeId`)
+			LEFT OUTER JOIN `lar_recyclingspec` r ON(m.goodsId = r.goods_id)
+			LEFT OUTER JOIN `lar_recyclingprice` p ON(r.id = p.`spec_id`)			
+		<where>
+					t.`enable` = 0
+				AND m.`enable` = 0
+				AND `startUsing` = 1
+				AND `startUsingForApp` = 1
+				<if test="priceEnable">
+					AND p.`enable` = 1
+				</if>
+				AND p.org in
+				<foreach collection="orgs" item="item" index="index" open="(" close=")" separator=",">
+		            #{item}
+	        	</foreach>
+		</where>		
+			ORDER BY
+				id,
+				goodsId
+	</select>
+	
+	<!-- 查询全部 -->
+	<select id="getOrgRecyclingAllTypes" resultType="com.sdcloud.api.lar.entity.RecyclingType">
+		SELECT
+		distinct
+				t.id AS "id",
+				typeName,
+				t.createDate AS "t_createDate",
+				t.sequence			
+			FROM
+			`lar_recyclingtype` t
+			LEFT OUTER JOIN `lar_recyclingmaterial` m ON (t.`id` = m.`recyclingTypeId`)
+			LEFT OUTER JOIN `lar_recyclingspec` r ON(m.goodsId = r.goods_id)
+			LEFT OUTER JOIN `lar_recyclingprice` p ON(r.id = p.`spec_id`)			
+		<where>
+				p.org in
+				<foreach collection="orgs" item="item" index="index" open="(" close=")" separator=",">
+		            #{item}
+	        	</foreach>
+		</where>		
+			ORDER BY
+				id,
+				goodsId
+	</select>
+	
+	<select id="getOrgRecyclingNames" resultType="com.sdcloud.api.lar.entity.RecyclingMaterial">
+		SELECT
+			DISTINCT
+			r.`id`,
+			r.`recyclingTypeId`,
+			r.`goodsId`,
+			r.`goodsName`,
+			r.`goodsDescribe`,
+			`meteringCompany`,
+			`imgUrl`,
+			r.`startUsing`,
+			`startUsingForApp`,
+			r.`enable`,
+			n.`id` AS "recyclingTypeId.id",
+			n.`typeName` AS "recyclingTypeId.typeName",
+			n.`enable` AS "recyclingTypeId.enable"
+		FROM
+			`lar_recyclingmaterial` r
+		LEFT OUTER JOIN `lar_recyclingtype` n ON (r.recyclingTypeId = n.id)
+		LEFT OUTER JOIN `lar_recyclingspec` s ON (s.goods_id = r.goodsId)
+		LEFT OUTER JOIN `lar_recyclingprice` p ON (p.spec_id = s.id)
+		
+		<where>
+			recyclingTypeId = #{type} 
+			and r.enable=0 
+			and r.startUsingForApp = 1 
+			and r.startUsing = 1
+			<if test="priceEnable">
+				and p.`enable` = 1
+			</if>		
+			and p.org in
+				<foreach collection="orgs" item="item" index="index" open="(" close=")" separator=",">
+		            #{item}
+	        	</foreach>
+		</where>
+	</select>
+	
+	<!-- 查询全部 -->
+	<select id="getOrgRecyclingAllNames" resultType="com.sdcloud.api.lar.entity.RecyclingMaterial">
+		SELECT
+			DISTINCT
+			r.`id`,
+			r.`recyclingTypeId`,
+			r.`goodsId`,
+			r.`goodsName`,
+			r.`goodsDescribe`,
+			`meteringCompany`,
+			`imgUrl`,
+			r.`startUsing`,
+			`startUsingForApp`,
+			r.`enable`,
+			n.`id` AS "recyclingTypeId.id",
+			n.`typeName` AS "recyclingTypeId.typeName",
+			n.`enable` AS "recyclingTypeId.enable"
+		FROM
+			`lar_recyclingmaterial` r
+		LEFT OUTER JOIN `lar_recyclingtype` n ON (r.recyclingTypeId = n.id)
+		LEFT OUTER JOIN `lar_recyclingspec` s ON (s.goods_id = r.goodsId)
+		LEFT OUTER JOIN `lar_recyclingprice` p ON (p.spec_id = s.id)
+		
+		<where>
+			recyclingTypeId = #{type} 
+			and p.org in
+				<foreach collection="orgs" item="item" index="index" open="(" close=")" separator=",">
+		            #{item}
+	        	</foreach>
+		</where>
+	</select>
+	
+</mapper>

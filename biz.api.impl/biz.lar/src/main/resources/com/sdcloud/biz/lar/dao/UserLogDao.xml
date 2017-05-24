@@ -1,0 +1,321 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2017-01-11
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.UserLogDao">
+	
+	<sql id="Base_Column_List">
+		ul.id, ul.user_id, ul.user_name, ul.user_group, ul.user_ip,
+		ul.user_app, ul.user_mac, ul.user_url, ul.user_time, ul.desc
+	</sql>
+	
+	<sql id="Insert_Column">
+		user_id, user_name, user_group, user_ip,
+		user_app, user_mac, user_url, user_time, remark
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{userId,jdbcType=BIGINT},
+		#{userName,jdbcType=VARCHAR}, #{userGroup,jdbcType=VARCHAR},
+		#{userIp,jdbcType=VARCHAR}, #{userApp,jdbcType=VARCHAR},
+		#{userMac,jdbcType=VARCHAR}, #{userUrl,jdbcType=VARCHAR},
+		#{userTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.userId,jdbcType=BIGINT},
+		#{item.userName,jdbcType=VARCHAR}, #{item.userGroup,jdbcType=VARCHAR},
+		#{item.userIp,jdbcType=VARCHAR}, #{item.userApp,jdbcType=VARCHAR},
+		#{item.userMac,jdbcType=VARCHAR}, #{item.userUrl,jdbcType=VARCHAR},
+		#{item.userTime,jdbcType=TIMESTAMP}, #{item.remark,jdbcType=VARCHAR}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="userId!=null">
+				ul.user_id=#{userId},
+			</if>
+			<if test="userName!=null &amp;&amp; userName!=''">
+				ul.user_name=#{userName},
+			</if>
+			<if test="userGroup!=null &amp;&amp; userGroup!=''">
+				ul.user_group=#{userGroup},
+			</if>
+			<if test="userIp!=null &amp;&amp; userIp!=''">
+				ul.user_ip=#{userIp},
+			</if>
+			<if test="userApp!=null &amp;&amp; userApp!=''">
+				ul.user_app=#{userApp},
+			</if>
+			<if test="userMac!=null &amp;&amp; userMac!=''">
+				ul.user_mac=#{userMac},
+			</if>
+			<if test="userUrl!=null &amp;&amp; userUrl!=''">
+				ul.user_url=#{userUrl},
+			</if>
+			<if test="userTime!=null">
+				ul.user_time=#{userTime},
+			</if>
+			<if test="remark!=null &amp;&amp; remark!=''">
+				ul.remark=#{remark},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="userLog" type="com.sdcloud.api.lar.entity.UserLog">
+        <id property="id" column="id"></id>
+		<result property="userId" column="user_id"></result>
+		<result property="userName" column="user_name"></result>
+		<result property="userGroup" column="user_group"></result>
+		<result property="userIp" column="user_ip"></result>
+		<result property="userApp" column="user_app"></result>
+		<result property="userMac" column="user_mac"></result>
+		<result property="userUrl" column="user_url"></result>
+		<result property="userTime" column="user_time"></result>
+		<result property="remark" column="remark"></result>
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="userLog">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_user_log ul
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ul.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(ul.id)
+		FROM lar_user_log ul
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ul.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO lar_user_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO lar_user_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM lar_user_log ul
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM lar_user_log ul
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ul.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	
+	<update id="update">
+		UPDATE lar_user_log ul
+		<include refid="Update_Column"></include>
+		WHERE ul.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE lar_user_log ul
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" ul.user_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userId}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.user_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userName}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.user_group = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userGroup}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.user_ip = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userIp}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.user_app = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userApp}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.user_mac = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userMac}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.user_url = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userUrl}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.user_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.userTime}
+               </foreach>
+            </trim>
+			<trim prefix=" ul.remark = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ul.id=#{i.id} THEN #{i.remark}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			ul.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="userLog">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_user_log ul
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ul.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(ul.id) 
+		FROM lar_user_log ul
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND ul.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND ul.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="userLog">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_user_log ul
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND ul.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND ul.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY updateDate DESC,createDate DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="userLog">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_user_log ul
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ul.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="userLog">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_user_log ul
+        <where>
+            ul.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ul.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+</mapper>

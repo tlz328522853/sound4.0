@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.LarClientUserDao">
+	
+	<sql id="Region_Sql">
+		regionId,regionCode,regionName,parentId,regionLevel,regionOrder,regionNameEn,regionShortNameEn 
+	</sql>
+	<sql id="Base_Column_List">
+		`id`,`customerId`,`phone`,`passWord`,`name`,`sex`,`age`,`level`,`iconUrl`,cityId,cityName,
+		`nowPoints`,`historyPoints`,`qrCodeId`,`qrCodeUrl`,`createDate`,`enable` ,`suggestCode`,
+		`address` ,`addressDetail` ,`longitude` ,`latitude` ,`regCity`,`regCityName`
+	</sql>
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.LarClientUser">
+		insert into lar_clientuser
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="customerId != null">
+				customerId,
+			</if>
+			<if test="phone != null">
+				phone,
+			</if>
+			<if test="passWord != null">
+				passWord,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="sex != null">
+				sex,
+			</if>
+			<if test="age != null">
+				age,
+			</if>
+			<if test="level != null">
+				level,
+			</if>
+			<if test="iconUrl != null">
+				iconUrl,
+			</if>
+			<if test="nowPoints != null">
+				nowPoints,
+			</if>
+			<if test="historyPoints != null">
+				historyPoints,
+			</if>
+			<if test="qrCodeId != null">
+				qrCodeId,
+			</if>
+			<if test="qrCodeUrl != null">
+				qrCodeUrl,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="suggestCode != null and suggestCode !=''">
+				suggestCode,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="cityId != null">
+				cityId,
+			</if>
+			<if test="cityName != null">
+				cityName,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="addressDetail != null">
+				addressDetail,
+			</if>
+			<if test="createUser != null">
+				createUser,
+			</if>
+			<if test="fromType != null">
+				fromType,
+			</if>
+			<if test="longitude != null">
+				longitude,
+			</if>
+			<if test="latitude != null">
+				latitude,
+			</if>
+			<if test="regCity != null">
+				regCity,
+			</if>
+			<if test="regCityName != null">
+				regCityName,
+			</if>
+			
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="customerId != null">
+				#{customerId,jdbcType=VARCHAR},
+			</if>
+			<if test="phone != null">
+				#{phone,jdbcType=VARCHAR},
+			</if>
+			<if test="passWord != null">
+				#{passWord,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				#{sex,jdbcType=INTEGER},
+			</if>
+			<if test="age != null">
+				#{age,jdbcType=INTEGER},
+			</if>
+			<if test="level != null">
+				#{level,jdbcType=INTEGER},
+			</if>
+			<if test="iconUrl != null">
+				#{iconUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="nowPoints != null">
+				#{nowPoints,jdbcType=INTEGER},
+			</if>
+			<if test="historyPoints != null">
+				#{historyPoints,jdbcType=INTEGER},
+			</if>
+			<if test="qrCodeId != null">
+				#{qrCodeId,jdbcType=VARCHAR},
+			</if>
+			<if test="qrCodeUrl != null">
+				#{qrCodeUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="suggestCode != null and suggestCode != ''">
+				#{suggestCode,jdbcType=VARCHAR},
+			</if>
+			<if test="enable != null">
+				#{enable,jdbcType=INTEGER},
+			</if>
+			<if test="cityId != null">
+				#{cityId,jdbcType=VARCHAR},
+			</if>
+			<if test="cityName != null">
+				#{cityName,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="addressDetail != null">
+				#{addressDetail,jdbcType=VARCHAR},
+			</if>
+			<if test="createUser != null">
+				#{createUser,jdbcType=VARCHAR},
+			</if>
+			<if test="fromType != null">
+				#{fromType,jdbcType=INTEGER},
+			</if>
+			<if test="longitude != null">
+				#{longitude},
+			</if>
+			<if test="latitude != null">
+				#{latitude},
+			</if>
+			<if test="regCity != null">
+				#{regCity},
+			</if>
+			<if test="regCityName != null">
+				#{regCityName},
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="insertUserGetId" parameterType="com.sdcloud.api.lar.entity.LarClientUser"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into lar_clientuser
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id!=null">
+				id,
+			</if>
+			<if test="customerId != null">
+				customerId,
+			</if>
+			<if test="phone != null">
+				phone,
+			</if>
+			<if test="passWord != null">
+				passWord,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="sex != null">
+				sex,
+			</if>
+			<if test="age != null">
+				age,
+			</if>
+			<if test="level != null">
+				level,
+			</if>
+			<if test="iconUrl != null">
+				iconUrl,
+			</if>
+			<if test="nowPoints != null">
+				nowPoints,
+			</if>
+			<if test="historyPoints != null">
+				historyPoints,
+			</if>
+			<if test="qrCodeId != null">
+				qrCodeId,
+			</if>
+			<if test="qrCodeUrl != null">
+				qrCodeUrl,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="customerId != null">
+				#{customerId,jdbcType=VARCHAR},
+			</if>
+			<if test="phone != null">
+				#{phone,jdbcType=VARCHAR},
+			</if>
+			<if test="passWord != null">
+				#{passWord,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				#{sex,jdbcType=INTEGER},
+			</if>
+			<if test="age != null">
+				#{age,jdbcType=INTEGER},
+			</if>
+			<if test="level != null">
+				#{level,jdbcType=INTEGER},
+			</if>
+			<if test="iconUrl != null">
+				#{iconUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="nowPoints != null">
+				#{nowPoints,jdbcType=INTEGER},
+			</if>
+			<if test="historyPoints != null">
+				#{historyPoints,jdbcType=INTEGER},
+			</if>
+			<if test="qrCodeId != null">
+				#{qrCodeId,jdbcType=VARCHAR},
+			</if>
+			<if test="qrCodeUrl != null">
+				#{qrCodeUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="enable != null">
+				#{enable,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	
+	<select id="getClientUsersCount" parameterType="map" resultType="long">
+		select count(id) FROM lar_clientuser
+		<where>
+			enable=0
+			<if test="params!=null and params.size>0">
+				<if test="params.customerId!=null">
+					and customerId=#{params.customerId}
+				</if>
+				<if test="params.name!=null">
+					and name like '${params.name}%'
+				</if>
+				<if test="params.phone!=null">
+					and phone like '${params.phone}%'
+				</if>
+				<if test="params.regCity!=null">
+					and regCity =#{params.regCity}
+				</if>
+				
+				<if test="params.suggestCode!=null">
+					and suggestCode like '${params.suggestCode}%'
+				</if>
+				<if test="params.endDate!=null">
+				<![CDATA[
+					and createDate < #{params.endDate}
+				]]>
+				</if>
+				<if test="params.firstDate!=null">
+				<![CDATA[
+					and createDate > #{params.firstDate}
+				]]>
+				</if>
+			</if>
+		</where>
+	</select>
+	<select id="getClientUsers" resultMap="addressResult" parameterType="com.sdcloud.framework.entity.LarPager">
+		SELECT 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if> 
+		<include refid="Base_Column_List"/>
+		FROM `lar_clientuser`
+		<where>
+			enable=0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.customerId!=null">
+					and customerId=#{larPager.params.customerId}
+				</if>
+				<if test="larPager.params.name!=null">
+					and name like '${larPager.params.name}%'
+				</if>
+				<if test="larPager.params.phone!=null">
+					and phone like '${larPager.params.phone}%'
+				</if>
+				<if test="larPager.params.regCity!=null">
+					and regCity =#{larPager.params.regCity}
+				</if>
+				<if test="larPager.params.suggestCode!=null">
+					and suggestCode like '${larPager.params.suggestCode}%'
+				</if>
+				<if test="larPager.params.endDate!=null">
+				<![CDATA[
+					and createDate < #{larPager.params.endDate}
+				]]>
+				</if>
+				<if test="larPager.params.firstDate!=null">
+				<![CDATA[
+					and createDate > #{larPager.params.firstDate}
+				]]>
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="selectByExample" resultMap="addressResult" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		from lar_clientuser 
+		<where>
+			enable=0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.id!=null">
+					and id=#{larPager.params.id}
+				</if>
+			</if>
+			<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+				<![CDATA[
+					and createDate > #{larPager.params.firstDate}
+				]]>
+			</if>
+			<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+				<![CDATA[
+					and createDate < #{larPager.params.endDate}
+				]]>
+			</if>
+			<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+				<![CDATA[
+					and createDate < #{larPager.params.endDate} and createDate > #{larPager.params.firstDate}
+				]]>
+			</if>
+			<if test="larPager.params.phone!=null and larPager.params.phone!=''">
+				and phone like '${larPager.params.phone}%'
+			</if>
+			<if test="larPager.params.name!=null and larPager.params.name!=''">
+				and name like '${larPager.params.name}%'
+			</if>
+			<if test="larPager.params.suggestCode!=null and larPager.params.suggestCode!=''">
+				and suggestCode like '%${larPager.params.suggestCode}%'
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+	<resultMap type="com.sdcloud.api.lar.entity.LarClientUser" id="regionResult">
+		<association property="larClientUserAddress.provinceId" column="provinceId" javaType="com.sdcloud.api.lar.entity.LarRegion" select="queryProvince"></association>
+		<association property="larClientUserAddress.cityId" column="cityId" javaType="com.sdcloud.api.lar.entity.LarRegion" select="queryCity"></association>
+		<association property="larClientUserAddress.areaId" column="areaId" javaType="com.sdcloud.api.lar.entity.LarRegion" select="queryArea"></association>
+	</resultMap>
+	<select id="queryProvince" resultType="com.sdcloud.api.lar.entity.LarRegion">
+		select <include refid="Region_Sql"/> from lar_region where regionId=#{provinceId}
+	</select>
+	<select id="queryCity" resultType="com.sdcloud.api.lar.entity.LarRegion">
+		select <include refid="Region_Sql"/> from lar_region where regionId=#{cityId}
+	</select>
+	<select id="queryArea" resultType="com.sdcloud.api.lar.entity.LarRegion">
+		select <include refid="Region_Sql"/> from lar_region where regionId=#{areaId}
+	</select>
+	
+	<delete id="deleteByExample" parameterType="map">
+		<if test="params.id!=null and params.id>0">
+			UPDATE lar_clientuser SET ENABLE=#{params.enable} 
+			<where>
+				id=#{params.id}
+			</where>
+		</if>
+	</delete>
+
+	<update id="updateByExampleSelective" parameterType="map">
+		update lar_clientuser
+		<set>
+			<if test="params.larClientUser.customerId != null">
+				customerId =
+				#{params.larClientUser.customerId,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.phone != null">
+				phone = #{params.larClientUser.phone,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.passWord != null">
+				passWord =
+				#{params.larClientUser.passWord,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.name != null">
+				name = #{params.larClientUser.name,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.sex != null">
+				sex = #{params.larClientUser.sex,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUser.age != null">
+				age = #{params.larClientUser.age,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUser.level != null">
+				level = #{params.larClientUser.level,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUser.iconUrl != null">
+				iconUrl =
+				#{params.larClientUser.iconUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.nowPoints != null">
+				nowPoints =
+				#{params.larClientUser.nowPoints,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUser.historyPoints != null">
+				historyPoints =
+				#{params.larClientUser.historyPoints,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUser.qrCodeId != null">
+				qrCodeId =
+				#{params.larClientUser.qrCodeId,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.qrCodeUrl != null">
+				qrCodeUrl =
+				#{params.larClientUser.qrCodeUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.cityName != null">
+				cityName =
+				#{params.larClientUser.cityName,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUser.cityId != null">
+				cityId =
+				#{params.larClientUser.cityId,jdbcType=BIGINT},
+			</if>
+			<if test="params.larClientUser.createDate != null">
+				createDate =
+				#{params.larClientUser.createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="params.larClientUser.enable != null">
+				enable = #{params.larClientUser.enable,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUser.longitude != null">
+				longitude = #{params.larClientUser.longitude},
+			</if>
+			<if test="params.larClientUser.latitude != null">
+				latitude = #{params.larClientUser.latitude},
+			</if>
+			<if test="params.larClientUser.address != null">
+				address = #{params.larClientUser.address},
+			</if>
+			<if test="params.larClientUser.addressDetail != null">
+				addressDetail = #{params.larClientUser.addressDetail},
+			</if>
+		</set>
+		<where>
+			<if test="params.larClientUser.id !=null">
+				id=#{params.larClientUser.id}
+			</if>
+		</where>
+	</update>
+	
+	<select id="selectUserByPass" resultMap="addressResult" parameterType="map">
+		select <include refid="Base_Column_List" />  from lar_clientuser 
+		<where>
+			enable=0
+			<choose>
+				<when test="params != null and params.size>0">
+					<if test="params.phone!=null">
+						and phone = #{params.phone}
+					</if>
+					<if test="params.passWord!=null">
+						and passWord = #{params.passWord}
+					</if>
+					<if test="params.id!=null">
+						and id = #{params.id}
+					</if>
+				</when>
+				<otherwise>
+					and 1=2
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	<select id="findByPhone" resultMap="addressResult">
+		select <include refid="Base_Column_List" />  from lar_clientuser 
+		<where>
+			<choose>
+				<when test="phone != null">
+					phone = #{phone}
+				</when>
+				<otherwise>
+					1=2
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<!-- 
+	`id`,`customerId`,`phone`,`passWord`,`name`,`sex`,`age`,`level`,`iconUrl`,
+		`nowPoints`,`historyPoints`,`qrCodeId`,`qrCodeUrl`,`createDate`,`enable` -->
+	<resultMap type="com.sdcloud.api.lar.entity.LarClientUser" id="addressResult">
+		<id property="id" column="id"/>
+		<result property="customerId" column="customerId" />
+		<association property="larClientUserAddress" column="customerId" select="selectClientAddress"></association>
+	</resultMap>
+	<select id="selectClientAddress" resultMap="com.sdcloud.biz.lar.dao.LarClientUserAddressDao.regionResult">
+		select id, userName, contact, address, region, detail, provinceId,cityId,areaId, defaultEnable,enable,longitude,latitude,larClientUser as "larClientUser.id"  
+		from lar_address where defaultEnable=1 and larClientUser=#{customerId} and enable=0
+	</select>
+	
+	<select id="queryClientUser" resultType="com.sdcloud.api.lar.entity.LarClientUser">
+		select * from lar_clientuser a where a.enable=0 and a.customerId in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+              #{item}
+         </foreach>
+	</select>
+	
+	<select id="queryClientUserByName" resultType="java.lang.Long">
+		select a.customerId from lar_clientuser a where a.enable=0 and a.name like '%${name}%'
+	</select>
+	
+</mapper>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.FormTemplateDao">
+	
+	<sql id="tableColumn">
+		funcId,tplName,tplId,tplType,cardCol,tenantId 
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="funcId != null">
+				and funcId = #{funcId} 
+			</if>
+			<if test="tplName != null &amp;&amp; tplName != ''">
+				tplName like '%${tplName}%' 
+			</if>
+			<if test="tplId != null &amp;&amp; tplId != ''">
+				tplId like '%${tplId}%' 
+			</if>
+			<if test="tplType != null">
+				and tplType = #{tplType} 
+			</if>
+			<if test="cardCol != null">
+				and cardCol = #{cardCol} 
+			</if>
+			<if test="tenantId != null">
+				and tenantId = #{tenantId} 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<insert id="insert" parameterType="FormTemplate" >
+		insert into pf_form_template(
+			formTplId,<include refid="tableColumn"/>
+		)values(
+			#{formTplId},#{funcId},#{tplName},#{tplId},#{tplType},
+			#{cardCol},#{tenantId}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from pf_form_template
+		<choose>
+			<when test="formTplIds != null &amp;&amp; formTplIds.size() != 0">
+				where formTplId in
+		      	<foreach item="item" index="index" collection="formTplIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="FormTemplate">
+		update pf_form_template 
+		<set>
+			<if test="funcId != null">funcId=#{funcId},</if>
+			<if test="tplName != null &amp;&amp; tplName != ''">tplName=#{tplName},</if>
+			<if test="tplId != null &amp;&amp; tplId != ''">tplId=#{tplId},</if>
+			<if test="tplType != null">tplType=#{tplType},</if>
+			<if test="cardCol != null">cardCol=#{cardCol},</if>
+			<if test="tplType == 0">cardCol=null,</if>
+			<if test="tenantId != null">tenantId=#{tenantId},</if>
+		</set>
+		where formTplId = #{formTplId}
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="FormTemplate">
+		select formTplId,<include refid="tableColumn"/>
+		from pf_form_template
+		where formTplId = #{formTplId}
+	</select>
+	
+	<select id="findAll" resultType="FormTemplate">
+		select 
+			formTplId, <include refid="tableColumn"/>
+		from 
+			pf_form_template 
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(formTplId)
+		from 
+			pf_form_template
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findByPid" parameterType="long" resultType="FormTemplate">
+		select formTplId, <include refid="tableColumn"/> 
+		from pf_form_template
+		<!-- where pid = #{pid} -->
+	</select>
+	
+</mapper>

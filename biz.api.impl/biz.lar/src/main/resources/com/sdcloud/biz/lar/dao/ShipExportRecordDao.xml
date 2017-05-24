@@ -1,0 +1,358 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2016-10-24
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipExportRecordDao">
+	
+	<sql id="Base_Column_List">
+		ser.id, ser.file_name, ser.all_num, ser.success_num, ser.faild_num,
+		ser.faild_file_url, ser.org, ser.type, ser.enable, ser.create_user,
+		ser.create_date, ser.update_user, ser.update_date
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, file_name, all_num, success_num, faild_num,
+		faild_file_url, org, type, enable, create_user,
+		create_date, update_user, update_date
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{fileName,jdbcType=VARCHAR},
+		#{allNum,jdbcType=INTEGER}, #{successNum,jdbcType=INTEGER},
+		#{faildNum,jdbcType=INTEGER}, #{faildFileUrl,jdbcType=VARCHAR},
+		#{org,jdbcType=BIGINT}, #{type,jdbcType=TINYINT},
+		#{enable,jdbcType=TINYINT}, #{createUser,jdbcType=BIGINT},
+		#{createDate,jdbcType=TIMESTAMP}, #{updateUser,jdbcType=BIGINT},
+		#{updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.fileName,jdbcType=VARCHAR},
+		#{item.allNum,jdbcType=INTEGER}, #{item.successNum,jdbcType=INTEGER},
+		#{item.faildNum,jdbcType=INTEGER}, #{item.faildFileUrl,jdbcType=VARCHAR},
+		#{item.org,jdbcType=BIGINT}, #{item.type,jdbcType=TINYINT},
+		#{item.enable,jdbcType=TINYINT}, #{item.createUser,jdbcType=BIGINT},
+		#{item.createDate,jdbcType=TIMESTAMP}, #{item.updateUser,jdbcType=BIGINT},
+		#{item.updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Where_Value">
+		<where>
+			<if test="params.id!=null &amp;&amp; params.id!=''">
+				AND ser.id=#{params.id}
+			</if>
+			<if test="params.fileName!=null &amp;&amp; params.fileName!=''">
+				AND ser.file_name=#{params.fileName}
+			</if>
+			<if test="params.allNum!=null">
+				AND ser.all_num=#{params.allNum}
+			</if>
+			<if test="params.successNum!=null">
+				AND ser.success_num=#{params.successNum}
+			</if>
+			<if test="params.faildNum!=null">
+				AND ser.faild_num=#{params.faildNum}
+			</if>
+			<if test="params.faildFileUrl!=null &amp;&amp; params.faildFileUrl!=''">
+				AND ser.faild_file_url=#{params.faildFileUrl}
+			</if>
+			<if test="params.type!=null">
+				AND ser.type=#{params.type}
+			</if>
+			<if test="params.enable!=null">
+				AND ser.enable=#{params.enable}
+			</if>
+			<if test="params.startDate != null &amp;&amp; params.endDate != null">
+				<![CDATA[
+						AND #{params.startDate} <= ser.create_date AND ser.create_date <= #{params.endDate}
+					]]>
+			</if>
+			<if test="params.startDate != null &amp;&amp; params.endDate == null">
+				<![CDATA[
+						AND ser.create_date >= #{params.startDate}
+					]]>
+			</if>
+			<if test="params.startDate == null &amp;&amp; params.endDate != null">
+				<![CDATA[
+						AND ser.create_date <= #{params.endDate}
+					]]>
+			</if>
+			<if test="params.createUser!=null &amp;&amp; params.createUser!=''">
+				AND ser.create_user=#{params.createUser}
+			</if>
+			<if test="params.updateUser!=null &amp;&amp; params.updateUser!=''">
+				AND ser.update_user=#{params.updateUser}
+			</if>
+			<if test="params.updateDate!=null &amp;&amp; params.updateDate!=''">
+				AND ser.update_date=#{params.updateDate}
+			</if>
+		    <if test="params.includeSub != null &amp;&amp; params.includeSub == true">
+				<if test="params.org != null">
+					AND ser.org IN 
+					<foreach collection="params.org" item="orgId" open="(" close=")" separator=",">
+						#{orgId}
+					</foreach>
+				</if>
+			</if>
+			<if test="params.includeSub == null || params.includeSub == false">
+				<if test="params.org != null">
+					AND ser.org = #{params.org}
+				</if>
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="fileName!=null &amp;&amp; fileName!=''">
+				ser.file_name=#{fileName},
+			</if>
+			<if test="allNum!=null">
+				ser.all_num=#{allNum},
+			</if>
+			<if test="successNum!=null">
+				ser.success_num=#{successNum},
+			</if>
+			<if test="faildNum!=null">
+				ser.faild_num=#{faildNum},
+			</if>
+			<if test="faildFileUrl!=null &amp;&amp; faildFileUrl!=''">
+				ser.faild_file_url=#{faildFileUrl},
+			</if>
+			<if test="org!=null &amp;&amp; org!=''">
+				ser.org=#{org},
+			</if>
+			<if test="type!=null">
+				ser.type=#{type},
+			</if>
+			<if test="enable!=null">
+				ser.enable=#{enable},
+			</if>
+			<if test="createUser!=null &amp;&amp; createUser!=''">
+				ser.create_user=#{createUser},
+			</if>
+			<if test="createDate!=null &amp;&amp; createDate!=''">
+				ser.create_date=#{createDate},
+			</if>
+			<if test="updateUser!=null &amp;&amp; updateUser!=''">
+				ser.update_user=#{updateUser},
+			</if>
+			<if test="updateDate!=null &amp;&amp; updateDate!=''">
+				ser.update_date=#{updateDate},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="shipExportRecord" type="com.sdcloud.api.lar.entity.ShipExportRecord">
+        <id property="id" column="id"></id>
+		<result property="fileName" column="file_name"></result>
+		<result property="allNum" column="all_num"></result>
+		<result property="successNum" column="success_num"></result>
+		<result property="faildNum" column="faild_num"></result>
+		<result property="faildFileUrl" column="faild_file_url"></result>
+		<result property="org" column="org"></result>
+		<result property="type" column="type"></result>
+		<result property="enable" column="enable"></result>
+		<result property="createUser" column="create_user"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateUser" column="update_user"></result>
+		<result property="updateDate" column="update_date"></result>
+	</resultMap>
+	
+	<insert id="save" >
+		INSERT INTO lar_ship_export_record
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO lar_ship_export_record
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM lar_ship_export_record ser
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="deleteByIds">
+		DELETE FROM lar_ship_export_record ser
+		<where>
+			<if test="list !=null &amp;&amp; list.size() >0">
+				ser.id IN
+				<foreach collection="list" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="list == null || list.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+	
+	<update id="disableByPrimary">
+		UPDATE lar_ship_export_record ser
+		SET ser.enable = 1
+		WHERE ser.id=#{id}
+	</update>
+	
+	<update id="disableByIds">
+		UPDATE lar_ship_export_record ser
+		SET ser.enable = 1
+		<where>
+			<if test="list != null &amp;&amp; list.size() > 0">
+				ser.id IN
+				<foreach collection="list" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="list == null || list.size() == 0">
+				false
+			</if>
+		</where>
+	</update>
+	
+	<update id="update">
+		UPDATE lar_ship_export_record ser
+		<include refid="Update_Column"></include>
+		WHERE ser.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE lar_ship_export_record ser
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" ser.file_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.fileName}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.all_num = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.allNum}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.success_num = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.successNum}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.faild_num = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.faildNum}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.faild_file_url = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.faildFileUrl}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.org = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.org}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.type = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.type}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.enable = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.enable}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.create_user = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.createUser}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.create_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.createDate}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.update_user = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.updateUser}
+               </foreach>
+            </trim>
+			<trim prefix=" ser.update_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ser.id=#{i.id} THEN #{i.updateDate}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			ser.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="selectByPrimary" resultMap="shipExportRecord">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_ship_export_record ser
+		WHERE ser.id=#{id}
+	</select>
+	
+	<select id="findByIds" resultMap="shipExportRecord">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_ship_export_record ser
+		<where>
+			<if test="list !=null &amp;&amp; list.size() >0">
+				ser.id IN
+				<foreach collection="list" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="list == null || list.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+	<select id="exist" resultMap="shipExportRecord">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_ship_export_record ser
+		<include refid="Where_Value"/>
+	</select>
+	
+	<select id="findAll" resultMap="shipExportRecord">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_ship_export_record ser
+		<include refid="Where_Value"/>
+		ORDER BY ser.create_date desc
+		<if test="pager != null">
+			LIMIT #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(ser.id)
+		FROM lar_ship_export_record ser
+		<include refid="Where_Value"/>
+	</select>
+	
+</mapper>

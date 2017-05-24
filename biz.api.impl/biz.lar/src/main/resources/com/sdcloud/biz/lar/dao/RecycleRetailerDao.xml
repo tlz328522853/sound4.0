@@ -1,0 +1,717 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	TLZ
+	date	:	2016-12-08
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleRetailerDao">
+	
+	<sql id="Base_Column_List">
+		rr.id, rr.org_id, rr.org_name, rr.retailer, rr.retailer_short,rr.accurl_id,
+		rr.retailer_coding, rr.retailer_type, rr.area_id,rr.area_name, rr.linkman, rr.contact_number,
+		rr.address, rr.remark, rr.accessory, rr.create_time, rr.create_men,
+		rr.update_time, rr.update_men, rr.enable
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, org_id, org_name, retailer, retailer_short,accurl_id,
+		retailer_coding, retailer_type, area_id,area_name, linkman, contact_number,
+		address, remark, accessory, create_time, create_men,
+		update_time, update_men, enable
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{orgId,jdbcType=BIGINT},
+		#{orgName,jdbcType=VARCHAR}, #{retailer,jdbcType=VARCHAR},
+		#{retailerShort,jdbcType=VARCHAR},#{accurlId}, 
+		#{retailerCoding,jdbcType=VARCHAR},
+		#{retailerType,jdbcType=VARCHAR}, #{areaId},#{areaName,jdbcType=VARCHAR},
+		#{linkman,jdbcType=VARCHAR}, #{contactNumber},
+		#{address,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},
+		#{accessory,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+		#{createMen,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP},
+		#{updateMen,jdbcType=VARCHAR}, #{enable,jdbcType=INTEGER}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.orgId,jdbcType=BIGINT},
+		#{item.orgName,jdbcType=VARCHAR}, #{item.retailer,jdbcType=VARCHAR},
+		#{item.retailerShort,jdbcType=VARCHAR}, #{accurlId},
+		#{item.retailerCoding,jdbcType=VARCHAR},
+		#{item.retailerType,jdbcType=VARCHAR}, #{item.areaId},#{item.areaName,jdbcType=VARCHAR},
+		#{item.linkman,jdbcType=VARCHAR}, #{item.contactNumber},
+		#{item.address,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR},
+		#{item.accessory,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP},
+		#{item.createMen,jdbcType=VARCHAR}, #{item.updateTime,jdbcType=TIMESTAMP},
+		#{item.updateMen,jdbcType=VARCHAR}, #{item.enable,jdbcType=INTEGER}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="orgId!=null">
+				rr.org_id=#{orgId},
+			</if>
+			<if test="orgName!=null &amp;&amp; orgName!=''">
+				rr.org_name=#{orgName},
+			</if>
+			<if test="retailer!=null &amp;&amp; retailer!=''">
+				rr.retailer=#{retailer},
+			</if>
+			<if test="retailerShort!=null &amp;&amp; retailerShort!=''">
+				rr.retailer_short=#{retailerShort},
+			</if>
+			<if test="retailerCoding!=null &amp;&amp; retailerCoding!=''">
+				rr.retailer_coding=#{retailerCoding},
+			</if>
+			<if test="retailerType!=null &amp;&amp; retailerType!=''">
+				rr.retailer_type=#{retailerType},
+			</if>
+			<if test="areaId!=null &amp;&amp; areaId!=''">
+				rr.area_id=#{areaId},
+			</if>
+			<if test="areaName!=null &amp;&amp; areaName!=''">
+				rr.area_name=#{areaName},
+			</if>
+			
+				rr.linkman=#{linkman},
+				rr.contact_number=#{contactNumber},
+				rr.address=#{address},
+				rr.remark=#{remark},
+			<if test="accessory!=null &amp;&amp; accessory!=''">
+				rr.accessory=#{accessory},
+			</if>
+			<if test="createTime!=null">
+				rr.create_time=#{createTime},
+			</if>
+			<if test="createMen!=null &amp;&amp; createMen!=''">
+				rr.create_men=#{createMen},
+			</if>
+			<if test="updateTime!=null">
+				rr.update_time=#{updateTime},
+			</if>
+			<if test="updateMen!=null &amp;&amp; updateMen!=''">
+				rr.update_men=#{updateMen},
+			</if>
+			<if test="enable!=null">
+				rr.enable=#{enable},
+			</if>
+			<if test="accurlId !=null">
+				rr.accurl_id=#{accurlId},
+			</if> 
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="recycleRetailer" type="com.sdcloud.api.lar.entity.RecycleRetailer">
+        <id property="id" column="id"></id>
+		<result property="orgId" column="org_id"></result>
+		<result property="orgName" column="org_name"></result>
+		<result property="retailer" column="retailer"></result>
+		<result property="retailerShort" column="retailer_short"></result>
+		<result property="retailerCoding" column="retailer_coding"></result>
+		<result property="retailerType" column="retailer_type"></result>
+		<result property="areaId" column="area_id"></result>
+		<result property="areaName" column="area_name"></result>
+		<result property="linkman" column="linkman"></result>
+		<result property="contactNumber" column="contact_number"></result>
+		<result property="address" column="address"></result>
+		<result property="remark" column="remark"></result>
+		<result property="accessory" column="accessory"></result>
+		<result property="createTime" column="create_time"></result>
+		<result property="createMen" column="create_men"></result>
+		<result property="updateTime" column="update_time"></result>
+		<result property="updateMen" column="update_men"></result>
+		<result property="enable" column="enable"></result>
+		<result property="accurlId" column="accurl_id"></result>
+		<collection property="recycleRetailerAccurl" ofType="com.sdcloud.api.lar.entity.RecycleRetailerAccurl" javaType="java.util.List" column="accurl_id" select="getAccurlById"></collection>
+	</resultMap>
+	
+	<select id="getAccurlById" resultType="com.sdcloud.api.lar.entity.RecycleRetailerAccurl">
+		SELECT `name`,`url` FROM `lar_recycle_retailer_accurl` WHERE `retailer_id`=#{accurl_id}
+	</select>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="recycleRetailer">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer rr
+	<!-- 	LEFT OUTER JOIN lar_recycle_retailer_accurl a
+		ON rr.accurl_id=a.retailer_id -->
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rr.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+			    and rr.enable = 0 
+				and rr.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 客户名称 -->
+				<if test="larPager.params.retailer != null and larPager.params.retailer !=''">
+					and retailer like '%${larPager.params.retailer}%'
+				</if>
+				<!-- 客户名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and retailer like '%${larPager.params.name}%'
+					
+				</if>
+				<!-- 客户简称 -->
+				<if test="larPager.params.retailerShort != null and larPager.params.retailerShort !=''">
+					and retailer_short like '%${larPager.params.retailerShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and contact_number=#{larPager.params.linkman}
+				</if>
+				<!-- 客户类型 -->
+				<if test="larPager.params.retailerType != null and larPager.params.retailerType !=''">
+					and retailer_type=#{larPager.params.retailerType}
+				</if>
+		</where>
+		<choose>
+		<when test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</when>
+		<otherwise>
+           order by rr.create_time desc ,rr.update_time desc
+        </otherwise>
+        </choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(rr.id)
+		FROM lar_recycle_retailer rr
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rr.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+			    and rr.enable = 0 
+				and rr.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 客户名称 -->
+				<if test="larPager.params.retailer != null and larPager.params.retailer !=''">
+					and retailer like '%${larPager.params.retailer}%'
+				</if>
+				<!-- 客户名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and retailer like '%${larPager.params.name}%'
+					
+				</if>
+				<!-- 客户简称 -->
+				<if test="larPager.params.retailerShort != null and larPager.params.retailerShort !=''">
+					and retailer_short like '%${larPager.params.retailerShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and linkman=#{larPager.params.linkman}
+				</if>
+				<!-- 客户类型 -->
+				<if test="larPager.params.retailerType != null and larPager.params.retailerType !=''">
+					and retailer_type=#{larPager.params.retailerType}
+				</if>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO lar_recycle_retailer
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO lar_recycle_retailer
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM lar_recycle_retailer rr
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM lar_recycle_retailer rr
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rr.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	<update id="disableByPrimary">
+		UPDATE lar_recycle_retailer rr
+		SET rr.enable = 1
+		WHERE rr.id=#{id}
+	</update>
+	
+	<update id="disableByIds">
+		UPDATE lar_recycle_retailer rr
+		SET rr.enable = 1
+		<where>
+			<if test="list != null &amp;&amp; list.size() > 0">
+				rr.id IN
+				<foreach collection="list" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="list == null || list.size() == 0">
+				false
+			</if>
+		</where>
+	</update>
+	<!-- 更改附件id -->
+	<update id="updateAccurlId">
+		UPDATE lar_recycle_retailer rr
+		<set>
+				rr.accurl_id=null,
+		</set>
+		WHERE rr.accurl_id=#{id}
+	</update>
+	
+	<update id="update">
+		UPDATE lar_recycle_retailer rr
+		<include refid="Update_Column"></include>
+		WHERE rr.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE lar_recycle_retailer rr
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" rr.org_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.orgId}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.org_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.orgName}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.retailer = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.retailer}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.retailer_short = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.retailerShort}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.retailer_coding = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.retailerCoding}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.retailer_type = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.retailerType}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.area_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.areaName}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.linkman = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.linkman}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.contact_number = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.contactNumber}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.address = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.address}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.remark = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.remark}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.accessory = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.accessory}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.create_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.createTime}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.create_men = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.createMen}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.update_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.updateTime}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.update_men = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.updateMen}
+               </foreach>
+            </trim>
+			<trim prefix=" rr.enable = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rr.id=#{i.id} THEN #{i.enable}
+               </foreach>
+            </trim>
+			
+		</trim>
+		<where>
+			rr.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="recycleRetailer">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer rr
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rr.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(rr.id)
+		FROM lar_recycle_retailer rr
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rr.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+				and rr.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 客户名称 -->
+				<if test="larPager.params.retailer != null and larPager.params.retailer !=''">
+					and retailer like '%${larPager.params.retailer}%'
+				</if>
+				<!-- 客户名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and retailer like '%${larPager.params.name}%'
+					
+				</if>
+				<!-- 客户简称 -->
+				<if test="larPager.params.retailerShort != null and larPager.params.retailerShort !=''">
+					and retailer_short like '%${larPager.params.retailerShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and linkman=#{larPager.params.linkman}
+				</if>
+				<!-- 客户类型 -->
+				<if test="larPager.params.retailerType != null and larPager.params.retailerType !=''">
+					and retailer_type=#{larPager.params.retailerType}
+				</if>
+		</where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="recycleRetailer">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer rr
+	<!-- 	LEFT OUTER JOIN lar_recycle_retailer_accurl a
+		ON rr.accurl_id=a.retailer_id -->
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rr.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+				and rr.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 客户名称 -->
+				<if test="larPager.params.retailer != null and larPager.params.retailer !=''">
+					and retailer like '%${larPager.params.retailer}%'
+				</if>
+				<!-- 客户名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and retailer like '%${larPager.params.name}%'
+					
+				</if>
+				<!-- 客户简称 -->
+				<if test="larPager.params.retailerShort != null and larPager.params.retailerShort !=''">
+					and retailer_short like '%${larPager.params.retailerShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and contact_number=#{larPager.params.linkman}
+				</if>
+				<!-- 客户类型 -->
+				<if test="larPager.params.retailerType != null and larPager.params.retailerType !=''">
+					and retailer_type=#{larPager.params.retailerType}
+				</if>
+		</where>
+		<choose>
+		<when test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</when>
+		<otherwise>
+           order by rr.create_time desc ,rr.update_time desc
+        </otherwise>
+        </choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+    </select>
+	
+    <select id="exist" resultMap="recycleRetailer">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer rr
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND rr.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="recycleRetailer">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer rr
+        <where>
+            rr.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND rr.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+	<select id="existByRetailer"  resultMap="recycleRetailer">
+   	 select id,rr.retailer
+	   	 from lar_recycle_retailer rr
+	   	 where 
+	   	 	1=1
+	   	 	<if test="mechanismId !=null">
+				and rr.org_id=#{mechanismId}
+				<!-- 客户名称 -->
+				
+			</if>
+			<if test="retailer != null">
+				and rr.retailer=#{retailer}
+			</if>
+    </select>
+	
+	<select id="existByRetailerShort"  resultMap="recycleRetailer">
+   	 select id,rr.retailer_short
+	   	 from lar_recycle_retailer rr
+	   	 where 
+	   	 	1=1
+	   	 	<if test="mechanismId !=null">
+				and rr.org_id=#{mechanismId}
+				<!-- 客户名称 -->
+				
+			</if>
+			<if test="retailerShort != null">
+				and rr.retailer_short=#{retailerShort}
+			</if>
+    </select>
+</mapper>

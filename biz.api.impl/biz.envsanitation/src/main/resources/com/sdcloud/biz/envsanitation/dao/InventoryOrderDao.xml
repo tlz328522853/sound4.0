@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.InventoryOrderDao">
+
+	<sql id="inventoryOrderColumn">
+		tag,
+		orgId,
+		inOutDate,
+		inventoryDicId,
+		inOutDicId,
+		mark,
+		purchaseOrderId,
+		acceptOrderId,
+		clientId,
+		purchaser,
+		orderMaker,
+		ocreateDate,
+		status,
+		auditor,
+		auditDate,
+		account,
+		accountDate,
+		modifiedTime,
+		type,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_inventory_in_out(
+			orderId, <include refid="inventoryOrderColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="inventoryOrders" separator=",">
+			(#{item.orderId},#{item.tag},
+			#{item.orgId}, #{item.inOutDate},
+			#{item.inventoryDicId}, #{item.inOutDicId},
+			#{item.mark}, #{item.purchaseOrderId},
+			#{item.acceptOrderId},#{item.clientId}, #{item.purchaser},
+			#{item.orderMaker},
+			#{item.ocreateDate},#{item.status}
+			,#{item.auditor},#{item.auditDate},#{item.account}
+			,#{item.accountDate},#{item.modifiedTime},#{item.type}
+			,#{item.tenantId}
+			)
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_inventory_in_out
+		<choose>
+			<when test="inventoryOrderIds != null &amp;&amp; inventoryOrderIds.size() != 0">
+				where orderId in
+		      	<foreach item="item" index="index" collection="inventoryOrderIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="inventory">
+		update so_inventory_in_out
+		<set>
+			<if test="tag != null">tag = #{tag},</if>
+			<if test="orgId != null">orgId = #{orgId},</if>
+			<if test="inOutDate != null">inOutDate = #{inOutDate},</if>
+			<if test="inventoryDicId != null">inventoryDicId = #{inventoryDicId},</if>
+			<if test="inOutDicId != null">inOutDicId = #{inOutDicId},</if>
+			<if test="mark != null&amp;&amp; mark != ''">mark = #{mark},</if>
+			<if test="purchaseOrderId != null &amp;&amp; purchaseOrderId != ''">purchaseOrderId = #{purchaseOrderId},</if>
+			<if test="acceptOrderId != null &amp;&amp; acceptOrderId != ''">acceptOrderId = #{acceptOrderId},</if>
+			<if test="clientId != null">clientId = #{clientId},</if>
+			<if test="purchaser != null ">purchaser = #{purchaser},</if>
+			<if test="orderMaker != null">orderMaker = #{orderMaker},</if>
+			<if test="ocreateDate != null">ocreateDate = #{ocreateDate},</if>
+			<if test="status != null ">status = #{status},</if>
+			<if test="auditor != null">auditor = #{auditor},</if>
+			<if test="auditDate != null">auditDate = #{auditDate},</if>
+			<if test="account != null">account = #{account},</if>
+			<if test="accountDate != null ">accountDate = #{accountDate},</if>
+			<if test="modifiedTime != null">modifiedTime = #{modifiedTime},</if>
+			<if test="type != null">type = #{type},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where orderId = #{orderId}
+	</update>
+	
+	<sql id="inventoryCondition">
+		<where>
+			<if test="newOrgId != null ">
+				o.newOrgId = #{newOrgId}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.orderId)
+		from so_inventory_in_out c
+		left join pf_employee po
+	    on po.employeeId=c.orderMaker
+	    left join pf_employee pu
+	    on pu.employeeId=c.purchaser
+	    left join so_inventory_client soc
+	    on soc.clientId=c.clientId
+	   <where>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				c.orgId = #{orgId}
+			</if>
+			<if test="inventoryDicId != null&amp;&amp; inventoryDicId >0">
+				and c.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="inOutDicId != null&amp;&amp; inOutDicId >0">
+				and c.inOutDicId = #{inOutDicId}
+			</if>
+			<if test="clientId != null">
+				and c.clientId = #{clientId}
+			</if>
+			<if test="purchaser != null">
+				and c.purchaser = #{purchaser}
+			</if>
+			<if test="orderMaker != null">
+				and c.orderMaker = #{orderMaker}
+			</if>
+			<if test="status != null">
+				and c.status = #{status}
+			</if>
+			<if test="auditor != null">
+				and c.auditor = #{auditor}
+			</if>
+			<if test="account != null">
+				and c.status = #{status}
+			</if>
+			<if test="type != null">
+				and c.type = #{type}
+			</if>
+			<if test="clientIdName != null &amp;&amp; clientIdName !=''">
+				and soc.clientName like '%${clientIdName}%'
+			</if>
+			<if test="orderMakerName != null &amp;&amp; orderMakerName !=''">
+				and po.name like '%${orderMakerName}%'
+			</if>
+			<if test="purchaserName != null &amp;&amp; purchaserName !=''">
+				and pu.name like '%${purchaserName}%'
+			</if>
+			<if test="purchaseOrderId != null &amp;&amp;purchaseOrderId !=''">
+				and c.purchaseOrderId like '%${purchaseOrderId}%'
+			</if>
+			<if test="acceptOrderId != null &amp;&amp;acceptOrderId !=''">
+				and c.acceptOrderId like '%${acceptOrderId}%'
+			</if>
+			<if test="tag != null &amp;&amp; tag !=''">
+				and c.tag like '%${tag}%'
+			</if>
+			<if test="startOcreateDate != null &amp;&amp; endOcreateDate !=null">
+				and c.ocreateDate between #{startOcreateDate} and #{endOcreateDate}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findInventoryOrderByIds" resultType="InventoryOrder">
+	    select 	orderId,
+	    (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.account) as accountName,
+	    (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.auditor) as auditorName,
+	    (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.orderMaker) as orderMakerName,
+	     (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.purchaser) as purchaserName,
+	    (SELECT soc.clientName from so_inventory_client soc where soc.clientId=c.clientId) as clientIdName,
+	    
+	    <include refid="inventoryOrderColumn"/>
+	    from so_inventory_in_out c
+	   <where>
+			<if test="orderIds != null &amp;&amp; orderIds.size() !=0">
+				c.orderId in
+				<foreach item="item" index="index" collection="orderIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			
+		</where>
+		
+	</select> 
+	<select id="findAllBy" resultType="InventoryOrder">
+	    select 	orderId,
+	    (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.account) as accountName,
+	    (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.auditor) as auditorName,
+	    (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.orderMaker) as orderMakerName,
+	    (SELECT pe.`name` from pf_employee pe where pe.employeeId=c.purchaser) as purchaserName,
+	    (SELECT soc.clientName from so_inventory_client soc where soc.clientId=c.clientId) as clientIdName,
+	    <include refid="inventoryOrderColumn"/>
+	    from so_inventory_in_out c
+	   <where>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				c.orgId = #{orgId}
+			</if>
+			<if test="inventoryDicId != null&amp;&amp; inventoryDicId >0">
+				and c.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="inOutDicId != null&amp;&amp; inOutDicId >0">
+				and c.inOutDicId = #{inOutDicId}
+			</if>
+			<if test="clientId != null">
+				and c.clientId = #{clientId}
+			</if>
+			<if test="purchaser != null">
+				and c.purchaser = #{purchaser}
+			</if>
+			<if test="orderMaker != null">
+				and c.orderMaker = #{orderMaker}
+			</if>
+			<if test="status != null">
+				and c.status = #{status}
+			</if>
+			<if test="auditor != null">
+				and c.auditor = #{auditor}
+			</if>
+			<if test="account != null">
+				and c.status = #{status}
+			</if>
+			<if test="type != null">
+				and c.type = #{type}
+			</if>
+			<if test="clientIdName != null &amp;&amp; clientIdName !=''">
+				and clientIdName like '%${clientIdName}%'
+			</if>
+			<if test="orderMakerName != null &amp;&amp; orderMakerName !=''">
+				and orderMakerName like '%${orderMakerName}%'
+			</if>
+			<if test="purchaserName != null &amp;&amp; purchaserName !=''">
+				and purchaserName like '%${purchaserName}%'
+			</if>
+			<if test="purchaseOrderId != null &amp;&amp;purchaseOrderId !=''">
+				and c.purchaseOrderId like '%${purchaseOrderId}%'
+			</if>
+			<if test="acceptOrderId != null &amp;&amp;acceptOrderId !=''">
+				and c.acceptOrderId like '%${acceptOrderId}%'
+			</if>
+			<if test="tag != null &amp;&amp; tag !=''">
+				and c.tag like '%${tag}%'
+			</if>
+			<if test="startOcreateDate != null &amp;&amp; endOcreateDate !=null">
+				and c.ocreateDate between #{startOcreateDate} and #{endOcreateDate}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+		</where>
+		<if test="pager != null">
+		 	<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+				order by  ${pager.orderBy}
+				<if test="pager.order!=null &amp;&amp; pager.order!=''">
+				  ${pager.order}
+				</if>
+			</if>
+			
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

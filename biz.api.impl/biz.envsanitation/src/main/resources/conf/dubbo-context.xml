@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation=" http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+      http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	<context:component-scan base-package="com.sdcloud" />
+	
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+        <property name="locations">  
+           <list>  
+              <value>classpath:conf/env.properties</value>  
+            </list>  
+        </property>  
+    </bean> 
+	<!-- Database config -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		 
+		<property name="url"
+			value="jdbc:mysql://${mysql.ipAndPort}/${mysql.database}?characterEncoding=utf-8&amp;autoReconnect=true" />
+		<property name="username" value="${mysql.userName}" />
+		<property name="password" value="${mysql.password}" />
+		
+				<!-- 最大活动连接 -->
+		<property name="maxActive" value="20" /> 
+		<!-- 最大空闲连接 maxIdle值与maxActive值应配置的接近。因为，当连接数超过maxIdle值后，刚刚使用完的连接（刚刚空闲下来）会立即被销毁。而不是我想要的空闲M秒后再销毁起一个缓冲作用-->
+		<property name="maxIdle" value="20" /> 
+		<!-- 最小空闲连接 -->
+		<property name="minIdle" value="5" /> 
+		<!-- 从池中取连接的最大等待时间，单位ms. -->
+		<property name="maxWait" value="30000" />
+		<!-- 初始化连接 -->
+		<property name="initialSize" value="5" />  
+		
+		<!-- 借出连接时不要测试，否则很影响性能 ，默认为true-->
+		<property name="testOnBorrow" value="false" /> 
+		
+		<!-- 指明连接是否被空闲连接回收器(如果有)进行检验.如果检测发现连接失败,则连接将被从池中去除. -->
+		<property name="testWhileIdle" value="true" /> 
+		<!-- 验证使用的SQL语句 -->
+		<property name="validationQuery" value="select 1" /> 
+		<!-- 每30秒运行一次空闲连接回收器. -->
+		<property name="timeBetweenEvictionRunsMillis" value="30000" /> 
+		<!-- 池中的连接空闲30分钟后被回收 -->
+		<property name="minEvictableIdleTimeMillis" value="1800000" /> 
+		<!-- 在每次空闲连接回收器线程(如果有)运行时检查的连接数量.默认为3个 -->
+		<property name="numTestsPerEvictionRun" value="3" /> 
+		 
+		<!-- 连接泄漏回收参数，当可用连接数少于3个时才执行 . -->
+		<property name="removeAbandoned" value="true" /> 
+		<!-- 连接泄漏回收参数，180秒，泄露的连接可以被删除的超时值 -->
+		<property name="removeAbandonedTimeout" value="180" /> 
+		<!-- 被丢弃的数据库连接是否做记录，以便跟踪 -->
+		<property name="logAbandoned" value="true" /> 
+		<!-- <property name="connectionInitSqls" value="set names utf8mb4;"/> -->
+	</bean>
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.sdcloud.api.envsanitation.entity"></property>
+		<property name="configLocation" value="" />
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"> 
+		<property name="basePackage" value="com.sdcloud.biz.envsanitation.dao" /> 
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property> 
+	</bean> 
+	
+	<!-- dubbo base config -->
+	<dubbo:application name="dubbo-provider" />
+	<dubbo:registry address="zookeeper://${dubbo.zookeeper.ipAndPort}" />
+	<dubbo:protocol name="dubbo" port="${dubbo.port}" threadpool="fixed" threads="200"/>
+
+	<!-- Add your service here -->
+	<dubbo:service ref="assetCarService" interface="com.sdcloud.api.envsanitation.service.AssetCarService"/>
+	<dubbo:service ref="assetDustbinServcice" interface="com.sdcloud.api.envsanitation.service.AssetDustbinService"/>
+	<dubbo:service ref="assetStationServcice" interface="com.sdcloud.api.envsanitation.service.AssetStationService"/>
+	<dubbo:service ref="assetWcServcice" interface="com.sdcloud.api.envsanitation.service.AssetWcService"/>
+	<dubbo:service ref="carAddOilServcice" interface="com.sdcloud.api.envsanitation.service.CarAddOilService"/>
+	<dubbo:service ref="carAddWaterServcice" interface="com.sdcloud.api.envsanitation.service.CarAddWaterService"/>
+	<dubbo:service ref="carCleanServcice" interface="com.sdcloud.api.envsanitation.service.CarCleanService"/>
+	<dubbo:service ref="empRoutePlanService" interface="com.sdcloud.api.envsanitation.service.EmpRoutePlanService"/>
+	<dubbo:service ref="empInspecPlanService" interface="com.sdcloud.api.envsanitation.service.EmpInspecPlanService"/>
+	<dubbo:service ref="carRoutePlanService" interface="com.sdcloud.api.envsanitation.service.CarRoutePlanService"/>
+	<dubbo:service ref="eventService" interface="com.sdcloud.api.envsanitation.service.EventService"/>
+	
+	<dubbo:service ref="anomalyService" interface="com.sdcloud.api.envsanitation.service.CarOilAnomalyService"/>
+	<dubbo:service ref="bizCompanyService" interface="com.sdcloud.api.envsanitation.service.BizCompanyService" />
+	<dubbo:service ref="analysisReportService" interface="com.sdcloud.api.envsanitation.service.AnalysisReportService" />
+	
+	<dubbo:service ref="inventoryService" interface="com.sdcloud.api.envsanitation.service.InventoryService" />
+	<dubbo:service ref="inventoryOrderService" interface="com.sdcloud.api.envsanitation.service.InventoryOrderService" />
+	<dubbo:service ref="inventoryWarehouseService" interface="com.sdcloud.api.envsanitation.service.InventoryWarehouseService" />
+	<dubbo:service ref="inventoryClientService" interface="com.sdcloud.api.envsanitation.service.InventoryClientService" />
+	<dubbo:service ref="rpProjectInfoService" interface="com.sdcloud.api.envsanitation.service.RpProjectInfoService" />
+	<dubbo:service ref="rpContractInfoService" interface="com.sdcloud.api.envsanitation.service.RpContractInfoService" />
+	<dubbo:service ref="rpProjectContractInfoService" interface="com.sdcloud.api.envsanitation.service.RpProjectContractInfoService" />
+	<dubbo:service ref="rpCarInsureInfoService" interface="com.sdcloud.api.envsanitation.service.RpCarInsureInfoService" />
+	<dubbo:service ref="rpAttendanceEmployeeMonthService" interface="com.sdcloud.api.envsanitation.service.RpAttendanceEmployeeMonthService" />
+	<dubbo:service ref="rpCostMonthService" interface="com.sdcloud.api.envsanitation.service.RpCostMonthService" />
+	<dubbo:service ref="rpIncomePayMonthService" interface="com.sdcloud.api.envsanitation.service.RpIncomePayMonthService" />
+	<dubbo:service ref="rpAccidentPersonService" interface="com.sdcloud.api.envsanitation.service.RpAccidentPersonService"/>
+	<dubbo:service ref="rpAccidentCarService" interface="com.sdcloud.api.envsanitation.service.RpAccidentCarService"/>
+	<dubbo:service ref="rpOperationQualityMonthService" interface="com.sdcloud.api.envsanitation.service.RpOperationQualityMonthService"/>
+	<dubbo:service ref="rpSecurityProductionMonthService" interface="com.sdcloud.api.envsanitation.service.RpSecurityProductionMonthService"/>
+	
+	<dubbo:service ref="inventoryAccountingService" interface="com.sdcloud.api.envsanitation.service.InventoryAccountingService" />
+	<dubbo:service ref="inventoryHistoryService" interface="com.sdcloud.api.envsanitation.service.InventoryHistoryService" />
+	<dubbo:service ref="asset2AdvertService" interface="com.sdcloud.api.envsanitation.service.Asset2AdvertService" />
+	<dubbo:service ref="deviceService" interface="com.sdcloud.api.envsanitation.service.DeviceService" />
+    <dubbo:service ref="deviceAdvertisementService" interface="com.sdcloud.api.envsanitation.service.DeviceAdvertisementService" />
+    <dubbo:service ref="advertisementService" interface="com.sdcloud.api.envsanitation.service.AdvertisementService" />
+    <dubbo:service ref="toiletDeviceService" interface="com.sdcloud.api.envsanitation.service.ToiletDeviceService" />
+    <dubbo:service ref="appVersionService" interface="com.sdcloud.api.envsanitation.service.AppVersionService" />
+    <dubbo:service ref="advertDirectiveService" interface="com.sdcloud.api.envsanitation.service.AdvertDirectiveService" />
+	 <dubbo:service ref="deviceReportService" interface="com.sdcloud.api.envsanitation.service.DeviceReportService" />
+	
+	<!-- bean @Service(value='')配置-->
+	<bean id="carAddOilServcice" class="com.sdcloud.biz.envsanitation.service.impl.CarAddOilServiceImpl"/>
+	<bean id="carAddWaterServcice" class="com.sdcloud.biz.envsanitation.service.impl.CarAddWaterServiceImpl"/>
+	<bean id="carCleanServcice" class="com.sdcloud.biz.envsanitation.service.impl.CarCleanServiceImpl"/>
+	 <bean id="empRoutePlanService" class="com.sdcloud.biz.envsanitation.service.impl.EmpRoutePlanServiceImpl"/>
+	<bean id="empInspecPlanService" class="com.sdcloud.biz.envsanitation.service.impl.EmpInspecPlanServiceImpl"/>
+	<bean id="carRoutePlanService" class="com.sdcloud.biz.envsanitation.service.impl.CarRoutePlanServiceImpl"/>
+	<bean id="eventService" class="com.sdcloud.biz.envsanitation.service.impl.EventServiceImpl" />
+	<bean id="bizCompanyService" class="com.sdcloud.biz.envsanitation.service.impl.BizCompanyServiceImpl" />
+	 <bean id="analysisReportService" class="com.sdcloud.biz.envsanitation.service.impl.AnalysisReportServiceImpl"/>
+
+	
+	<!-- consumer -->
+	
+	<dubbo:reference id="mqttInterface" interface="com.sound.cloud.rpc.api.MqttInterface" check="false"/>
+</beans>

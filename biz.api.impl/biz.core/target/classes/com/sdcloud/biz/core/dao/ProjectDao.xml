@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.ProjectDao">
+
+	<sql id="tableColumn">
+		p.employee,p.population,p.sweepArea,p.greenBeltArea,p.mechOpRate,p.garbageCleanup,p.recycle,p.
+		district,p.districtCode,p.province,p.city,p.county,p.project,p.stockRatio,p.stockRatioDetail,p.registerCapital,p.
+		businessAddress,p.registerTime,p.corporateRepresentative,p.generalManager,p.generalManagerTel,p.
+		viceGeneralManager,p.viceGeneralManagerTel,p.telephone,p.zipCode,p.fax,p.informant,p.informantTime,p.
+		modifier,p.modifierTime,p.latitude,p.longitude,p.scaling,p.projectAddress
+	</sql>
+	
+	<sql id="tableColumn2">
+		employee,population,sweepArea,greenBeltArea,mechOpRate,garbageCleanup,recycle,
+		district,districtCode,province,city,county,project,stockRatio,stockRatioDetail,registerCapital,
+		businessAddress,registerTime,corporateRepresentative,generalManager,generalManagerTel,
+		viceGeneralManager,viceGeneralManagerTel,telephone,zipCode,fax,informant,informantTime,
+		modifier,modifierTime,latitude,longitude,scaling,projectAddress
+	</sql>
+
+	<sql id="queryCondition">
+		<where>
+			<if test="name != null &amp;&amp; name != ''">
+				name like '%${name}%'
+			</if>
+		</where>
+	</sql>
+
+	<insert id="insert">
+		insert into pf_project (
+			orgId
+			,<include refid="tableColumn2" />
+		)values(
+			#{orgId},#{employee},#{population},#{sweepArea},#{greenBeltArea},#{mechOpRate},#{garbageCleanup},#{recycle},
+			#{district},#{districtCode},#{province},#{city},#{county},#{project},#{stockRatio},#{stockRatioDetail},#{registerCapital},
+			#{businessAddress},#{registerTime},#{corporateRepresentative},#{generalManager},#{generalManagerTel},
+			#{viceGeneralManager},#{viceGeneralManagerTel},#{telephone},#{zipCode},#{fax},#{informant},now(),
+			null,null,#{latitude},#{longitude},#{scaling},#{projectAddress}
+		)
+	</insert>
+
+	<update id="update" parameterType="map">
+		update pf_project 
+		<set>
+			employee=#{project.employee},
+			population=#{project.population},
+			sweepArea=#{project.sweepArea},
+			greenBeltArea=#{project.greenBeltArea},
+			mechOpRate=#{project.mechOpRate},
+			garbageCleanup=#{project.garbageCleanup},
+			recycle=#{project.recycle},
+			<if test="project.districtCode != null">
+				districtCode=#{project.districtCode},
+			</if>
+			district=#{project.district},	
+			province=#{project.province},
+			city=#{project.city},
+			county=#{project.county},
+			project=#{project.project},
+			stockRatio=#{project.stockRatio},
+			stockRatioDetail=#{project.stockRatioDetail},
+			registerCapital=#{project.registerCapital},
+			businessAddress=#{project.businessAddress},
+			projectAddress=#{project.projectAddress},
+			registerTime=#{project.registerTime},
+			corporateRepresentative=#{project.corporateRepresentative},
+			generalManager=#{project.generalManager},
+			generalManagerTel=#{project.generalManagerTel},
+			viceGeneralManager=#{project.viceGeneralManager},
+			viceGeneralManagerTel=#{project.viceGeneralManagerTel},
+			telephone=#{project.telephone},
+			zipCode=#{project.zipCode},
+			fax=#{project.fax},
+			modifier=#{project.modifier},
+			modifierTime=now(),
+			latitude=#{project.latitude},
+			longitude=#{project.longitude},
+			scaling=#{project.scaling}
+		</set>
+		where orgId = #{project.orgId}
+	</update>
+
+	<delete id="delete" parameterType="map">
+		delete from pf_project
+		<choose>
+			<when test="orgIds != null &amp;&amp; orgIds.size() != 0">
+				where orgId in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+	</delete>
+
+	<select id="findById" parameterType="long" resultType="Project">
+		select
+			p.orgId
+			,<include refid="tableColumn" />
+			,p.orgId as "org.orgId" 
+			,o.name as "org.name" 
+			,o.fullName as "org.fullName" 
+			,o.parentId as "org.parentId" 
+			,e.name as "informantName" 
+			,e2.name as "modifierName" 
+		from pf_project p 
+		left join pf_org o on p.orgId = o.orgId  
+		left join pf_employee e on p.informant = e.employeeId 
+		left join pf_employee e2 on p.modifier = e2.employeeId 
+		where p.orgId = #{orgId}
+	</select>
+	
+	<select id="findAll" parameterType="map" resultType="Project">
+		select
+			o.orgId
+			,<include refid="tableColumn" />
+			,p.orgId as "org.orgId" 
+			,o.name as "org.name" 
+			,o.fullName as "org.fullName" 
+			,o.parentId as "org.parentId" 
+			,e.name as "informantName" 
+			,e2.name as "modifierName" 
+		from pf_org o 
+		left join pf_project p on o.orgId = p.orgId 
+		left join pf_employee e on p.informant = e.employeeId 
+		left join pf_employee e2 on p.modifier = e2.employeeId 
+		<choose>
+			<when test="orgIds != null &amp;&amp; orgIds.size() != 0">
+				where o.orgId in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+				<if test="isSubCompany != null">
+					and o.isSubCompany = #{isSubCompany}
+				</if>
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+		order by o.sequence
+	</select>
+	
+	<select id="findMonitorTree" parameterType="map" resultType="Project">
+		select
+			o.orgId as "org.orgId",
+			o.name as "org.name",
+			o.fullName as "org.fullName",
+			o.sequence as "org.sequence",
+			o.description as "org.description",
+			o.isSubCompany as "org.isSubCompany",
+			o.subCompanyCode as "org.subCompanyCode",
+			o.ownerCode as "org.ownerCode",
+			o.tenantId as "org.tenantId",
+			o.companyId as "org.companyId",
+			o.parentId as "org.parentId",
+			p.orgId as orgId,
+			p.latitude as "org.latitude",		
+			p.longitude as "org.longitude",		
+			p.scaling as "org.scaling"
+		from pf_org o 
+		left join pf_project p on o.orgId = p.orgId 
+		<choose>
+			<when test="orgIds != null &amp;&amp; orgIds.size() != 0">
+				where o.orgId in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+				<if test="isSubCompany != null">
+					and o.isSubCompany = #{isSubCompany}
+				</if>
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+		order by o.sequence
+	</select>
+	
+	<select id="findForDup" resultType="Long">
+		select count(1) as regionCodeCount
+		from pf_org o 
+		left join pf_project p on o.orgId = p.orgId 
+		left join pf_employee e on p.informant = e.employeeId 
+		left join pf_employee e2 on p.modifier = e2.employeeId
+		<where>
+			p.districtCode=#{districtCode}
+			<if test="orgId != null">
+				and o.orgId != #{orgId}
+			</if>
+		</where>
+	</select>
+</mapper>

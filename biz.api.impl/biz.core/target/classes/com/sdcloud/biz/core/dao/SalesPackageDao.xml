@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.SalesPackageDao">
+
+	<sql id="salesPackageColumn">
+		salesPackageName,description,creator,createTime,editor,editTime,money 
+	</sql>
+	
+	<insert id="insert" parameterType="SalesPackage" useGeneratedKeys="true" keyProperty="salesPackageId">
+		insert into pf_sales_package(
+			salesPackageId, <include refid="salesPackageColumn"/>
+		)values(
+			#{salesPackageId}, #{salesPackageName}, #{description}, #{creator}, now(),
+			#{editor}, now(),#{money}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="long" >
+		delete from 
+			pf_sales_package
+		where 
+			salesPackageId=#{salesPackageId}
+	</delete>
+	
+	<update id="update" parameterType="SalesPackage">
+		update pf_sales_package
+		<set>
+			<if test="salesPackageName != null &amp;&amp; salesPackageName != ''">salesPackageName=#{salesPackageName},</if>
+			<if test="description != null &amp;&amp; description != ''">description=#{description},</if>
+			<if test="creator != null">creator=#{creator},</if>
+			<if test="editor != null">editor=#{editor},</if>
+			<if test="money != null">money=#{money},</if>
+			<if test="2 > 1">editTime=now()</if>
+		</set>
+		where salesPackageId = #{salesPackageId}
+	</update>
+	 
+	<resultMap type="com.sdcloud.api.core.entity.SalesPackage" id="salesPackageResultMap">
+		<id column="salesPackageId" property="salesPackageId"/>
+		<result column="salesPackageName" property="salesPackageName"/>
+		<result column="description" property="description"/>
+		<result column="creator" property="creator"/>
+		<result column="createTime" property="createTime"/>
+		<result column="editor" property="editor"/>
+		<result column="editTime" property="editTime"/>
+		<result column="money" property="money"/>
+		<collection property="modules" javaType="com.sdcloud.api.core.entity.Module">
+			<id column="m_moduleId" property="moduleId"/>
+			<result column="m_moduleCode" property="moduleCode"/>
+			<result column="m_moduleName" property="moduleName"/>
+			<result column="m_url" property="url"/>
+			<result column="m_status" property="status"/>	
+			<result column="m_sequence" property="sequence"/>	
+			<result column="m_creator" property="creator"/>	
+			<result column="m_createTime" property="createTime"/>	
+			<result column="m_editor" property="editor"/>	
+			<result column="m_editTime" property="editTime"/>
+			
+		</collection>
+	</resultMap>
+	
+	<select id="findById" parameterType="long" resultMap="salesPackageResultMap">
+		select p.salesPackageId, p.salesPackageName, p.description, p.creator, p.createTime, p.editor, p.editTime,
+			   m.moduleId as "m_moduleId", m.moduleCode as "m_moduleCode", m.moduleName as "m_moduleName", 
+			   m.url as "m_url", m.status as "m_status", m.sequence as "m_sequence", 
+			   m.creator as "m_creator", m.createTime as "m_createTime", 
+			   m.editor as "m_editor", m.editTime as "m_editTime",
+			   p.money
+		from pf_sales_package p 
+		left outer join pf_sales_package_module pm 
+		on p.salesPackageId = pm.salesPackageId 
+		left outer join pf_module m 
+		on pm.moduleId = m.moduleId 
+		where p.salesPackageId = #{salesPackageId}
+		order by  m.sequence
+	</select>
+	
+	<select id="findAll" resultType="SalesPackage">
+		select 
+			salesPackageId,<include refid="salesPackageColumn"/>
+		from 
+			pf_sales_package 
+	</select>
+   <select id="findUserSalesPackage" resultType="Long">
+		SELECT pt.salesPackageId from pf_tenant  pt 
+		INNER JOIN pf_user pu 
+		on pu.tenantId=pt.tenantId
+		where pu.userId=#{userId}
+   </select>
+</mapper> 

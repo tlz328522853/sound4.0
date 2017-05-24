@@ -1,0 +1,635 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	luorongjie
+	date	:	2016-12-05
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleInstockDao">
+	
+	<sql id="Base_Column_List">
+		ri.id, ri.org_id, ri.vendor_id, ri.instock_date, ri.instock_no,
+		ri.instock_type, ri.instock_type_name, ri.price_id, ri.pay_price, ri.num,
+		ri.pay_money, ri.paid_price, ri.paid_money, ri.paid_type, ri.paid_type_name,
+		ri.remark, ri.register_id, ri.register_name, ri.registe_date, ri.instock_status,
+		ri.audit_status, ri.audit_user, ri.audit_user_name, ri.audit_date, ri.audit_remark,
+		ri.create_user, ri.create_user_name, ri.create_date, ri.update_user, ri.update_user_name,
+		ri.update_date,ri.enable,ri.version,
+		s.spec_name,s.spec_company,m.goodsName,t.typeName,p.spec_id,m.goodsId,v.vendor,v.vendor_short
+		
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, org_id, vendor_id, instock_date, instock_no,
+		instock_type, instock_type_name, price_id, pay_price, num,
+		pay_money, paid_price, paid_money, paid_type, paid_type_name,
+		remark, register_id, register_name, registe_date, instock_status,
+		audit_status, audit_user, audit_user_name, audit_date, audit_remark,enable,
+		create_user, create_user_name, create_date, update_user, update_user_name,
+		update_date,version
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{orgId,jdbcType=BIGINT},
+		#{vendorId,jdbcType=BIGINT}, #{instockDate,jdbcType=TIMESTAMP},
+		#{instockNo,jdbcType=VARCHAR}, #{instockType,jdbcType=TINYINT},
+		#{instockTypeName,jdbcType=VARCHAR}, #{priceId,jdbcType=BIGINT},
+		#{payPrice,jdbcType=DECIMAL}, #{num,jdbcType=DECIMAL},
+		#{payMoney,jdbcType=DECIMAL}, #{paidPrice,jdbcType=DECIMAL},
+		#{paidMoney,jdbcType=DECIMAL}, #{paidType,jdbcType=TINYINT},
+		#{paidTypeName,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},
+		#{registerId,jdbcType=BIGINT}, #{registerName,jdbcType=VARCHAR},
+		#{registeDate,jdbcType=TIMESTAMP}, #{instockStatus,jdbcType=TINYINT},
+		#{auditStatus,jdbcType=TINYINT}, #{auditUser,jdbcType=BIGINT},
+		#{auditUserName,jdbcType=VARCHAR}, #{auditDate,jdbcType=TIMESTAMP},
+		#{auditRemark,jdbcType=VARCHAR},#{enable,jdbcType=VARCHAR}, #{createUser,jdbcType=BIGINT},
+		#{createUserName,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP},
+		#{updateUser,jdbcType=BIGINT}, #{updateUserName,jdbcType=VARCHAR},
+		#{updateDate,jdbcType=TIMESTAMP}, #{version,jdbcType=BIGINT}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.orgId,jdbcType=BIGINT},
+		#{item.vendorId,jdbcType=BIGINT}, #{item.instockDate,jdbcType=TIMESTAMP},
+		#{item.instockNo,jdbcType=VARCHAR}, #{item.instockType,jdbcType=TINYINT},
+		#{item.instockTypeName,jdbcType=VARCHAR}, #{item.priceId,jdbcType=BIGINT},
+		#{item.payPrice,jdbcType=DECIMAL}, #{item.num,jdbcType=DECIMAL},
+		#{item.payMoney,jdbcType=DECIMAL}, #{item.paidPrice,jdbcType=DECIMAL},
+		#{item.paidMoney,jdbcType=DECIMAL}, #{item.paidType,jdbcType=TINYINT},
+		#{item.paidTypeName,jdbcType=VARCHAR}, #{item.remark,jdbcType=VARCHAR},
+		#{item.registerId,jdbcType=BIGINT}, #{item.registerName,jdbcType=VARCHAR},
+		#{item.registeDate,jdbcType=TIMESTAMP}, #{item.instockStatus,jdbcType=TINYINT},
+		#{item.auditStatus,jdbcType=TINYINT}, #{item.auditUser,jdbcType=BIGINT},
+		#{item.auditUserName,jdbcType=VARCHAR}, #{item.auditDate,jdbcType=TIMESTAMP},
+		#{item.auditRemark,jdbcType=VARCHAR},#{item.enable,jdbcType=VARCHAR}, #{item.createUser,jdbcType=BIGINT},
+		#{item.createUserName,jdbcType=VARCHAR}, #{item.createDate,jdbcType=TIMESTAMP},
+		#{item.updateUser,jdbcType=BIGINT}, #{item.updateUserName,jdbcType=VARCHAR},
+		#{item.updateDate,jdbcType=TIMESTAMP}, #{item.version,jdbcType=BIGINT}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="orgId!=null">
+				ri.org_id=#{orgId},
+			</if>
+			<if test="vendorId!=null">
+				ri.vendor_id=#{vendorId},
+			</if>
+			<if test="instockDate!=null">
+				ri.instock_date=#{instockDate},
+			</if>
+			<if test="instockNo!=null &amp;&amp; instockNo!=''">
+				ri.instock_no=#{instockNo},
+			</if>
+			<if test="instockType!=null">
+				ri.instock_type=#{instockType},
+			</if>
+			<if test="instockTypeName!=null &amp;&amp; instockTypeName!=''">
+				ri.instock_type_name=#{instockTypeName},
+			</if>
+			<if test="priceId!=null">
+				ri.price_id=#{priceId},
+			</if>
+			<if test="payPrice!=null">
+				ri.pay_price=#{payPrice},
+			</if>
+			<if test="num!=null">
+				ri.num=#{num},
+			</if>
+			<if test="payMoney!=null">
+				ri.pay_money=#{payMoney},
+			</if>
+			<if test="paidPrice!=null">
+				ri.paid_price=#{paidPrice},
+			</if>
+			<if test="paidMoney!=null">
+				ri.paid_money=#{paidMoney},
+			</if>
+			<if test="paidType!=null">
+				ri.paid_type=#{paidType},
+			</if>
+			<if test="paidTypeName!=null &amp;&amp; paidTypeName!=''">
+				ri.paid_type_name=#{paidTypeName},
+			</if>
+			<if test="remark!=null &amp;&amp; remark!=''">
+				ri.remark=#{remark},
+			</if>
+			<if test="registerId!=null">
+				ri.register_id=#{registerId},
+			</if>
+			<if test="registerName!=null &amp;&amp; registerName!=''">
+				ri.register_name=#{registerName},
+			</if>
+			<if test="registeDate!=null">
+				ri.registe_date=#{registeDate},
+			</if>
+			<if test="instockStatus!=null">
+				ri.instock_status=#{instockStatus},
+			</if>
+			<if test="auditStatus!=null">
+				ri.audit_status=#{auditStatus},
+			</if>
+			<if test="auditUser!=null">
+				ri.audit_user=#{auditUser},
+			</if>
+			<if test="auditUserName!=null &amp;&amp; auditUserName!=''">
+				ri.audit_user_name=#{auditUserName},
+			</if>
+			<if test="auditDate!=null">
+				ri.audit_date=#{auditDate},
+			</if>
+			<if test="auditRemark!=null &amp;&amp; auditRemark!=''">
+				ri.audit_remark=#{auditRemark},
+			</if>
+			<if test="enable!=null">
+				ri.enable = #{enable},
+			</if>
+			<if test="createUser!=null">
+				ri.create_user=#{createUser},
+			</if>
+			<if test="createUserName!=null &amp;&amp; createUserName!=''">
+				ri.create_user_name=#{createUserName},
+			</if>
+			<if test="createDate!=null">
+				ri.create_date=#{createDate},
+			</if>
+			<if test="updateUser!=null">
+				ri.update_user=#{updateUser},
+			</if>
+			<if test="updateUserName!=null &amp;&amp; updateUserName!=''">
+				ri.update_user_name=#{updateUserName},
+			</if>
+			<if test="updateDate!=null">
+				ri.update_date=#{updateDate},
+			</if>
+				ri.version = #{version}+1
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="recycleInstock" type="com.sdcloud.api.lar.entity.RecycleInstock">
+        <id property="id" column="id"></id>
+		<result property="orgId" column="org_id"></result>
+		<result property="vendorId" column="vendor_id"></result>
+		<result property="instockDate" column="instock_date"></result>
+		<result property="instockNo" column="instock_no"></result>
+		<result property="instockType" column="instock_type"></result>
+		<result property="instockTypeName" column="instock_type_name"></result>
+		<result property="priceId" column="price_id"></result>
+		<result property="payPrice" column="pay_price"></result>
+		<result property="num" column="num"></result>
+		<result property="payMoney" column="pay_money"></result>
+		<result property="paidPrice" column="paid_price"></result>
+		<result property="paidMoney" column="paid_money"></result>
+		<result property="paidType" column="paid_type"></result>
+		<result property="paidTypeName" column="paid_type_name"></result>
+		<result property="remark" column="remark"></result>
+		<result property="registerId" column="register_id"></result>
+		<result property="registerName" column="register_name"></result>
+		<result property="registeDate" column="registe_date"></result>
+		<result property="instockStatus" column="instock_status"></result>
+		<result property="auditStatus" column="audit_status"></result>
+		<result property="auditUser" column="audit_user"></result>
+		<result property="auditUserName" column="audit_user_name"></result>
+		<result property="auditDate" column="audit_date"></result>
+		<result property="auditRemark" column="audit_remark"></result>
+		<result property="createUser" column="create_user"></result>
+		<result property="createUserName" column="create_user_name"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateUser" column="update_user"></result>
+		<result property="updateUserName" column="update_user_name"></result>
+		<result property="updateDate" column="update_date"></result>
+		<result property="specName" column="spec_name"></result>
+		<result property="specUnit" column="spec_company"></result>
+		<result property="goodsName" column="goodsName"></result>
+		<result property="typeName" column="typeName"></result>
+		<result property="specId" column="spec_id"></result>
+		<result property="goodsId" column="goodsId"></result>
+		<result property="enable" column="enable"></result>
+		<result property="version" column="version"></result> 
+		<result property="vendorName" column="vendor"></result> 
+		<result property="vendorShort" column="vendor_short"></result> 
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="recycleInstock">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_instock ri
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ri.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(ri.id)
+		FROM lar_recycle_instock ri
+		
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ri.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO lar_recycle_instock
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO lar_recycle_instock
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM lar_recycle_instock ri
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM lar_recycle_instock ri
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ri.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+				
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	
+	<update id="update">
+		UPDATE lar_recycle_instock ri
+		<include refid="Update_Column"></include>
+		WHERE ri.id=#{id}
+			AND ri.enable=0
+			AND ri.version = #{version}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE lar_recycle_instock ri
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" ri.org_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.orgId}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.vendor_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.vendorId}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.instock_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.instockDate}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.instock_no = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.instockNo}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.instock_type = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.instockType}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.instock_type_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.instockTypeName}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.price_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.priceId}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.pay_price = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.payPrice}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.num = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.num}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.pay_money = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.payMoney}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.paid_price = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.paidPrice}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.paid_money = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.paidMoney}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.paid_type = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.paidType}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.paid_type_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.paidTypeName}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.remark = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.remark}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.register_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.registerId}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.register_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.registerName}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.registe_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.registeDate}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.instock_status = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.instockStatus}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.audit_status = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.auditStatus}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.audit_user = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.auditUser}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.audit_user_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.auditUserName}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.audit_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.auditDate}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.audit_remark = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.auditRemark}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.create_user = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.createUser}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.create_user_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.createUserName}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.create_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.createDate}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.update_user = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.updateUser}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.update_user_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.updateUserName}
+               </foreach>
+            </trim>
+			<trim prefix=" ri.update_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN ri.id=#{i.id} THEN #{i.updateDate}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			ri.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+            AND ri.enable=0
+            
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="recycleInstock">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_instock ri
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ri.org_id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			AND ri.enable=0
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(ri.id) 
+		FROM lar_recycle_instock ri
+		LEFT JOIN lar_recyclingprice p ON ri.price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN lar_recycle_vendor v ON ri.vendor_id = v.id
+		
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND ri.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="larPager.extendMap !=null and larPager.extendMap.firstDate !=null">
+				and ri.instock_date &gt; #{larPager.extendMap.firstDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.endDate !=null">
+				and ri.instock_date &lt; #{larPager.extendMap.endDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.type_id !=null">
+				and  s.type_id = #{larPager.extendMap.type_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.goods_id !=null">
+				and  s.goods_id = #{larPager.extendMap.goods_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.spec_id !=null">
+				and  p.spec_id = #{larPager.extendMap.spec_id}
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.audit_user_name !=null">
+				and  ri.audit_user_name LIKE '%${larPager.extendMap.audit_user_name}%'
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.vendor !=null">
+				and  v.vendor LIKE '%${larPager.extendMap.vendor}%'
+			</if>
+            <if test="ids !=null and ids.size() >0">
+                AND ri.org_id IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+            AND ri.enable=0
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="recycleInstock">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_instock ri
+		LEFT JOIN lar_recyclingprice p ON ri.price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN lar_recycle_vendor v ON ri.vendor_id = v.id
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND ri.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="larPager.extendMap !=null and larPager.extendMap.firstDate !=null">
+				and ri.instock_date &gt; #{larPager.extendMap.firstDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.endDate !=null">
+				and ri.instock_date &lt; #{larPager.extendMap.endDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.type_id !=null">
+				and  s.type_id = #{larPager.extendMap.type_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.goods_id !=null">
+				and  s.goods_id = #{larPager.extendMap.goods_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.spec_id !=null">
+				and  p.spec_id = #{larPager.extendMap.spec_id}
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.audit_user_name !=null">
+				and  ri.audit_user_name LIKE '%${larPager.extendMap.audit_user_name}%'
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.vendor !=null">
+				and  v.vendor LIKE '%${larPager.extendMap.vendor}%'
+			</if>
+           
+            <if test="ids !=null and ids.size() >0">
+                AND ri.org_id IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+            AND ri.enable=0
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY create_date DESC, update_date DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="recycleInstock">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_instock ri
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ri.${item}=#{map[${item}]}
+                </foreach>
+                AND ri.enable=0
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="recycleInstock">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_instock ri
+        <where>
+            ri.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ri.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="existByInstockNo"  resultType="int">
+   	 select count(id) 
+	   	 from lar_recycle_instock 
+	   	 where 
+	   	 	enable=0
+	   	 	<if test="instock_no != null">
+	   	 		and instock_no =#{instock_no} 
+	   	 	</if>
+	   	 	<if test="id != null ">
+	   		 	and id <![CDATA[ <> ]]> #{id}
+	   		</if>
+    </select>
+	
+</mapper>

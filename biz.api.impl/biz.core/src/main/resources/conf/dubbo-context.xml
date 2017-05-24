@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+	
+	<context:component-scan base-package="com.sdcloud"></context:component-scan>
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+        <property name="locations">  
+           <list>  
+              <value>classpath:conf/env.properties</value>  
+            </list>  
+        </property>  
+    </bean>
+    
+    <util:properties ignore-resource-not-found="true" id="sysConfigProperties" location="classpath:conf/env.properties" />
+	
+	<!-- 192.168.2.222,jira -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://${mysql.ipAndPort}/${mysql.database}?characterEncoding=utf-8&amp;autoReconnect=true&amp;allowMultiQueries=true" />
+		<property name="username" value="${mysql.userName}" />
+		<property name="password" value="${mysql.password}" />
+
+		
+		<!-- 最大活动连接 -->
+		<property name="maxActive" value="20" /> 
+		<!-- 最大空闲连接 maxIdle值与maxActive值应配置的接近。因为，当连接数超过maxIdle值后，刚刚使用完的连接（刚刚空闲下来）会立即被销毁。而不是我想要的空闲M秒后再销毁起一个缓冲作用-->
+		<property name="maxIdle" value="20" /> 
+		<!-- 最小空闲连接 -->
+		<property name="minIdle" value="5" /> 
+		<!-- 从池中取连接的最大等待时间，单位ms. -->
+		<property name="maxWait" value="30000" />
+		<!-- 初始化连接 -->
+		<property name="initialSize" value="5" />  
+		
+		<!-- 借出连接时不要测试，否则很影响性能 ，默认为true-->
+		<property name="testOnBorrow" value="false" /> 
+		
+		<!-- 指明连接是否被空闲连接回收器(如果有)进行检验.如果检测发现连接失败,则连接将被从池中去除. -->
+		<property name="testWhileIdle" value="true" /> 
+		<!-- 验证使用的SQL语句 -->
+		<property name="validationQuery" value="select 1" /> 
+		<!-- 每30秒运行一次空闲连接回收器. -->
+		<property name="timeBetweenEvictionRunsMillis" value="30000" /> 
+		<!-- 池中的连接空闲30分钟后被回收 -->
+		<property name="minEvictableIdleTimeMillis" value="1800000" /> 
+		<!-- 在每次空闲连接回收器线程(如果有)运行时检查的连接数量.默认为3个 -->
+		<property name="numTestsPerEvictionRun" value="3" /> 
+		 
+		<!-- 连接泄漏回收参数，当可用连接数少于3个时才执行 . -->
+		<property name="removeAbandoned" value="true" /> 
+		<!-- 连接泄漏回收参数，180秒，泄露的连接可以被删除的超时值 -->
+		<property name="removeAbandonedTimeout" value="180" /> 
+		<!-- 被丢弃的数据库连接是否做记录，以便跟踪 -->
+		<property name="logAbandoned" value="true" /> 
+	</bean>
+	<task:annotation-driven />  
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.sdcloud.api.core.entity"></property>
+		<property name="configLocation" value="" />
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 配置自动注入service -->
+	<context:component-scan base-package="com.sdcloud" />
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"> 
+		<property name="basePackage" value="com.sdcloud.biz.core.dao" /> 
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property> 
+	</bean> 
+	
+	
+	<!-- dubbo base config -->
+	<dubbo:application name="dubbo-provider" />
+	<dubbo:registry address="zookeeper://${dubbo.zookeeper.ipAndPort}" />
+	<dubbo:protocol name="dubbo" port="${dubbo.port}" threadpool="fixed" threads="200" />
+
+	<!-- Add your service here -->
+	<dubbo:service ref="moduleService" interface="com.sdcloud.api.core.service.ModuleService"/>
+	<dubbo:service ref="functionService" interface="com.sdcloud.api.core.service.FunctionService"/>
+	<dubbo:service ref="rightService" interface="com.sdcloud.api.core.service.FunctionRightService"/>
+	<dubbo:service ref="userService" interface="com.sdcloud.api.core.service.UserService"/>
+	<dubbo:service ref="orgService" interface="com.sdcloud.api.core.service.OrgService"/>
+	<dubbo:service ref="projectService" interface="com.sdcloud.api.core.service.ProjectService"/>
+	<dubbo:service ref="employeeService" interface="com.sdcloud.api.core.service.EmployeeService"/>
+	<dubbo:service ref="tenantService" interface="com.sdcloud.api.core.service.TenantService"/>
+	<dubbo:service ref="packageService" interface="com.sdcloud.api.core.service.SalesPackageService"/>
+	<dubbo:service ref="roleService" interface="com.sdcloud.api.core.service.RoleService"/>
+	<dubbo:service ref="dicService" interface="com.sdcloud.api.core.service.DicService"/>
+	<dubbo:service ref="tblService" interface="com.sdcloud.api.core.service.TableService"/>
+	<dubbo:service ref="fieldService" interface="com.sdcloud.api.core.service.TableFieldService"/>
+	<dubbo:service ref="formTplService" interface="com.sdcloud.api.core.service.FormTemplateService"/>
+	<dubbo:service ref="propTplService" interface="com.sdcloud.api.core.service.PropertyTemplateService"/>
+	<dubbo:service ref="orgRightService" interface="com.sdcloud.api.core.service.OrgRightService"/>
+	<dubbo:service ref="groupRoleService" interface="com.sdcloud.api.core.service.GroupRoleService"/>
+	<dubbo:service ref="groupUserService" interface="com.sdcloud.api.core.service.GroupUserService"/>
+	<dubbo:service ref="userGroupService" interface="com.sdcloud.api.core.service.UserGroupService"/>
+	<dubbo:service ref="portalInfoService" interface="com.sdcloud.api.core.service.PortalInfoService"/>
+	<dubbo:service ref="regionService" interface="com.sdcloud.api.core.service.RegionService"/>
+	<dubbo:service ref="employeeChageReportService" interface="com.sdcloud.api.core.service.EmployeeChageReportService"/>
+	<dubbo:service ref="platformLogService" interface="com.sdcloud.api.core.service.PlatformLogService"/>
+	<dubbo:service ref="regionCodeDupService" interface="com.sdcloud.api.core.service.RegionCodeDupService"/>
+	
+	<dubbo:service ref="messageService" interface="com.sdcloud.api.core.service.MessageService"/>
+	<dubbo:service ref="messageUnreadUserService" interface="com.sdcloud.api.core.service.MessageUnreadUserService"/>
+	<dubbo:service ref="topicService" interface="com.sdcloud.api.core.service.TopicService"/>
+	<dubbo:service ref="topicRightService" interface="com.sdcloud.api.core.service.TopicRightService"/>
+	<dubbo:service ref="sendMessageService" interface="com.sdcloud.api.core.service.SendMessageService"/>
+	<dubbo:service ref="historyRecordService" interface="com.sdcloud.api.core.service.HistoryRecordService"/>
+	
+	
+	<!-- bean @Service(value='')配置-->
+	<bean id="orgRightService" class="com.sdcloud.biz.core.service.impl.OrgRightServiceImpl"/>
+	<bean id="mqttMessageTool" class="com.sdcloud.framework.util.MqttMessageTool" init-method="init"> 
+		<property name="broker" value="${broker}"></property> 
+		<property name="clientId" value="${clientId}"/> 
+	</bean>
+</beans>

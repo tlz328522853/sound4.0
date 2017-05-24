@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.TopicDao">
+
+	<sql id="topicColumn">
+		topicName,code,type,moduleId,description,createTime
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="code != null &amp;&amp; code != ''">
+				and f.code like '%${code}%' 
+			</if>
+			<if test="topicName != null &amp;&amp; topicName != ''">
+				and f.topicName like '%${topicName}%' 
+			</if>
+			<if test="description != null &amp;&amp; description != ''">
+				and f.description like '%${description}%' 
+			</if>
+			<if test="type != null &amp;&amp; type != ''">
+				and f.type = #{type}
+			</if>
+			
+			<if test="moduleId != null">
+				and f.moduleId = #{moduleId}
+			</if>
+		 	<if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+				and f.moduleId in
+		      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+	      	</if>
+			<if test="topicIds != null &amp;&amp; topicIds.size() != 0">
+				and f.topicId in
+		      	<foreach item="item" index="index" collection="topicIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+	      	</if>
+			<!-- 查询普通子功能 -->
+			
+			<if test="userId != null&amp;&amp; userId != -1">
+				and ( pfr.ownerType = 2
+				AND pfr.ownerId=#{userId})
+		    </if>
+		    <if test="roleIds != null">
+		       or (pfr.ownerType = 1
+				AND pfr.ownerId in
+				<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+			      		#{item}
+			    </foreach>
+				
+				)
+		    </if>
+		     <if test="groupId != null">
+		       or (pfr.ownerType = 3
+				AND pfr.ownerId=#{groupId})
+		    </if>
+		</where>	
+	</sql>
+	
+	<insert id="insert" parameterType="Topic" useGeneratedKeys="true" keyProperty="topicId">
+		insert into pf_topic(
+			topicId, <include refid="topicColumn"/>		
+		)values(
+			#{topicId}, #{topicName}, #{code}, #{type}, #{moduleId}, #{description},#{createTime}
+		)
+	</insert>
+	
+	<update id="update" parameterType="Topic">
+		update pf_topic
+		<set>
+			<if test="moduleId != null">moduleId = #{moduleId},</if>
+			<if test="type != null">type = #{type},</if>
+			<if test="topicName != null &amp;&amp; topicName != ''">topicName = #{topicName},</if>
+			<if test="code != null &amp;&amp; code != ''">code = #{code},</if>
+			<if test="description != null &amp;&amp; description != ''">description = #{description},</if>
+		</set>
+		where topicId = #{topicId}
+	</update>
+	
+	<delete id="delete" parameterType="list" >
+		delete from pf_topic
+		<choose>
+			<when test="topicIds != null &amp;&amp; topicIds.size() != 0">
+				where topicId in
+		      	<foreach item="item" index="index" collection="topicIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+		
+	<delete id="deleteByModuleId" parameterType="list" >
+		delete from pf_topic
+		<choose>
+			<when test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+				where moduleId in
+		      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<select id="findTopicIdByModuleId" parameterType="map" resultType="Long">
+		select pff.topicId from pf_topic pff
+		<where>
+			<if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+					 pff.moduleId in
+			      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			      	</if>
+		</where>
+	</select>
+	<select id="findByModuleId" parameterType="map" resultType="Topic">
+		select pff.topicId, pff.topicName,pff.code,pff.type,pff.moduleId,pff.description,pff.createTime
+		from pf_topic pff
+		left outer join pf_module m
+		on pff.moduleId = m.moduleId  
+		<where>
+			    <if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+					 and pff.moduleId in
+			      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			     </if>
+		   </where>
+		     group by pff.topicId 
+		     <if test="orderBy != null &amp;&amp; orderBy != ''">
+					order by ${orderBy} 
+			</if>
+	</select>
+	<select id="findAuthenTopic"  resultType="Topic">
+		select pff.topicId, pff.topicName,pff.code,pff.type,pff.moduleId,pff.description,pff.createTime
+		from pf_topic pff
+		left outer join pf_module m
+		on pff.moduleId = m.moduleId  
+		<where>
+			    <if test="moduleId != null &amp;&amp; moduleId!= -1">
+					  pff.moduleId = #{moduleId} and  pff.`pid` is null
+			     </if>
+		   </where>
+		     group by pff.topicId 
+	</select>
+	<select id="findById" parameterType="list" resultType="Topic">
+		select topicId, <include refid="topicColumn"/>
+		from pf_topic
+		<choose>
+			<when test="topicIds != null &amp;&amp; topicIds.size() != 0">
+				where topicId in
+		      	<foreach item="item" index="index" collection="topicIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(topicId)
+		from 
+			pf_topic f 
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findAll" resultType="Topic">
+		select  f.topicId, f.topicName,f.code,f.type,f.moduleId,f.description,f.createTime
+		from pf_topic f
+		<choose>
+			<when test="userId != null||roleIds!=nul||groupId!=null">
+				INNER JOIN pf_topic_right pfr
+				on pfr.topicId=f.topicId
+		    </when>
+		</choose> 
+			left outer join pf_module m
+			on f.moduleId = m.moduleId 
+		<include refid="queryCondition"/>
+		group by f.topicId 
+		<choose>
+			<when test="pager != null">
+				order by ${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+		    </when>
+		    <when test="pager == null">
+				order by moduleId
+		    </when>
+		</choose>
+	</select>
+</mapper>

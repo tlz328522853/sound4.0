@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.GroupRoleDao">
+	
+	<sql id="column">
+		
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="roleId != null">
+				roleId = #{roleId} 
+			</if>
+			<if test="roleId == null">
+				1 = 2
+			</if>
+		</where>	
+		
+	</sql>
+	<select id="findGroupIdByRole" resultType="long">
+		select 
+			groupId
+		from 
+			pf_group_role
+		<where>
+			<if test="roleId != null">
+				roleId = #{roleId} 
+			</if>
+			
+		</where>	
+	</select>
+	<select id="findRoleIdByGroup" resultType="long">
+		select 
+			roleId
+		from 
+			pf_group_role
+		<where>
+			<if test="groupId != null">
+				groupId = #{groupId} 
+			</if>
+		</where>	
+	</select>
+	<select id="findAuthenRoleIdByGroup" resultType="long">
+		select 
+			pgr.roleId
+		from 
+			pf_group_role pgr
+			INNER JOIN pf_role pr
+			on pgr.roleId=pr.roleId
+		<where>
+			<if test="groupIds != null">
+				 <foreach item="item" collection="groupIds" open="" separator="" close=" 1>3">
+				    ((pgr.groupId=#{item} 
+					 and (pr.roleType=1 or pr.roleType=0)) 
+					 or 
+					 (pgr.groupId=#{item}
+					 and pr.roleType=2 and pr.pId=#{item})) or
+			    </foreach>
+			   
+			</if>
+		</where>	
+	</select>
+	<select id="hasGroupRole" resultType="GroupRole">
+		select 
+			groupRoleId, groupId, roleId, ownerCode, tenantId
+		from 
+			pf_group_role
+		<where>
+			<if test="groupId != null">
+				groupId = #{groupId} 
+			</if>
+			<if test="roleId != null">
+				and roleId = #{roleId} 
+			</if>
+		</where>	
+	</select>
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(groupRoleId)
+		from 
+			pf_group_role
+		<include refid="queryCondition"/>
+	</select>
+	
+	<insert id="insert" parameterType="GroupRole">
+		insert into pf_group_role
+			(groupRoleId, groupId, roleId, ownerCode, tenantId)
+		values
+			(#{groupRoleId}, #{groupId}, #{roleId}, #{ownerCode,jdbcType=BIGINT}, #{tenantId,jdbcType=BIGINT})
+	</insert>
+	
+	<delete id="deleteByRoleId" parameterType="list">
+		delete from pf_group_role
+		where 
+		<if test="roleIds != null">
+		    roleId in 
+		    <foreach item="item" collection="roleIds" open="(" separator="," close=")">
+		        #{item}
+		    </foreach>
+		</if>
+	</delete>
+	<delete id="deleteGroupRole">
+		delete from pf_group_role
+		<where>
+			<if test="groupId != null">
+				groupId = #{groupId} 
+			</if>
+			<if test="roleId != null">
+				and roleId = #{roleId} 
+			</if>
+		</where>
+	</delete>
+</mapper>

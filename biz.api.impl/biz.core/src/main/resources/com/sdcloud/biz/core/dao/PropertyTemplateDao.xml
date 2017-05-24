@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.PropertyTemplateDao">
+	
+	<sql id="tableColumn">
+		tblEnName,fieldEnName,fieldChName,isShow,fieldSequence,fieldGroupId,formTplId,tenantId  
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="tblEnName != null &amp;&amp; tblEnName != ''">
+				tblEnName like '%${tblEnName}%' 
+			</if>
+			<if test="fieldEnName != null &amp;&amp; fieldEnName != ''">
+				and fieldEnName like '%${fieldEnName}%' 
+			</if>
+			<if test="fieldChName != null &amp;&amp; fieldChName != ''">
+				and fieldChName like '%${fieldChName}%' 
+			</if>
+			<if test="isShow != null">
+				and isShow = #{isShow} 
+			</if>
+			<if test="fieldSequence != null">
+				and fieldSequence = #{fieldSequence} 
+			</if>
+			<if test="fieldGroupId != null">
+				and fieldGroupId = #{fieldGroupId} 
+			</if>
+			<if test="formTplId != null">
+				and formTplId = #{formTplId} 
+			</if>
+			<if test="tenantId != null">
+				and tenantId = #{tenantId} 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<insert id="insert" parameterType="PropertyTemplate" >
+		insert into pf_property_template(
+			propTplId,<include refid="tableColumn"/>
+		)values(
+			#{propTplId},#{tblEnName},#{fieldEnName},#{fieldChName},#{isShow},
+			#{fieldSequence},#{fieldGroupId},#{formTplId},#{tenantId}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from pf_property_template
+		<choose>
+			<when test="propTplIds != null &amp;&amp; propTplIds.size() != 0">
+				where propTplId in
+		      	<foreach item="item" index="index" collection="propTplIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="PropertyTemplate">
+		update pf_property_template 
+		<set>
+			<if test="tblEnName != null &amp;&amp; tblEnName != ''">tblEnName=#{tblEnName},</if>
+			<if test="fieldEnName != null &amp;&amp; fieldEnName != ''">fieldEnName=#{fieldEnName},</if>
+			<if test="fieldChName != null &amp;&amp; fieldChName != ''">fieldChName=#{fieldChName},</if>
+			<if test="isShow != null">isShow=#{isShow},</if>
+			<if test="fieldSequence != null">fieldSequence=#{fieldSequence},</if>
+			<if test="fieldGroupId != null">fieldGroupId=#{fieldGroupId},</if>
+			<if test="formTplId != null">formTplId=#{formTplId},</if>
+			<if test="tenantId != null">tenantId=#{tenantId},</if>
+		</set>
+		where propTplId = #{propTplId}
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="PropertyTemplate">
+		select propTplId,<include refid="tableColumn"/>
+		from pf_property_template
+		where propTplId = #{propTplId}
+	</select>
+	
+	<select id="findAll" resultType="PropertyTemplate">
+		select 
+			propTplId, <include refid="tableColumn"/>
+		from 
+			pf_property_template 
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(propTplId)
+		from 
+			pf_property_template
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findByPid" parameterType="long" resultType="PropertyTemplate">
+		select propTplId, <include refid="tableColumn"/> 
+		from pf_property_template
+		<!-- where pid = #{pid} -->
+	</select>
+	
+</mapper>

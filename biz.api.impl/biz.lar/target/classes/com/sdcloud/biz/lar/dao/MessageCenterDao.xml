@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.MessageCenterDao">
+	<sql id="Base_Column_List">
+		id, title, detail, customerId,     
+		createUser, updateUser, createDate, updateDate
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id}, #{item.title},#{item.detail}, #{item.customerId}, 
+		#{item.createUser}, #{item.updateUser}, #{item.createDate}, #{item.updateDate}
+	</sql>
+	
+	<select id="getById" parameterType="java.lang.Long" resultType="com.sdcloud.api.lar.entity.MessageCenter">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_messagecenter
+		where id = #{id}
+	</select>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultType="com.sdcloud.api.lar.entity.MessageCenter">
+		select
+		<include refid="Base_Column_List"></include>
+		from lar_messagecenter
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  separator="and">
+						${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id)
+		from lar_messagecenter
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  >
+						${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<insert id="save" parameterType="com.sdcloud.api.lar.entity.MessageCenter">
+		insert into lar_messagecenter
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="title != null">
+				title,
+			</if>
+			<if test="detail != null">
+				detail,
+			</if>
+			<if test="customerId != null">
+				customerId,
+			</if>
+			<if test="createUser != null">
+				createUser,
+			</if>
+			<if test="updateUser != null">
+				updateUser,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="updateDate != null ">
+				updateDate,
+			</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="title != null">
+				#{title},
+			</if>
+			<if test="detail != null">
+				#{detail},
+			</if>
+			<if test="customerId != null">
+				#{customerId},
+			</if>
+			<if test="createUser != null">
+				#{createUser},
+			</if>
+			<if test="updateUser != null">
+				#{updateUser},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="updateDate != null ">
+				#{updateDate},
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.MessageCenter">
+		update lar_messagecenter
+		<set>
+			<if test="title != null">
+				title=#{title},
+			</if>
+			<if test="detail != null">
+				detail=#{detail},
+			</if>
+			<if test="customerId != null">
+				customerId=#{customerId},
+			</if>
+			<if test="createUser !=null and createUser !=''">
+				createUser=#{createUser},
+			</if>
+			<if test="createDate !=null and createDate !=''">
+				createDate=#{createDate},
+			</if>
+			<if test="updateUser !=null and updateUser !=''">
+				updateUser=#{updateUser},
+			</if>
+			<if test="updateDate !=null and updateDate !=''">
+				updateDate=#{updateDate},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from lar_messagecenter
+		where id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		delete from lar_messagecenter
+		<where>
+			<if test="ids !=null and ids.size() >0">
+				id in
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	
+	<insert id="batchSave">
+		insert into lar_messagecenter
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Base_Column_List"></include>
+		</trim>
+		values
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+</mapper> 

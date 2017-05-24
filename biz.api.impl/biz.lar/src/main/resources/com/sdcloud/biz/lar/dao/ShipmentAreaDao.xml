@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipmentAreaDao">
+	<sql id="Base_Column_List">
+		id, org, name, workingArea, position,time,startTime,endTime,startDate, endDate, remark
+	</sql>
+	<insert id="save" parameterType="ShipmentArea">
+		insert into lar_shipmentArea(
+		<include refid="Base_Column_List" />
+		)values(
+		#{id},#{org},#{name},#{workingArea},#{position},#{time},#{startTime},#{endTime},#{startDate},#{endDate},#{remark}
+		)
+	</insert>
+	<update id="update" parameterType="ShipmentArea">
+		update lar_shipmentArea
+		set org = #{org},
+		name = #{name},
+		workingArea = #{workingArea},
+		position = #{position},
+		time = #{time},
+		startDate = #{startDate},
+		endDate = #{endDate},
+		startTime = #{startTime},
+		endTime = #{endTime},
+		remark = #{remark}
+		where id = #{id}
+	</update>
+	<select id="findAll" resultType="ShipmentArea">
+		select
+		<include refid="Base_Column_List" />
+		from lar_shipmentArea
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  >
+					and 	${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.ShipmentArea">
+		select
+		id, org, name, workingArea, position,CONCAT(DATE_FORMAT(startTime,'%H:%i'),'-',DATE_FORMAT(endTime,'%H:%i')) as time,
+		startTime,endTime,startDate, endDate, remark
+		from lar_shipmentArea
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by updateDate desc,createDate desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<delete id="delete">
+		delete from lar_shipmentArea where id=#{id}
+	</delete>
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id) from lar_shipmentArea
+			<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  >
+						${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select count(id) from lar_shipmentArea
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+</mapper>

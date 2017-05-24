@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.DeviceAdvertisementDao">
+
+	<sql id="tableColumn">
+	advertisementId,
+	deviceMac,playCount,residenceTime,
+	createTime,modifiedTime,state
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_device_advertisement(
+			deviceAdvertisementId, <include refid="tableColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="deviceAdvertisements" separator=",">
+			(
+			#{item.deviceAdvertisementId},
+			#{item.advertisementId},
+			#{item.deviceMac},#{item.playCount},
+			#{item.residenceTime},now(),now(),#{item.state}
+			)
+		</foreach>
+	</insert>
+	<update id="update" parameterType="DeviceAdvertisement">
+		update so_device_advertisement
+		<set>
+			<if test="deviceMac != null">deviceMac = #{deviceMac},</if>
+			<if test="playCount != null &amp;&amp; playCount != ''">playCount = #{playCount},</if>
+			<if test="createTime != null &amp;&amp; createTime != ''">createTime = #{createTime},</if>
+			<if test="modifiedTime != null &amp;&amp; modifiedTime != ''">modifiedTime = #{modifiedTime},</if>
+			<if test="residenceTime != null &amp;&amp; residenceTime != ''">residenceTime = #{residenceTime},</if>
+			<if test="advertisementId != null">advertisementId = #{advertisementId},</if>
+		    <if test="state != null">state = #{state},</if>
+		</set>
+		where deviceAdvertisementId = #{deviceAdvertisementId}
+	</update>
+	 <delete id="delete" parameterType="list" >
+		delete from so_device_advertisement
+		<choose>
+			<when test="deviceAdvertisementIds != null &amp;&amp; deviceAdvertisementIds.size() != 0">
+				where deviceAdvertisementId in
+		      	<foreach item="item" index="index" collection="deviceAdvertisementIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<delete id="deleteByMacs" parameterType="list" >
+		delete from so_device_advertisement
+		<choose>
+			<when test="deviceMacs != null &amp;&amp; deviceMacs.size() != 0">
+				where deviceMac in
+		      	<foreach item="item" index="index" collection="deviceMacs" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<delete id="deleteByAdverts" parameterType="list" >
+		delete from so_device_advertisement
+		<choose>
+			<when test="advertIds != null &amp;&amp; advertIds.size() != 0">
+				where advertisementId in
+		      	<foreach item="item" index="index" collection="advertIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<delete id="deleteAll">
+		delete from so_device_advertisement
+		<where>
+			<if test="deviceMac != null &amp;&amp; deviceMac !=''">
+				 deviceMac = #{deviceMac}
+			</if>
+			<if test="deviceMac == null &amp;&amp; deviceMac ==''">
+				and  1=2
+			</if>
+		</where>
+	</delete>
+	
+	<select id="findAdvertisementByDeviceMac" resultType="Advertisement">
+		select 
+			sa.*,
+			sd.playCount as playCount,
+			sd.residenceTime as residenceTime,
+			sd.deviceAdvertisementId as deviceAdvertisementId
+		from 
+			so_advertisement sa
+			INNER JOIN so_device_advertisement sd
+			on sd.advertisementId=sa.advertisementId
+		<where>
+			<if test="deviceMac != null &amp;&amp; deviceMac !=''">
+				 sd.deviceMac = #{deviceMac}
+			</if>
+			<if test="deviceMac == null &amp;&amp; deviceMac ==''">
+				and  1=2
+			</if>
+		</where>
+		
+	</select>
+	<select id="findByDeviceMac" resultType="DeviceAdvertisement">
+		select 
+			sa.*
+		from 
+			so_device_advertisement sa
+		<where>
+			<if test="deviceMac != null &amp;&amp; deviceMac !=''">
+				 sa.deviceMac = #{deviceMac}
+			</if>
+			<if test="deviceMac == null &amp;&amp; deviceMac ==''">
+				and  1=2
+			</if>
+		</where>
+		
+	</select>
+	<select id="getDeviceAdvertisementById" resultType="DeviceAdvertisement">
+		select 
+			sa.*
+		from 
+			so_device_advertisement sa
+		<where>
+			sa.deviceAdvertisementId = #{deviceAdvertisementId}
+		</where>
+		
+	</select>
+	
+</mapper>

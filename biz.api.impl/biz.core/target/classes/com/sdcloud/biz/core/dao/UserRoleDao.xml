@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.UserRoleDao">
+	
+	<sql id="column">
+		
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="roleId != null">
+				pu.roleId = #{roleId} 
+			</if>
+			<if test="groupIds != null">
+					AND pgu.groupId in 
+			    	<foreach item="item" index="index" collection="groupIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			</if>
+			<if test="groupId != null">
+					AND pgu.groupId = #{groupId} 
+			</if>
+			<if test="roleId == null">
+				1 = 2
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<select id="findUserIdsByRoleIds" resultType="long">
+		select 
+			userId
+		from 
+			pf_user_role pu
+		<where>
+			<if test="roleIds != null &amp;&amp; roleIds.size !=0">
+		        pu.roleId in
+		        <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </if>
+		</where>
+	</select>
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(pu.userRoleId)
+		from 
+			pf_user_role pu
+		<choose>
+			<when test="groupIds != null||groupId != null">
+				LEFT JOIN pf_group_user pgu 
+			    on pgu.userId=pu.userId
+		    </when>
+		</choose> 
+		<include refid="queryCondition"/>
+	</select>
+	
+	<insert id="insert" parameterType="UserRole">
+		insert into pf_user_role
+			(userRoleId, userId, roleId, ownerCode, tenantId)
+		values
+			(#{userRoleId}, #{userId}, #{roleId}, #{ownerCode,jdbcType=BIGINT}, #{tenantId,jdbcType=BIGINT})
+	</insert>
+	
+	<delete id="deleteByUserId" parameterType="list">
+		delete from pf_user_role
+		where 
+		<if test="userIds != null">
+		    userId in 
+		    <foreach item="item" collection="userIds" open="(" separator="," close=")">
+		        #{item}
+		    </foreach>
+		</if>
+		<if test="userIds == null">
+		    1 = 2
+		</if>
+	</delete>
+</mapper>

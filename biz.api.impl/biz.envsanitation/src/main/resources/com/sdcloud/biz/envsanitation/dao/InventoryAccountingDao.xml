@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.InventoryAccountingDao">
+
+	<sql id="inventoryAccountingColumn">
+		inventoryId,
+		inventoryDicId,
+		orderId,
+		batchCode,
+		price,
+		count,
+		amount,
+		countAfterAccounting,
+		amountAfterAccounting,
+		prodDate,
+		month,
+		expiry,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_inventory_accounting(
+			accountingId, <include refid="inventoryAccountingColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="inventoryAccountings" separator=",">
+			(#{item.accountingId},#{item.inventoryId}, 
+			#{item.inventoryDicId},#{item.orderId},
+			#{item.batchCode}, #{item.price},
+			#{item.count}, #{item.amount},
+			#{item.countAfterAccounting},#{item.amountAfterAccounting}, #{item.prodDate},
+			#{item.month},
+			#{item.expiry},#{item.tenantId})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_inventory_accounting
+		<choose>
+			<when test="accountingIds != null &amp;&amp; accountingIds.size() != 0">
+				where accountingId in
+		      	<foreach item="item" index="index" collection="accountingIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<delete id="deleteByOrderId" parameterType="list" >
+		delete from so_inventory_accounting
+		<choose>
+			<when test="orderIds != null &amp;&amp; orderIds.size() != 0">
+				where orderId in
+		      	<foreach item="item" index="index" collection="orderIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<update id="update" parameterType="inventoryAccounting">
+		update so_inventory_accounting
+		<set>
+			<if test="inventoryId != null">inventoryId = #{inventoryId},</if>
+			<if test="orderId != null">orderId = #{orderId},</if>
+			<if test="batchCode != null &amp;&amp; batchCode != ''">batchCode = #{batchCode},</if>
+			<if test="price != null">price = #{price},</if>
+			<if test="count != null">count = #{count},</if>
+			<if test="amount != null">amount = #{amount},</if>
+			<if test="countAfterAccounting != null">countAfterAccounting = #{countAfterAccounting},</if>
+			<if test="amountAfterAccounting != null">amountAfterAccounting = #{amountAfterAccounting},</if>
+			<if test="prodDate != null">prodDate = #{prodDate},</if>
+			<if test="month != null ">month = #{month},</if>
+			<if test="inventoryDicId != null">inventoryDicId = #{inventoryDicId},</if>
+			<if test="expiry != null">expiry = #{expiry},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where accountingId = #{accountingId}
+	</update>
+	<sql id="inventoryAccountingCondition">
+		<where>
+			<if test="newOrgId != null ">
+				o.newOrgId = #{newOrgId}
+			</if>
+		</where>	
+	</sql>
+	<select id="getTotalCount" resultType="long">
+		select count(allA.accountingId) 
+		from (select c.accountingId as accountingId
+		from so_inventory_accounting c
+		left JOIN so_inventory_in_out sio
+		on c.orderId=sio.orderId
+	   <where>
+			<if test="inventoryId != null &amp;&amp; inventoryId !=0">
+				c.inventoryId = #{inventoryId}
+			</if>
+			<if test="orderId != null">
+				and c.orderId = #{orderId}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				and sio.orgId = #{orgId}
+			</if>
+			<if test="inventoryDicId != null">
+				and c.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="batchCode != null &amp;&amp; batchCode !=''">
+				and c.batchCode like '%${batchCode}%'
+			</if>
+			<if test="price != null">
+				and c.price = #{price}
+			</if>
+			<if test="status != null">
+				and sio.status = #{status}
+			</if>
+			<if test="count != null">
+				and c.count = #{count}
+			</if>
+			<if test="available != null&amp;&amp;available==1 ">
+				and c.count > 0 and (sio.status=4 or sio.status=2)
+			</if>
+			<if test="amount != null">
+				and c.amount  =#{amount}
+			</if>
+			<if test="countAfterAccounting != null">
+				and c.countAfterAccounting  =#{countAfterAccounting}
+			</if>
+			<if test="amountAfterAccounting != null">
+				and c.amountAfterAccounting  =#{amountAfterAccounting}
+			</if>
+			<if test="month != null">
+				and c.month  =#{month}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="1 == 1">
+			    and c.expiry is null
+			</if>
+		</where>
+		UNION
+		select c.accountingId as accountingId
+		from so_inventory_accounting c
+		left JOIN so_inventory_in_out sio
+		on c.orderId=sio.orderId
+	   <where>
+			<if test="inventoryId != null &amp;&amp; inventoryId !=0">
+				c.inventoryId = #{inventoryId}
+			</if>
+			<if test="orderId != null">
+				and c.orderId = #{orderId}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				and sio.orgId = #{orgId}
+			</if>
+			<if test="inventoryDicId != null">
+				and c.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="batchCode != null &amp;&amp; batchCode !=''">
+				and c.batchCode like '%${batchCode}%'
+			</if>
+			<if test="price != null">
+				and c.price = #{price}
+			</if>
+			<if test="status != null">
+				and sio.status = #{status}
+			</if>
+			<if test="count != null">
+				and c.count = #{count}
+			</if>
+			<if test="available != null&amp;&amp;available==1 ">
+				and c.count > 0 and (sio.status=4 or sio.status=2)
+			</if>
+			<if test="availableDate != null">
+				and c.expiry  >=   #{availableDate}
+			</if>
+			<if test="amount != null">
+				and c.amount  =#{amount}
+			</if>
+			<if test="countAfterAccounting != null">
+				and c.countAfterAccounting  =#{countAfterAccounting}
+			</if>
+			<if test="amountAfterAccounting != null">
+				and c.amountAfterAccounting  =#{amountAfterAccounting}
+			</if>
+			<if test="month != null">
+				and c.month  =#{month}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="1 == 1">
+			and c.expiry is not null
+			</if>
+		</where>
+		GROUP BY accountingId
+		) as allA
+	</select>
+	<select id="findAllBy" resultType="InventoryAccounting">
+	 select allA.* from  (select  c.accountingId,
+	    s.inventoryCode,
+		s.inventoryName ,
+		s.type,
+		s.unit,
+	    c.inventoryId,
+		c.inventoryDicId,
+		c.orderId,
+		c.batchCode,
+		c.price,
+		c.count,
+		c.amount,
+		c.countAfterAccounting,
+		c.amountAfterAccounting,
+		c.prodDate,
+		c.month,
+		c.expiry,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inventoryDicId )as inventoryDicName,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inOutDicId )as inOutdicName,
+		c.tenantId
+	    from so_inventory_accounting c
+	    left join so_inventory s
+	    on s.inventoryId=c.inventoryId
+	    left JOIN so_inventory_in_out sio
+		on c.orderId=sio.orderId
+	   <where>
+			<if test="inventoryId != null &amp;&amp;  inventoryId !=0">
+				c.inventoryId = #{inventoryId}
+			</if>
+			<if test="orderId != null">
+				and c.orderId = #{orderId}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				and sio.orgId = #{orgId}
+			</if>
+			<if test="status != null">
+				and sio.status = #{status}
+			</if>
+			<if test="inventoryDicId != null">
+				and c.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="batchCode != null &amp;&amp; batchCode !=''">
+				and c.batchCode like '%${batchCode}%'
+			</if>
+			<if test="price != null">
+				and c.price = #{price}
+			</if>
+			<if test="count != null">
+				and c.count = #{count}
+			</if>
+			<if test="available != null&amp;&amp;available==1 ">
+				and c.count > 0  and (sio.status=4 or sio.status=2)
+			</if>
+			<if test="amount != null">
+				and c.amount  =#{amount}
+			</if>
+			<if test="countAfterAccounting != null">
+				and c.countAfterAccounting  =#{countAfterAccounting}
+			</if>
+			<if test="amountAfterAccounting != null">
+				and c.amountAfterAccounting  =#{amountAfterAccounting}
+			</if>
+			<if test="month != null">
+				and c.month  =#{month}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="accountingIds != null&amp;&amp; accountingIds.size()>0">
+				and accountingId in
+		      	<foreach item="item" index="index" collection="accountingIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </if>
+		    <if test="1 == 1">
+		    and c.expiry is null
+		    </if>
+		</where>
+		UNION
+		select 	c.accountingId,
+	    s.inventoryCode,
+		s.inventoryName ,
+		s.type,
+		s.unit,
+	    c.inventoryId,
+		c.inventoryDicId,
+		c.orderId,
+		c.batchCode,
+		c.price,
+		c.count,
+		c.amount,
+		c.countAfterAccounting,
+		c.amountAfterAccounting,
+		c.prodDate,
+		c.month,
+		c.expiry,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inventoryDicId )as inventoryDicName,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inOutDicId )as inOutdicName,
+		c.tenantId
+	    from so_inventory_accounting c
+	    left join so_inventory s
+	    on s.inventoryId=c.inventoryId
+	    left JOIN so_inventory_in_out sio
+		on c.orderId=sio.orderId
+	   <where>
+			<if test="inventoryId != null &amp;&amp;  inventoryId !=0">
+				c.inventoryId = #{inventoryId}
+			</if>
+			<if test="orderId != null">
+				and c.orderId = #{orderId}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				and sio.orgId = #{orgId}
+			</if>
+			<if test="status != null">
+				and sio.status = #{status}
+			</if>
+			<if test="inventoryDicId != null">
+				and c.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="batchCode != null &amp;&amp; batchCode !=''">
+				and c.batchCode like '%${batchCode}%'
+			</if>
+			<if test="price != null">
+				and c.price = #{price}
+			</if>
+			<if test="count != null">
+				and c.count = #{count}
+			</if>
+			<if test="available != null&amp;&amp;available==1 ">
+				and c.count > 0  and (sio.status=4 or sio.status=2)
+			</if>
+			<if test="availableDate != null">
+				and c.expiry  >=   #{availableDate}
+			</if>
+			<if test="amount != null">
+				and c.amount  =#{amount}
+			</if>
+			<if test="countAfterAccounting != null">
+				and c.countAfterAccounting  =#{countAfterAccounting}
+			</if>
+			<if test="amountAfterAccounting != null">
+				and c.amountAfterAccounting  =#{amountAfterAccounting}
+			</if>
+			<if test="month != null">
+				and c.month  =#{month}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="accountingIds != null&amp;&amp; accountingIds.size()>0">
+				and accountingId in
+		      	<foreach item="item" index="index" collection="accountingIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </if>
+		    <if test="1 == 1">
+		    and c.expiry is not null
+		   </if>
+		</where>
+		GROUP BY c.accountingId
+		) as allA
+		<if test="pager != null">
+			order by allA.accountingId
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+	<select id="findByOrderId" resultType="InventoryAccounting">
+	    select 	c.accountingId,
+	    c.inventoryId,
+		c.inventoryDicId,
+		c.orderId,
+		c.batchCode,
+		c.price,
+		s.inventoryCode,
+		s.inventoryName ,
+		s.type,
+		s.unit,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inventoryDicId )as inventoryDicName,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inOutDicId)as inOutdicName,
+		c.count,
+		c.amount,
+		c.countAfterAccounting,
+		c.amountAfterAccounting,
+		c.prodDate,
+		c.month,
+		c.expiry,
+		c.tenantId
+	    from so_inventory_accounting c
+	    left join so_inventory s
+	    on s.inventoryId=c.inventoryId
+	    left JOIN so_inventory_in_out sio
+		on c.orderId=sio.orderId
+	   <where>
+			<if test="orderId != null">
+				 c.orderId = #{orderId}
+			</if>
+			order by c.accountingId
+		</where>
+	</select>
+	<select id="findByOrderIdHistory" resultType="InventoryAccounting">
+		SELECT history.accountingId,
+		 sia.inventoryId,
+		 sia.inventoryDicId,
+		 orderi.orderId, 
+		 sia.batchCode,
+		 sia.price, 
+		 si.inventoryCode,
+		 si.inventoryName ,
+		 si.type, 
+		 si.unit,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=orderi.inventoryDicId )as inventoryDicName,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=orderi.inOutDicId)as inOutdicName, 
+		 history.price as amount,
+		 history.number as count,
+		sia.countAfterAccounting, 
+		sia.amountAfterAccounting,
+		sia.prodDate,
+		sia.month, 
+		sia.expiry,
+		sia.tenantId 
+		from so_inventory_history history
+		INNER JOIN so_inventory_in_out orderi
+		on orderi.orderId=history.orderId
+		INNER JOIN so_inventory_accounting sia
+		on sia.accountingId=history.accountingId
+		INNER JOIN so_inventory si
+		on si.inventoryId=sia.inventoryId
+	   <where>
+			<if test="orderId != null">
+				history.orderId = #{orderId}
+			</if>
+			order by history.accountingId
+		</where>
+	</select>
+	<select id="findAllByBeginning" resultType="InventoryAccounting">
+	    select 	c.accountingId,
+	    c.inventoryId,
+		c.inventoryDicId,
+		c.orderId,
+		c.batchCode,
+		c.price,
+		s.inventoryCode,
+		s.inventoryName,
+		s.type,
+		s.unit,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inventoryDicId )as inventoryDicName,
+		(SELECT pd.`name` from pf_dic pd where pd.dicId=sio.inOutDicId)as inOutdicName,
+		 history.price as amount,
+		 history.number as count,
+		c.countAfterAccounting,
+		c.amountAfterAccounting,
+		c.prodDate,
+		c.month,
+		c.expiry,
+		c.tenantId
+	    from so_inventory_accounting c
+	    inner JOIN so_inventory_history history
+    	on history.accountingId=c.accountingId	
+	    left join so_inventory s
+	    on s.inventoryId=c.inventoryId
+	    left JOIN so_inventory_in_out sio
+		on c.orderId=sio.orderId
+	   <where>
+			<if test="orderId != null">
+				 c.orderId = #{orderId}
+			</if>
+			<if test="status != null">
+				and sio.status = #{status}
+			</if>
+			<if test="month != null">
+				and c.month = #{month}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				and sio.orgId = #{orgId}
+			</if>
+			<if test="amount != null">
+				and amount = #{amount}
+			</if>
+			<if test="count != null">
+				and count = #{count}
+			</if>
+			<if test="countAfterAccounting != null">
+				and c.countAfterAccounting = #{countAfterAccounting}
+			</if>
+			<if test="amountAfterAccounting != null">
+				and c.amountAfterAccounting = #{amountAfterAccounting}
+			</if>
+			<if test="inventoryDicId != null &amp;&amp; inventoryDicId > 0">
+				and  sio.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="inventoryCode != null &amp;&amp;inventoryCode !=''">
+				and s.inventoryCode like '%${inventoryCode}%'
+			</if>
+			<if test="inventoryName != null &amp;&amp;inventoryName !=''">
+				and s.inventoryName like '%${inventoryName}%'
+			</if>
+			<if test="type != null &amp;&amp;type !=''">
+				and s.type like '%${type}%'
+			</if>
+			<if test="unit != null &amp;&amp;unit !=''">
+				and s.unit like '%${unit}%'
+			</if>
+			<if test="startProdDate != null &amp;&amp; endProdDate !=null">
+				and c.prodDate between #{startProdDate} and #{endProdDate}
+			</if>
+			<if test="startExpiry != null &amp;&amp; endExpiry !=null">
+				and c.expiry between #{startExpiry} and #{endExpiry}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="pager != null">
+			 group  by c.accountingId
+				<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+			</if>
+		</where>
+	</select>
+	<select id="getTotalCountBeginning" resultType="long">
+	    select 	count(DISTINCT c.accountingId)
+	    from so_inventory_accounting c
+	    inner JOIN so_inventory_history history
+    	on history.accountingId=c.accountingId	
+	    left join so_inventory s
+	    on s.inventoryId=c.inventoryId
+	    left JOIN so_inventory_in_out sio
+		on c.orderId=sio.orderId
+	   <where>
+			<if test="orderId != null">
+				 c.orderId = #{orderId}
+			</if>
+			<if test="status != null">
+				and sio.status = #{status}
+			</if>
+			<if test="month != null">
+				and c.month = #{month}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=0">
+				and sio.orgId = #{orgId}
+			</if>
+			<if test="amount != null">
+				and amount = #{amount}
+			</if>
+			<if test="count != null">
+				and count = #{count}
+			</if>
+			<if test="countAfterAccounting != null">
+				and c.countAfterAccounting = #{countAfterAccounting}
+			</if>
+			<if test="amountAfterAccounting != null">
+				and c.amountAfterAccounting = #{amountAfterAccounting}
+			</if>
+			<if test="inventoryDicId != null &amp;&amp; inventoryDicId >0">
+				and  sio.inventoryDicId = #{inventoryDicId}
+			</if>
+			<if test="inventoryCode != null &amp;&amp;inventoryCode !=''">
+				and s.inventoryCode like '%${inventoryCode}%'
+			</if>
+			<if test="inventoryName != null &amp;&amp;inventoryName !=''">
+				and s.inventoryName like '%${inventoryName}%'
+			</if>
+			<if test="type != null &amp;&amp;type !=''">
+				and s.type like '%${type}%'
+			</if>
+			<if test="unit != null &amp;&amp;unit !=''">
+				and s.unit like '%${unit}%'
+			</if>
+			<if test="startProdDate != null &amp;&amp; endProdDate !=null">
+				and c.prodDate between #{startProdDate} and #{endProdDate}
+			</if>
+			<if test="startExpiry != null &amp;&amp; endExpiry !=null">
+				and c.expiry between #{startExpiry} and #{endExpiry}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			
+		</where>
+	</select>  
+</mapper>

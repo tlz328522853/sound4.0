@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.FunctionDao">
+
+	<sql id="functionColumn">
+		funcCode,moduleId,moduleCode,pid,funcName,fullFuncName,funcTips,sequence,
+		url,icon,treeDisplay,funcLevel,funcCodePid,funcCodePids,funcURl 
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="funcName != null &amp;&amp; funcName != ''">
+				and f.funcName like '%${funcName}%' 
+			</if>
+			<if test="funcCode != null &amp;&amp; funcCode != ''">
+				and f.funcCode = #{funcCode}
+			</if>
+			
+			<if test="moduleId != null">
+				and f.moduleId = #{moduleId}
+			</if>
+		 	<if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+				and f.moduleId in
+		      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+	      	</if>
+			
+			<!-- 查询普通子功能 -->
+			<if test="pid != null &amp;&amp; pid != -1">
+				and f.pid = #{pid} 
+			</if>
+			<!-- 查询模块下的一级子功能 -->
+			<if test="pid != null &amp;&amp; pid == -1">
+				and f.pid is null 
+			</if>
+			<if test="userId != null&amp;&amp; userId != -1">
+				and ( pfr.ownerType = 2
+				AND pfr.ownerId=#{userId})
+		    </if>
+		    <if test="roleIds != null">
+		       or (pfr.ownerType = 1
+				AND pfr.ownerId in
+				<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+			      		#{item}
+			    </foreach>
+				
+				)
+		    </if>
+		     <if test="groupId != null">
+		       or (pfr.ownerType = 3
+				AND pfr.ownerId=#{groupId})
+		    </if>
+		</where>	
+	</sql>
+	
+	<insert id="insert" parameterType="Function" useGeneratedKeys="true" keyProperty="funcId">
+		insert into pf_function(
+			funcId, <include refid="functionColumn"/>		
+		)values(
+			#{funcId}, #{funcCode}, #{moduleId}, #{moduleCode}, #{pid}, #{funcName}, #{fullFuncName}, #{funcTips}, #{sequence},
+			#{url}, #{icon}, #{treeDisplay}, #{funcLevel}, #{funcCodePid}, #{funcCodePids}, #{funcURl}
+		)
+	</insert>
+	
+	<update id="update" parameterType="Function">
+		update pf_function
+		<set>
+			<if test="moduleId != null">moduleId = #{moduleId},</if>
+			<if test="moduleCode != null &amp;&amp; moduleCode != ''">moduleCode = #{moduleCode},</if>
+			<if test="funcName != null &amp;&amp; funcName != ''">funcName = #{funcName},</if>
+			<if test="fullFuncName != null &amp;&amp; fullFuncName != ''">fullFuncName = #{fullFuncName},</if>
+			<if test="funcTips != null &amp;&amp; funcTips != ''">funcTips = #{funcTips},</if>
+			<if test="sequence != null">sequence = #{sequence},</if>
+			<if test="url != null &amp;&amp; url != ''">url = #{url},</if>
+			<if test="icon != null &amp;&amp; icon != ''">icon = #{icon},</if>
+			<if test="treeDisplay != null">treeDisplay = #{treeDisplay},</if>
+			<if test="funcLevel != null">funcLevel = #{funcLevel},</if>
+			<if test="funcURl != null">funcURl = #{funcURl},</if>
+			<if test="funcCodePid != null &amp;&amp; funcCodePid != ''">funcCodePid = #{funcCodePid},</if>
+			<if test="funcCodePids != null &amp;&amp; funcCodePids != ''">funcCodePids = #{funcCodePids}</if>
+		</set>
+		where funcId = #{funcId}
+	</update>
+	
+	<delete id="delete" parameterType="list" >
+		delete from pf_function
+		<choose>
+			<when test="funcIds != null &amp;&amp; funcIds.size() != 0">
+				where funcId in
+		      	<foreach item="item" index="index" collection="funcIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+		
+	<delete id="deleteByModuleId" parameterType="list" >
+		delete from pf_function
+		<choose>
+			<when test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+				where moduleId in
+		      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<select id="findFunIdByModuleId" parameterType="map" resultType="Long">
+		select pff.funcId from pf_function pff
+		<where>
+			<if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+					 pff.moduleId in
+			      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			      	</if>
+		</where>
+	</select>
+	<select id="findByModuleId" parameterType="map" resultType="Function">
+		select pff.funcId, pff.funcCode,pff.moduleId,pff.moduleCode,pff.pid,pff.funcName,pff.fullFuncName,pff.funcTips,pff.sequence,
+		pff.url,pff.icon,pff.treeDisplay,pff.funcLevel,pff.funcCodePid,pff.funcCodePids,pff.funcURl,
+		m.moduleName as "moduleName" 
+		from pf_function pff
+		<choose>
+			<when test="userId != null||roleIds != null||groupId != null">
+				LEFT JOIN pf_func_right fr   
+				ON fr.`funcId` =pff.`funcId`   
+		    </when>
+		</choose>
+		left outer join pf_module m
+		on pff.moduleId = m.moduleId  
+		<where>
+				<if test="userId != null">
+				  fr.`ownerId`=#{userId}
+					<if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+					 and pff.moduleId in
+			      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			      	</if>
+			      	<if test="pid != null &amp;&amp; pid != -1">
+						AND pff.`pid`=#{pid}
+					</if>
+					<if test="pid != null &amp;&amp; pid == -1">
+						AND pff.`pid` is null 
+					</if>
+					 <if test="funcLevels != null &amp;&amp; funcLevels.size() != 0">
+					AND pff.funcLevel in
+			      	<foreach item="item" index="index" collection="funcLevels" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+		      		</if>
+				</if>
+				<if test="groupId != null">
+					or  fr.`ownerId`=#{groupId}
+					<if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+					and pff.moduleId in
+			      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			      	</if>
+			      	<if test="pid != null &amp;&amp; pid != -1">
+						AND pff.`pid`=#{pid}
+					</if>
+					<if test="pid != null &amp;&amp; pid == -1">
+						AND pff.`pid` is null 
+					</if>
+					 <if test="funcLevels != null &amp;&amp; funcLevels.size() != 0">
+					AND pff.funcLevel in
+			      	<foreach item="item" index="index" collection="funcLevels" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+		      		</if>
+				</if>
+				<if test="roleIds != null &amp;&amp; roleIds.size() != 0">
+					or  fr.`ownerId` in
+			      	<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			      	<if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+					and pff.moduleId in
+			      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			      	</if>
+			      	<if test="pid != null &amp;&amp; pid != -1">
+						AND pff.`pid`=#{pid}
+					</if>
+					<if test="pid != null &amp;&amp; pid == -1">
+						AND pff.`pid` is null 
+					</if>
+					 <if test="funcLevels != null &amp;&amp; funcLevels.size() != 0">
+					AND pff.funcLevel in
+			      	<foreach item="item" index="index" collection="funcLevels" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+		      		</if>			   	
+			    </if>
+			    <if test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+					 and pff.moduleId in
+			      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+			      	</if>
+			      	<if test="pid != null &amp;&amp; pid != -1">
+						AND pff.`pid`=#{pid}
+					</if>
+					<if test="pid != null &amp;&amp; pid == -1">
+						AND pff.`pid` is null 
+					</if>
+					 <if test="funcLevels != null &amp;&amp; funcLevels.size() != 0">
+					AND pff.funcLevel in
+			      	<foreach item="item" index="index" collection="funcLevels" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+		      		</if>
+		   </where>
+		     group by pff.funcId 
+		     <if test="orderBy != null &amp;&amp; orderBy != ''">
+					order by ${orderBy} 
+			</if>
+	</select>
+	<select id="findAuthenFunction"  resultType="Function">
+		select pff.funcId, pff.funcCode,pff.moduleId,pff.moduleCode,pff.pid,pff.funcName,pff.fullFuncName,pff.funcTips,pff.sequence,
+		pff.url,pff.icon,pff.treeDisplay,pff.funcLevel,pff.funcCodePid,pff.funcCodePids,pff.funcURl,
+		m.moduleName as "moduleName" 
+		from pf_function pff
+		left outer join pf_module m
+		on pff.moduleId = m.moduleId  
+		<where>
+			    <if test="moduleId != null &amp;&amp; moduleId!= -1">
+					  pff.moduleId = #{moduleId} and  pff.`pid` is null
+			     </if>
+		      	<if test="pid != null &amp;&amp; pid != -1">
+						AND pff.`pid`=#{pid}
+				</if>
+		   </where>
+		     group by pff.funcId 
+	</select>
+	
+	<select id="findByPid" parameterType="long" resultType="Function">
+		select funcId, <include refid="functionColumn"/> 
+		from pf_function
+		where pid = #{pid}
+	</select>
+		
+	<select id="findById" parameterType="list" resultType="Function">
+		select funcId, <include refid="functionColumn"/>
+		from pf_function
+		<choose>
+			<when test="funcIds != null &amp;&amp; funcIds.size() != 0">
+				where funcId in
+		      	<foreach item="item" index="index" collection="funcIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(funcId)
+		from 
+			pf_function f 
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findAll" resultType="Function">
+		select  f.funcId,f.funcCode,f.moduleId,f.moduleCode,f.pid,f.funcName,f.fullFuncName,f.funcTips,f.sequence,
+		f.url,f.icon,f.treeDisplay,f.funcLevel,f.funcCodePid,f.funcCodePids,f.funcURl,m.moduleName as "moduleName"  
+		from pf_function f
+		<choose>
+			<when test="userId != null||roleIds!=nul||groupId!=null">
+				INNER JOIN pf_func_right pfr
+				on pfr.funcId=f.funcId
+		    </when>
+		</choose> 
+			left outer join pf_module m
+			on f.moduleId = m.moduleId 
+		<include refid="queryCondition"/>
+		group by f.funcId 
+		<choose>
+			<when test="pager != null">
+				order by ${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+		    </when>
+		    <when test="pager == null">
+				order by moduleId
+		    </when>
+		</choose>
+	</select>
+	<select id="findUrlByUserId" parameterType="map" resultType="java.lang.String">
+		select pff.funcURl
+		from pf_function pff
+		LEFT JOIN pf_func_right fr
+		ON fr.`funcId` =pff.`funcId`
+		LEFT JOIN pf_user pu
+		ON pu.`userId`=fr.`ownerId`
+		LEFT JOIN pf_role pr
+		ON pr.`roleId`=fr.`ownerId`
+		LEFT JOIN pf_user_role pur
+		ON pur.`userId`=pu.`userId`
+	   <where>
+		   <if test="userId != null&amp;&amp; userId != ''">
+			  pur.`userId`=#{userId}
+			</if>
+			 AND pff.funcURl IS NOT NULL
+	   </where>
+	     GROUP BY pff.funcURl
+	</select>
+	
+	<select id="findUrls" parameterType="map" resultType="java.lang.String">
+		select pff.funcURl
+		from pf_function pff
+		<where>
+
+			   <if test="funcIds != null &amp;&amp; funcIds.size() != 0">
+					pff.funcId in
+			      	<foreach item="item" index="index" collection="funcIds" open="(" separator="," close=")">
+			      		#{item}
+			      	</foreach>
+		      	</if>
+		      	<if test="funcId != null&amp;&amp; funcId != -1">
+					 pff.funcId=#{funcId}
+				</if>
+				
+		   </where>
+		     group by pff.funcId 
+		    
+	</select>
+</mapper>

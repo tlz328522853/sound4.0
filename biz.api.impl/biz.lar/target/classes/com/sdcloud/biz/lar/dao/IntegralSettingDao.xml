@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.IntegralSettingDao">
+		<sql id="Base_Column_List">
+			 `id`,`level`,`integralNum`,`remark`,enable
+		</sql>
+		
+		<select id="getByLevel" resultType="com.sdcloud.api.lar.entity.IntegralSetting">
+			select 
+			<include refid="Base_Column_List"/>
+			from lar_integralSetting 
+			where level = #{level}
+			order by level asc
+		</select>
+		
+		<select id="getById" parameterType="java.lang.Long" resultType="com.sdcloud.api.lar.entity.IntegralSetting">
+			select
+			<include refid="Base_Column_List"/>
+			from lar_integralSetting 
+			where id = #{id}
+			order by level asc
+		</select>
+		
+		<!-- 带条件的分页查询 -->
+		<select id="findAll" resultType="com.sdcloud.api.lar.entity.IntegralSetting" parameterType="com.sdcloud.framework.entity.LarPager">
+			select
+			<include refid="Base_Column_List"/>
+			FROM lar_integralSetting 
+			
+			order by level asc
+			
+			<if test="larPager.first!=null and larPager.pageSize!=null">
+				limit #{larPager.first}, #{larPager.pageSize}
+			</if>
+		</select>
+		
+		<select id="totalCount" resultType="java.lang.Long">
+			select count(id)
+			from lar_integralSetting 
+			order by level asc
+		</select>
+		
+		<insert id="save" parameterType="com.sdcloud.api.lar.entity.IntegralSetting">
+		insert into lar_integralSetting 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="level != null">
+				level,
+			</if>
+			<if test="integralNum != null">
+				integralNum,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="level != null">
+				#{level},
+			</if>
+			<if test="integralNum != null">
+				#{integralNum},
+			</if>
+			<if test="remark != null">
+				#{remark},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+		</trim>
+	</insert>
+		
+		<delete id="delete" parameterType="java.lang.Long">
+			delete from lar_integralSetting
+			where id=#{id}
+		</delete>
+		
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.IntegralSetting">
+		update lar_integralSetting
+		<set>
+			<if test="level != null">
+				level=#{level},
+			</if>
+			<if test="integralNum != null">
+				integralNum=#{integralNum},
+			</if>
+			<if test="remark != null">
+				remark=#{remark},
+			</if>
+			<if test="enable != null">
+				enable=#{enable},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.DeviceDao">
+
+	<sql id="deviceColumn">
+		deviceMac,
+		displayMac,
+		deviceName ,
+		versionNo,
+		createTime,
+        modifiedTime,
+		orgId,
+		run
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_device(
+			deviceId, <include refid="deviceColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="devices" separator=",">
+			(#{item.deviceId},#{item.deviceMac},#{item.displayMac},
+			#{item.deviceName},#{item.versionNo},#{item.createTime},
+			#{item.modifiedTime},#{item.orgId},#{item.run})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_device
+		<choose>
+			<when test="deviceMacs != null &amp;&amp; deviceMacs.size() != 0">
+				where deviceMac in
+		      	<foreach item="item" index="index" collection="deviceMacs" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="device">
+		update so_device
+		<set>
+			<if test="deviceMac != null">deviceMac = #{deviceMac},</if>
+			<if test="displayMac != null">displayMac = #{displayMac},</if>
+			<if test="deviceName != null &amp;&amp; deviceName != ''">deviceName = #{deviceName},</if>
+			<if test="createTime != null &amp;&amp; createTime != ''">createTime = #{createTime},</if>
+			<if test="modifiedTime != null &amp;&amp; modifiedTime != ''">modifiedTime = #{modifiedTime},</if>
+			<if test="versionNo != null &amp;&amp; versionNo != ''">versionNo = #{versionNo},</if>
+			<if test="orgId != null">orgId = #{orgId},</if>
+			<if test="run != null">run = #{run},</if>
+		</set>
+		where deviceId = #{deviceId}
+	</update>
+	<update id="updateRun" parameterType="device">
+		update so_device
+		<set>
+			<if test="run != null">run = #{run},</if>
+		</set>
+		where deviceMac = #{deviceMac}
+	</update>
+	<sql id="deviceCondition">
+		<where>
+			<if test="orgId != null ">
+				o.orgId = #{orgId}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.deviceId)
+		from so_device c
+	   <where>
+			<if test="deviceMac != null &amp;&amp;deviceMac !=''">
+				and c.deviceMac like '%${deviceMac}%'
+			</if>
+			<if test="displayMac != null &amp;&amp; displayMac !=''">
+				and c.displayMac like '%${displayMac}%'
+			</if>
+			
+			<if test="deviceId != null">
+				and c.deviceId = #{deviceId}
+			</if>
+			<if test="deviceName != null &amp;&amp;deviceName !=''">
+				and c.deviceName like '%${deviceName}%'
+			</if>
+			<if test="heviceMac != null &amp;&amp; heviceMac !=''">
+				and c.deviceMac = #{heviceMac}
+			</if>
+			
+			<if test="isFilter != null &amp;&amp; isFilter ==1">
+				and c.deviceMac not in 
+				(
+				SELECT deviceMac from so_toilet_device
+				)
+			</if>
+			<if test="orgId != null">
+				and c.orgId = #{orgId}
+			</if>
+			<if test="filterDeviceIds!= null">
+				and c.deviceId not in
+				<foreach item="item" index="index" collection="filterDeviceIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="orgIds != null &amp;&amp;orgIds.size() >0">
+				and c.orgId in
+				<foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="versionNo != null &amp;&amp;versionNo !=''">
+				and c.versionNo like '%${versionNo}%'
+			</if>
+			<if test="startFirstDate != null &amp;&amp;startEndDate !=null">
+				and Date(c.createTime) between #{startFirstDate} and #{startEndDate}
+			</if>
+			<if test="endFirstDate != null &amp;&amp;endEndDate !=null">
+				and Date(c.modifiedTime) between #{endFirstDate} and #{endEndDate}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="Device">
+	    select 	c.deviceId,c.displayMac,c.deviceMac,
+		c.deviceName ,
+		c.versionNo,
+		c.createTime,
+        c.modifiedTime,
+		c.orgId,po.name as orgName
+	    from so_device c
+	    left join pf_org po
+	    on po.orgId=c.orgId
+	   <where>
+			<if test="deviceMac != null &amp;&amp;deviceMac !=''">
+				 c.deviceMac like '%${deviceMac}%'
+			</if>
+			<if test="displayMac != null &amp;&amp; displayMac !=''">
+				and c.displayMac like '%${displayMac}%'
+			</if>
+			<if test="heviceMac != null &amp;&amp; heviceMac !=''">
+				and c.deviceMac = #{heviceMac}
+			</if>
+			<if test="isFilter != null &amp;&amp; isFilter ==1">
+				and c.deviceMac not in 
+				(
+				SELECT deviceMac from so_toilet_device
+				)
+			</if>
+			<if test="deviceName != null &amp;&amp;deviceName !=''">
+				and c.deviceName like '%${deviceName}%'
+			</if>
+			<if test="orgId != null">
+				and c.orgId = #{orgId}
+			</if>
+			<if test="orgIds != null &amp;&amp;orgIds.size() >0">
+				and c.orgId in
+				<foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="filterDeviceIds!= null">
+				and c.deviceId not in
+				<foreach item="item" index="index" collection="filterDeviceIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="deviceId != null">
+				and c.deviceId = #{deviceId}
+			</if>
+			<if test="versionNo != null &amp;&amp;versionNo !=''">
+				and c.versionNo like '%${versionNo}%'
+			</if>
+			<if test="startFirstDate != null &amp;&amp;startEndDate !=null">
+				and Date(c.createTime) between #{startFirstDate} and #{startEndDate}
+			</if>
+			<if test="endFirstDate != null &amp;&amp;endEndDate !=null">
+				and Date(c.modifiedTime) between #{endFirstDate} and #{endEndDate}
+			</if>
+		</where>
+		<if test="pager != null">
+			<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

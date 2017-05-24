@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.CarCleanRelatedDao">
+
+	<sql id="carCleanColumn">
+	assetId,
+	empId,cleanTime,
+	cleanNumber,cleanPosition,
+	remark 
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_car_clean(
+			cleanId, <include refid="carCleanColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="carCleans" separator=",">
+			(
+			 #{item.cleanId},
+			#{item.assetId}, #{item.empId},
+			#{item.cleanTime}, #{item.cleanNumber},
+			#{item.cleanPosition}, 
+			#{item.remark}
+			)
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_car_clean
+		<choose>
+			<when test="carCleanIds != null &amp;&amp; carCleanIds.size() != 0">
+				where cleanId in
+		      	<foreach item="item" index="index" collection="carCleanIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="CarClean">
+		update so_car_clean
+		<set>
+			<if test="assetId != null &amp;&amp; assetId != ''">assetId = #{assetId},</if>
+			<if test="cleanTime != null">cleanTime = #{cleanTime},</if>
+			<if test="cleanPosition != null &amp;&amp; cleanPosition != ''">cleanPosition = #{cleanPosition},</if>
+			<if test="cleanNumber != null &amp;&amp; cleanNumber != ''">cleanNumber = #{cleanNumber},</if>
+			<if test="remark != null &amp;&amp; remark != ''">remark = #{remark},</if>
+		</set>
+		where cleanId = #{cleanId}
+	</update>
+	
+	<sql id="carCleanCondition">
+		<where>
+			<if test="newOrgId != null &amp;&amp;newOrgId !=0">
+				o.newOrgId = #{newOrgId}
+			</if>
+			<if test="orgIds != null &amp;&amp;orgIds.size() >0">
+				and o.newOrgId in
+				<foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="empId != null &amp;&amp;empId !=0">
+				and c.empId = #{empId}
+			</if>
+			<if test="empName != null &amp;&amp;empName !=''">
+				and em.name like '%${empName}%'
+			</if>
+			<if test="cleanNumber != null &amp;&amp;cleanNumber >0">
+				and c.cleanNumber = #{cleanNumber}
+			</if>
+			<if test="carNumber != null &amp;&amp;carNumber !=''">
+				and ca.carNumber like '%${carNumber}%'
+			</if>
+			<if test="assetId != null &amp;&amp;assetId !=0">
+				and c.assetId = #{assetId}
+			</if>
+			<if test="cleanPosition != null &amp;&amp;cleanPosition !=''">
+				and c.cleanPosition like '%${cleanPosition}%'
+			</if>
+			<if test="carName != null &amp;&amp;carName !=''">
+				and ca.carName like '%${carName}%'
+			</if>
+			<if test="firstDate != null">
+				and c.cleanTime >= #{firstDate}
+			</if>
+			<if test="endDate !=null">
+				<![CDATA[
+					and c.cleanTime <= #{endDate}
+				]]>
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.assetId)
+		from so_car_clean c
+	    left outer join so_asset_object o
+	    on c.assetId = o.assetId
+	    left outer join so_asset_car ca
+	    on ca.assetId = c.assetId
+		left outer join pf_employee em
+	    on c.empId = em.employeeId
+	  <include refid="carCleanCondition"></include>
+	</select>
+	
+	<select id="findAllBy" resultType="CarClean">
+	    select 	cleanId, c.assetId,
+	    ca.carNumber,ca.carName,ca.carCode,
+		empId,cleanTime,
+		cleanNumber,cleanPosition,
+		c.remark,em.name as "empName" 
+	    from so_car_clean c
+	    left outer join so_asset_object o
+	    on c.assetId = o.assetId
+	    left outer join so_asset_car ca
+	    on ca.assetId = c.assetId
+	    left outer join pf_employee em
+	    on c.empId = em.employeeId
+	    <include refid="carCleanCondition"></include>
+		<if test="pager != null">
+			order by o.${pager.orderSql} 
+			<if test="for_method_exportData != 'true'">
+			limit #{pager.first}, #{pager.pageSize}
+			</if>
+		</if>
+	</select> 
+	
+</mapper>

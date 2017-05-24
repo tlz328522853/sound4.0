@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ProblemOrderDao">
+	<sql id="Base_Column_List">
+		  p.id AS "id",
+		  a.order_no AS "orderNo",
+		  a.biz_type AS "bizType",
+		  a.order_time AS "orderTime",
+		  a.order_state AS "orderState",
+		  a.org AS "org",
+		  a.area AS "area",
+		  p.type AS "type",
+		  detail,
+		  fileName,
+		  fileUrl,
+		  `status` as "status",
+		  urgencyLevel,
+		  receiverId,
+		  receiverName,
+		  receiverOrgId,
+		  receiverOrgName,
+		  responderId,
+		  responderName,
+		  responseInfo,
+		  responseDate,
+		  responseFileName,
+		  responseFileUrl 
+	</sql>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultType="com.sdcloud.api.lar.entity.ProblemOrder">
+		select
+		<include refid="Base_Column_List"></include>
+		from lar_problem_order p inner join 
+		<if  test="null ==larPager.params.bizType or '寄快递'==larPager.params.bizType">
+			lar_send_express a
+		</if >
+		<if  test="null !=larPager.params.bizType and '同城送'==larPager.params.bizType">
+			lar_city_send a
+		</if >
+		<if  test="null !=larPager.params.bizType and '帮我买'==larPager.params.bizType">
+			lar_help_me_buy a
+		</if >
+		on p.order_no = a.order_no 
+		
+		<where>
+			<if test="null!=larPager.params">
+				<foreach collection="larPager.params.keys" item="item" index="key"  separator="and">
+						${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<if test="null != larPager.orderBy and null != larPager.order">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="null != larPager.first and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id)
+		from lar_problem_order
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" separator="and" >
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<insert id="save" parameterType="com.sdcloud.api.lar.entity.ProblemOrder">
+		insert into lar_problem_order
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="orderNo != null">
+				order_no,
+			</if>
+			
+			<if test="order.org != null">
+				org,
+			</if>
+			
+			<if test="type != null">
+				type,
+			</if>
+			<if test="detail != null">
+				detail,
+			</if>
+			<if test="fileName != null">
+				fileName,
+			</if>
+			<if test="fileUrl != null">
+				fileUrl,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+	
+			<if test="urgencyLevelId != null">
+				urgencyLevelId,
+			</if>
+			<if test="urgencyLevelName != null">
+				urgencyLevelName,
+			</if>
+			<if test="receiverId != null">
+				receiverId,
+			</if>
+			<if test="receiverName != null">
+				receiverName,
+			</if>
+			<if test="receiverOrgId != null">
+				receiverOrgId,
+			</if>
+			<if test="receiverOrgName != null">
+				receiverOrgName,
+			</if>
+			<if test="responderId != null">
+				responderId,
+			</if>
+			<if test="responderName != null">
+				responderName,
+			</if>
+			<if test="responseInformation != null">
+				responseInformation,
+			</if>
+			<if test="responseDate != null">
+				responseDate,
+			</if>
+			<if test="responseFileName != null">
+				responseFileName,
+			</if>
+			<if test="responseFileUrl != null">
+				responseFileUrl,
+			</if>
+			<if test="createUser != null">
+				createUser,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="updateUser != null">
+				updateUser,
+			</if>
+			<if test="updateDate != null">
+				updateDate,
+			</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="orderId != null">
+				#{orderId},
+			</if>
+			
+			<if test="order.org != null">
+				#{order.org},
+			</if>
+			
+			<if test="type != null">
+				#{type},
+			</if>
+			<if test="detail != null">
+				#{detail},
+			</if>
+			<if test="fileName != null">
+				#{fileName},
+			</if>
+			<if test="fileUrl != null">
+				#{fileUrl},
+			</if>
+			<if test="status != null">
+				#{status},
+			</if>
+			<if test="urgencyLevel != null">
+				#{urgencyLevel},
+			</if>
+			<if test="receiverId != null">
+				#{receiverId},
+			</if>
+			<if test="receiverName != null">
+				#{receiverName},
+			</if>
+			<if test="receiverOrgId != null">
+				#{receiverOrgId},
+			</if>
+			<if test="receiverOrgName != null">
+				#{receiverOrgName},
+			</if>
+			<if test="responderId != null">
+				#{responderId},
+			</if>
+			<if test="responderName != null">
+				#{responderName},
+			</if>
+			<if test="responseInfo != null">
+				#{responseInfo},
+			</if>
+			<if test="responseDate != null">
+				#{responseDate},
+			</if>
+			<if test="responseFileName != null">
+				#{responseFileName},
+			</if>
+			<if test="responseFileUrl != null">
+				#{responseFileUrl},
+			</if>
+			<if test="createUser != null">
+				#{createUser},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="updateUser != null">
+				#{updateUser},
+			</if>
+			<if test="updateDate != null">
+				#{updateDate},
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.ProblemOrder">
+		update lar_problem_order
+		<set>
+			
+			<if test="type != null">
+				type=#{type},
+			</if>
+			<if test="detail != null">
+				detail=#{detail},
+			</if>
+			
+			<if test="fileName != null">
+				fileName=#{fileName},
+			</if>
+			<if test="fileUrl != null">
+				fileUrl=#{fileUrl},
+			</if>
+			
+			<if test="status != null">
+				status=#{status},
+			</if>
+			<if test="urgencyLevel != null">
+				urgencyLevel=#{urgencyLevel},
+			</if>
+			<if test="receiverId != null">
+				receiverId=#{receiverId},
+			</if>
+			<if test="receiverName != null">
+				receiverName=#{receiverName},
+			</if>
+			<if test="receiverOrgId != null">
+				receiverOrgId=#{receiverOrgId},
+			</if>
+			<if test="receiverOrgName != null">
+				receiverOrgName=#{receiverOrgName},
+			</if>
+			<if test="responderId != null">
+				responderId=#{responderId},
+			</if>
+			<if test="responderName != null">
+				responderName=#{responderName},
+			</if>
+			<if test="responseInfo != null">
+				responseInfo=#{responseInfo},
+			</if>
+			<if test="responseDate != null">
+				responseDate=#{responseDate},
+			</if>
+			<if test="responseFileName != null">
+				responseFileName=#{responseFileName},
+			</if>
+			<if test="responseFileUrl != null">
+				responseFileUrl=#{responseFileUrl},
+			</if>
+			
+			<if test="createUser !=null and createUser !=''">
+				createUser=#{createUser},
+			</if>
+			<if test="createDate !=null and createDate !=''">
+				createDate=#{createDate},
+			</if>
+			<if test="updateUser !=null and updateUser !=''">
+				updateUser=#{updateUser},
+			</if>
+			<if test="updateDate !=null and updateDate !=''">
+				updateDate=#{updateDate},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from lar_problem_order
+		where id=#{id}
+	</delete>
+	
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select count(id) from lar_problemorder
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" separator="and">
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.ProblemOrder">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_partner
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" separator="and">
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by updateDate desc,createDate desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<delete id="batchDelete">
+		delete from lar_problem_order
+		<where>
+			<if test="ids !=null and ids.size() >0">
+				id in
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+</mapper>

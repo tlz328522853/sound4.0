@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	luorongjie
+	date	:	2016-12-05
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleInstockPriceDao">
+
+	<sql id="Base_Column_List">
+		id,org_id,month,spec_id,price_id ,price,create_date,update_date
+	</sql>
+	
+	<sql id="Insert_Column">
+		id,org_id,month,spec_id,price_id ,price,create_date,update_date
+	</sql>
+	
+	
+	<insert id="save" >
+		INSERT INTO lar_recycle_instock_price
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		(
+		#{id},
+		#{orgId},	
+		#{month},
+		#{specId},
+		#{priceId},
+		(
+			select sum(ins.paid_money)/sum(ins.num) 
+			from lar_recycle_instock ins 
+			LEFT JOIN lar_recyclingprice p ON ins.price_id = p.id
+			where p.spec_id = #{specId}
+			and p.org=#{orgId}
+			and DATE_FORMAT(ins.audit_date,'%Y%m')=#{month}
+		
+		),
+		#{createDate},
+		#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		update lar_recycle_instock_price inp
+		set inp.price = 
+			(
+				select sum(ins.paid_money)/sum(ins.num) 
+				from lar_recycle_instock ins 
+				LEFT JOIN lar_recyclingprice p ON ins.price_id = p.id
+				where p.spec_id = #{specId}
+				and p.org=#{orgId}
+				and DATE_FORMAT(ins.audit_date,'%Y%m')=#{month}
+			)
+			
+		where id = #{id}
+	</update>
+	
+	<insert id="copyHistory" >
+		INSERT INTO lar_recycle_instock_price
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		(
+		#{id},
+		#{orgId},	
+		#{month},
+		#{specId},
+		#{priceId},
+		(
+			SELECT price from lar_recycle_instock_price inp
+			where inp.spec_id = #{specId}
+			and inp.org_id = #{orgId}
+			and inp.`month` = 	(select max(inp.month) 
+								from lar_recycle_instock_price inp
+								where inp.spec_id = #{specId}
+								and inp.org_id = #{orgId}
+								and inp.`month` <![CDATA[ <= ]]> #{month})
+
+		
+		),
+		#{createDate},
+		#{updateDate}
+		)
+	</insert>
+</mapper>

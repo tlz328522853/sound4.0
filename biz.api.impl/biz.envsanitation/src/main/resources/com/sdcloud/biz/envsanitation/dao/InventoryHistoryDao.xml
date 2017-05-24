@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.InventoryHistoryDao">
+
+	<sql id="inventoryHistoryColumn">
+		accountingId,
+		orderId,
+		number,
+		createTime,
+		price,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_inventory_history(
+			historyId,<include refid="inventoryHistoryColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="inventoryHistorys" separator=",">
+			(#{item.historyId},
+			#{item.accountingId}, #{item.orderId},
+			#{item.number}, #{item.createTime},
+			#{item.price},#{item.tenantId})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_inventory_history
+		<choose>
+			<when test="historyIds != null &amp;&amp; historyIds.size() != 0">
+				where historyId in
+		      	<foreach item="item" index="index" collection="historyIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<delete id="deleteByOrdeId" parameterType="list" >
+		delete from so_inventory_history
+		<choose>
+			<when test="orderIds != null &amp;&amp; orderIds.size()!=0">
+				where orderId in
+		      	<foreach item="item" index="index" collection="orderIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<update id="update" parameterType="inventory">
+		update so_inventory_history
+		<set>
+			<if test="accountingId != null">accountingId = #{accountingId},</if>
+			<if test="orderId != null">orderId = #{orderId},</if>
+			<if test="number != null">number = #{number},</if>
+			<if test="createTime != null">createTime = #{createTime},</if>
+			<if test="price != null">price = #{price},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where historyId = #{historyId}
+	</update>
+	
+	<sql id="inventoryCondition">
+		<where>
+			<if test="newOrgId != null ">
+				o.newOrgId = #{newOrgId}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.historyId)
+		from so_inventory_history c
+	   <where>
+			<if test="accountingId != null &amp;&amp; accountingId !=0">
+				c.accountingId = #{accountingId}
+			</if>
+			<if test="orderId != null">
+				and c.orderId = #{orderId}
+			</if>
+			<if test="number != null">
+				and c.number = #{number}
+			</if>
+			<if test="price != null">
+				and c.price = #{price}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="InventoryHistory">
+	    select 	historyId,<include refid="inventoryHistoryColumn"/>
+	    from so_inventory_history c
+	   <where>
+			<if test="accountingId != null &amp;&amp; accountingId !=0">
+				c.accountingId = #{accountingId}
+			</if>
+			<if test="orderId != null">
+				and c.orderId = #{orderId}
+			</if>
+			<if test="number != null">
+				and c.number = #{number}
+			</if>
+			<if test="price != null">
+				and c.price = #{price}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+		</where>
+		<if test="pager != null">
+			order by c.createTime
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	<select id="findOutAllBy" resultType="InventoryHistory">
+	    select 	c.historyId,c.accountingId,
+		c.orderId,
+		c.number,
+		c.createTime,
+		c.price,
+		c.tenantId
+	    from so_inventory_history c
+	    INNER JOIN so_inventory_in_out sio
+		on sio.orderId=c.orderId
+	   <where>
+			<if test="accountingId != null &amp;&amp; accountingId !=0">
+				c.accountingId = #{accountingId}
+			</if>
+			<if test="orderId != null">
+				and c.orderId = #{orderId}
+			</if>
+			<if test="number != null">
+				and c.number = #{number}
+			</if>
+			<if test="price != null">
+				and c.price = #{price}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="1==1">
+				and  sio.type=0
+			</if>
+			
+		</where>
+		<if test="pager != null">
+			order by c.createTime
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+</mapper>

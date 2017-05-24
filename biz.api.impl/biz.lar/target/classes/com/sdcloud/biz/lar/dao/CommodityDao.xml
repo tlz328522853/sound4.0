@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.CommodityDao">
+	<sql id="Base_Column_List">
+		c.`id`,`shopId`,`shopName`,`shopDescribe`,`brand`,`specifications`,`shopImg`,
+		c.`createDate`,c.`enable`,c.`mechanismId`,`shelfLife`,`shelfTime`,`paymentMethod`,`unitPrice`,
+		`moneyUnit`,t.`id` AS "commodityType.id",`typeName` AS "commodityType.typeName",t.`enable` AS "commodityType.enable",
+		t.`createDate` AS "commodityType.createDate",t.`mechanismId` AS "commodityType.mechanismId" 
+	</sql>
+	<sql id="Type_Column_List">
+		`id`,`typeName`,`enable`,`createDate`,mechanismId 
+	</sql>
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.Commodity">
+		insert into lar_commodity 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="commodityType != null and commodityType.id!=null">
+				commodityType,
+			</if>
+			<if test="shopId != null">
+				shopId,
+			</if>
+			<if test="shopName != null">
+				shopName,
+			</if>
+			<if test="shopDescribe != null">
+				shopDescribe,
+			</if>
+			<if test="brand != null">
+				brand,
+			</if>
+			<if test="specifications != null">
+				specifications,
+			</if>
+			<if test="shopImg != null">
+				shopImg,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="mechanismId != null">
+				mechanismId,
+			</if>
+			<if test="shelfLife != null">
+				shelfLife,
+			</if>
+			<if test="shelfTime != null">
+				shelfTime,
+			</if>
+			<if test="paymentMethod != null">
+				paymentMethod,
+			</if>
+			<if test="unitPrice != null">
+				unitPrice,
+			</if>
+			<if test="moneyUnit != null">
+				moneyUnit,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="commodityType != null and commodityType.id!=null">
+				#{commodityType.id},
+			</if>
+			<if test="shopId != null">
+				#{shopId},
+			</if>
+			<if test="shopName != null">
+				#{shopName},
+			</if>
+			<if test="shopDescribe != null">
+				#{shopDescribe},
+			</if>
+			<if test="brand != null">
+				#{brand},
+			</if>
+			<if test="specifications != null">
+				#{specifications},
+			</if>
+			<if test="shopImg != null">
+				#{shopImg},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="mechanismId != null">
+				#{mechanismId},
+			</if>
+			<if test="shelfLife != null">
+				#{shelfLife},
+			</if>
+			<if test="shelfTime != null">
+				#{shelfTime},
+			</if>
+			<if test="paymentMethod != null">
+				#{paymentMethod},
+			</if>
+			<if test="unitPrice != null">
+				#{unitPrice},
+			</if>
+			<if test="moneyUnit != null">
+				#{moneyUnit},
+			</if>
+		</trim>
+	</insert>
+	<!-- 
+	
+	<insert id="insertSelectiveType" parameterType="com.sdcloud.api.lar.entity.RecyclingType">
+		insert into lar_recyclingtype
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="typeName != null">
+				typeName,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="typeName != null">
+				#{typeName},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+		</trim>
+	</insert> -->
+	<select id="countById" parameterType="map" resultType="long">
+		select count(c.id) FROM `lar_commodity` c LEFT OUTER JOIN `lar_commoditytype` t ON(c.commodityType=t.id) 
+		<where>
+			c.enable=0 
+			<if test="params!=null and params.size>0">
+				<if test="params.id!=null">
+					and c.id=#{params.id}
+				</if>
+				<if test="params.mechanismId!=null">
+					and c.mechanismId=#{params.mechanismId}
+				</if>
+				<if test="params.orgIds!=null and params.orgIds.size>0">
+					and c.mechanismId in 
+					<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+	                       #{item}
+	               	</foreach>
+				</if>
+				<if test="params.moneyUnit!=null">
+					and c.moneyUnit=#{params.moneyUnit}
+				</if>
+				<if test="params.shelfLife !=null and params.shelfLife=='true'">
+					<if test="params.endDate==null">
+						<![CDATA[
+							and shelfLife>= #{params.firstDate}
+						]]>
+					</if>
+					<if test="params.firstDate==null">
+						<![CDATA[
+							and shelfLife <= #{params.endDate}
+						]]>
+					</if>
+					<if test="params.endDate!=null and params.firstDate!=null">
+						<![CDATA[
+							and shelfLife <= #{params.endDate} and shelfLife>= #{params.firstDate}
+						]]>
+					</if>
+				</if>
+				<if test="params.shelfTime !=null and params.shelfTime=='true'">
+					<if test="params.endDate==null">
+						<![CDATA[
+							and shelfTime>= #{params.firstDate}
+						]]>
+					</if>
+					<if test="params.firstDate==null">
+						<![CDATA[
+							and shelfTime <= #{params.endDate}
+						]]>
+					</if>
+					<if test="params.endDate!=null and params.firstDate!=null">
+						<![CDATA[
+							and shelfTime <= #{params.endDate} and shelfTime>= #{params.firstDate}
+						]]>
+					</if>
+				</if>
+				<if test="params.commodityType !=null">
+					and commodityType = #{params.commodityType}
+				</if>
+				<if test="params.shopName !=null">
+					and shopName = #{params.shopName}
+				</if>
+				<if test="params.paymentMethod !=null">
+					and paymentMethod = #{params.paymentMethod}
+				</if>
+				<if test="params.brand !=null">
+					and brand = #{params.brand}
+				</if>
+			</if>
+		</where>
+	</select>
+	<select id="selectByExample" resultType="com.sdcloud.api.lar.entity.Commodity" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		FROM `lar_commodity` c LEFT OUTER JOIN `lar_commoditytype` t ON(c.commodityType=t.id) 
+		<where>
+			c.enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.id!=null">
+					and c.id=#{larPager.params.id}
+				</if>
+				<if test="larPager.params.mechanismId!=null">
+					and c.mechanismId=#{larPager.params.mechanismId}
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and c.mechanismId in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="larPager.params.moneyUnit!=null">
+					and c.moneyUnit=#{larPager.params.moneyUnit} AND NOW() BETWEEN TIMESTAMP(shelfLife) AND TIMESTAMP(shelfTime) 
+				</if>
+				<if test="larPager.params.shelfLife !=null and larPager.params.shelfLife=='true'">
+					<if test="larPager.params.endDate==null">
+						<![CDATA[
+							and shelfLife >= #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null">
+						<![CDATA[
+							and shelfLife <= #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and shelfLife <= #{larPager.params.endDate} and shelfLife >= #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<if test="larPager.params.shelfTime !=null and larPager.params.shelfTime=='true'">
+					<if test="larPager.params.endDate==null">
+						<![CDATA[
+							and shelfTime>= #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null">
+						<![CDATA[
+							and shelfTime <= #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and shelfTime <= #{larPager.params.endDate} and shelfTime>= #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<if test="larPager.params.commodityType !=null">
+					and commodityType = #{larPager.params.commodityType}
+				</if>
+				<if test="larPager.params.shopName !=null">
+					and shopName = #{larPager.params.shopName}
+				</if>
+				<if test="larPager.params.paymentMethod !=null">
+					and paymentMethod = #{larPager.params.paymentMethod}
+				</if>
+				<if test="larPager.params.brand !=null">
+					and brand = #{larPager.params.brand}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="getCommoditysById" resultType="com.sdcloud.api.lar.entity.Commodity" parameterType="map">
+		select 
+		<include refid="Base_Column_List" /> 
+		FROM `lar_commodity` c LEFT OUTER JOIN `lar_commoditytype` t ON(c.commodityType=t.id) 
+		<where>
+			c.enable=0 
+			<if test="params!=null and params.size>0">
+				<if test="params.id!=null">
+					and c.id=#{params.id}
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectTypeByExample" resultType="com.sdcloud.api.lar.entity.CommodityType" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Type_Column_List" /> 
+		FROM lar_recyclingtype 
+		<where>
+			enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.id!=null">
+					and id=#{larPager.params.id}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+	<update id="updateByExampleSelective" parameterType="map">
+		update lar_commodity  
+		<set>
+			<if test="params.commodity.commodityType != null and params.commodity.commodityType.id !=null">
+				commodityType = #{params.commodity.commodityType.id},
+			</if>
+			<if test="params.commodity.shopId != null">
+				shopId = #{params.commodity.shopId},
+			</if>
+			<if test="params.commodity.shopName != null">
+				shopName = #{params.commodity.shopName},
+			</if>
+			<if test="params.commodity.shopDescribe != null">
+				shopDescribe = #{params.commodity.shopDescribe},
+			</if>
+			<if test="params.commodity.brand != null">
+				brand = #{params.commodity.brand},
+			</if>
+			<if test="params.commodity.specifications != null">
+				specifications = #{params.commodity.specifications},
+			</if>
+			<if test="params.commodity.shopImg != null">
+				shopImg = #{params.commodity.shopImg},
+			</if>
+			<if test="params.commodity.createDate != null">
+				createDate = #{params.commodity.createDate},
+			</if>
+			<if test="params.commodity.enable != null">
+				enable = #{params.commodity.enable},
+			</if>
+			<if test="params.commodity.mechanismId != null">
+				mechanismId = #{params.commodity.mechanismId},
+			</if>
+			<if test="params.commodity.shelfLife != null">
+				shelfLife=#{params.commodity.shelfLife},
+			</if>
+			<if test="params.commodity.shelfTime != null">
+				shelfTime=#{params.commodity.shelfTime},
+			</if>
+			<if test="params.commodity.paymentMethod != null">
+				paymentMethod=#{params.commodity.paymentMethod},
+			</if>
+			<if test="params.commodity.unitPrice != null">
+				unitPrice=#{params.commodity.unitPrice},
+			</if>
+			<if test="params.commodity.moneyUnit != null">
+				moneyUnit=#{params.commodity.moneyUnit},
+			</if>
+		</set>
+		<where>
+			<if test="params.commodity.id !=null">
+				id=#{params.commodity.id}
+			</if>
+		</where>
+	</update>
+	
+	<update id="updateTypeByExampleSelective" parameterType="map">
+		update lar_recyclingtype 
+		<set>
+			<if test="params.recyclingType.typeName != null">
+				typeName = #{params.recyclingType.typeName},
+			</if>
+			<if test="params.recyclingType.enable != null">
+				enable = #{params.recyclingType.enable},
+			</if>
+			<if test="params.recyclingType.createDate != null">
+				createDate = #{params.recyclingType.createDate},
+			</if>
+		</set>
+		<where>
+			<if test="params.recyclingType.id !=null">
+				id=#{params.recyclingType.id}
+			</if>
+		</where>
+	</update>
+	
+	<!-- 回收蓝批量删除 -->
+	<delete id="deleteShoppingCartsById">
+		delete from lar_shoppingcart where 
+		<choose>
+			<when test="ids !=null and ids.size>0">
+				id in 
+				<foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+		            #{item}
+	        	</foreach>
+			</when>
+			<otherwise>
+				1=0
+			</otherwise>
+		</choose>
+	</delete>
+	
+	<delete id="deleteShoppingCartsByCommodity" parameterType="map">
+		delete from lar_shoppingcart where appUserId=#{userId} 
+		<choose>
+			<when test="commodityIds !=null and commodityIds.size>0">
+				and commodity in 
+				<foreach collection="commodityIds" item="item" index="index" open="(" close=")" separator=",">
+		            #{item}
+	        	</foreach>
+			</when>
+			<otherwise>
+				and 1=0
+			</otherwise>
+		</choose>
+	</delete>
+	
+	<!-- 回收蓝批量添加 -->
+	<insert id="saveShoppingCart" parameterType="com.sdcloud.api.lar.entity.ShoppingCart">
+		insert into lar_shoppingcart 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				`id`,
+			</if>
+			<if test="commodity != null and commodity.id!=null">
+				`commodity`,
+			</if>
+			<if test="number != null">
+				number,
+			</if>
+			<if test="appUserId != null">
+				appUserId,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="commodity != null and commodity.id!=null">
+				#{commodity.id},
+			</if>
+			<if test="number != null">
+				#{number},
+			</if>
+			<if test="appUserId != null">
+				#{appUserId},
+			</if>
+		</trim>
+	</insert>
+	<!-- 更新回收篮 -->
+	<update id="updateShoppingCart" parameterType="com.sdcloud.api.lar.entity.ShoppingCart">
+		update lar_shoppingcart 
+		<set>
+			<if test="commodity != null and commodity.id!=null">
+				`commodity`=#{commodity.id},
+			</if>
+			<if test="number != null">
+				number=#{number},
+			</if>
+			<if test="appUserId != null">
+				appUserId=#{appUserId},
+			</if>
+		</set>
+		<where>
+			<if test="id !=null">
+				id=#{id}
+			</if>
+		</where>
+	</update>
+	
+
+	<select id = "getGoodsByOrgs" parameterType="list" resultType="java.lang.String">
+		SELECT shopName
+		FROM `lar_commodity`
+			<where>
+			ENABLE=0
+				<if test="orgIds !=null and orgIds.size>0">
+				and
+				mechanismId in
+					<foreach collection="orgIds" item="item" index="index" open="(" close=")" separator=",">
+				            #{item}
+			        </foreach>
+			    </if>
+			</where>
+		GROUP BY shopName
+	</select>
+
+	<select id = "getBrandsByOrgs" parameterType="list" resultType="java.lang.String">
+		SELECT brand
+		FROM `lar_commodity`
+			<where>
+			ENABLE=0
+				<if test="orgIds !=null and orgIds.size>0">
+				and
+				mechanismId in
+					<foreach collection="orgIds" item="item" index="index" open="(" close=")" separator=",">
+				            #{item}
+			        </foreach>
+			    </if>
+			</where>
+		GROUP BY brand
+	</select>
+	
+	<select id = "getShoppingCartsCount" resultType="int">
+		SELECT
+			count(c.id)
+		FROM
+		`lar_commodity` c 
+		<where>
+			NOW() BETWEEN TIMESTAMP (c.shelfLife) AND TIMESTAMP (c.shelfTime)
+			<if test="ids !=null and ids">
+				and c.id in
+					<foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+				            #{item}
+			        </foreach>
+			</if>
+		</where>
+	</select>
+	
+</mapper>

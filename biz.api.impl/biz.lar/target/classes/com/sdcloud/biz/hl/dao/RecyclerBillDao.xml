@@ -1,0 +1,369 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2017-05-08
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.hl.dao.RecyclerBillDao">
+	
+	<sql id="Base_Column_List">
+		rb.id, rb.bill_id, rb.mchid, rb.mchtype, rb.user_id,
+		rb.type, rb.description, rb.photos, rb.status, rb.remark,
+		rb.ctime, rb.rtime, rb.create_date, rb.update_date
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, bill_id, mchid, mchtype, user_id,
+		type, description, photos, status, remark,
+		ctime, rtime, create_date, update_date
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{billId,jdbcType=INTEGER},
+		#{mchid,jdbcType=VARCHAR}, #{mchtype,jdbcType=TINYINT},
+		#{userId,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR},
+		#{description,jdbcType=VARCHAR}, #{photos,jdbcType=VARCHAR},
+		#{status,jdbcType=TINYINT}, #{remark,jdbcType=VARCHAR},
+		#{ctime,jdbcType=TIMESTAMP}, #{rtime,jdbcType=TIMESTAMP},
+		#{createDate,jdbcType=TIMESTAMP}, #{updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.billId,jdbcType=INTEGER},
+		#{item.mchid,jdbcType=VARCHAR}, #{item.mchtype,jdbcType=TINYINT},
+		#{item.userId,jdbcType=INTEGER}, #{item.type,jdbcType=VARCHAR},
+		#{item.description,jdbcType=VARCHAR}, #{item.photos,jdbcType=VARCHAR},
+		#{item.status,jdbcType=TINYINT}, #{item.remark,jdbcType=VARCHAR},
+		#{item.ctime,jdbcType=TIMESTAMP}, #{item.rtime,jdbcType=TIMESTAMP},
+		#{item.createDate,jdbcType=TIMESTAMP}, #{item.updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+<!-- 			<if test="billId!=null">
+				rb.bill_id=#{billId},
+			</if> -->
+			<if test="mchid!=null &amp;&amp; mchid!=''">
+				rb.mchid=#{mchid},
+			</if>
+			<if test="mchtype!=null">
+				rb.mchtype=#{mchtype},
+			</if>
+			<if test="userId!=null">
+				rb.user_id=#{userId},
+			</if>
+			<if test="type!=null &amp;&amp; type!=''">
+				rb.type=#{type},
+			</if>
+			<if test="description!=null &amp;&amp; description!=''">
+				rb.description=#{description},
+			</if>
+			<if test="photos!=null &amp;&amp; photos!=''">
+				rb.photos=#{photos},
+			</if>
+			<if test="status!=null">
+				rb.status=#{status},
+			</if>
+			<if test="remark!=null &amp;&amp; remark!=''">
+				rb.remark=#{remark},
+			</if>
+			<if test="ctime!=null">
+				rb.ctime=#{ctime},
+			</if>
+			<if test="rtime!=null">
+				rb.rtime=#{rtime},
+			</if>
+			<if test="createDate!=null">
+				rb.create_date=#{createDate},
+			</if>
+			<if test="updateDate!=null">
+				rb.update_date=#{updateDate},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="recyclerBill" type="com.sdcloud.api.hl.entity.RecyclerBill">
+        <id property="id" column="id"></id>
+		<result property="billId" column="bill_id"></result>
+		<result property="mchid" column="mchid"></result>
+		<result property="mchtype" column="mchtype"></result>
+		<result property="userId" column="user_id"></result>
+		<result property="type" column="type"></result>
+		<result property="description" column="description"></result>
+		<result property="photos" column="photos"></result>
+		<result property="status" column="status"></result>
+		<result property="remark" column="remark"></result>
+		<result property="ctime" column="ctime"></result>
+		<result property="rtime" column="rtime"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateDate" column="update_date"></result>
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="recyclerBill">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_recycler_bill rb
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND rb.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="countByBillId" resultType="java.lang.Long">
+		SELECT COUNT(*)
+		FROM hl_recycler_bill rb
+		WHERE rb.bill_id=#{billId}
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(rb.id)
+		FROM hl_recycler_bill rb
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND rb.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO hl_recycler_bill
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO hl_recycler_bill
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM hl_recycler_bill rb
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM hl_recycler_bill rb
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rb.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	
+	<update id="update">
+		UPDATE hl_recycler_bill rb
+		<include refid="Update_Column"></include>
+		WHERE rb.bill_id=#{billId}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE hl_recycler_bill rb
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" rb.bill_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.billId}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.mchid = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.mchid}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.mchtype = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.mchtype}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.user_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.userId}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.type = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.type}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.description = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.description}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.photos = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.photos}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.status = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.status}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.remark = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.remark}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.ctime = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.ctime}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.rtime = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.rtime}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.create_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.createDate}
+               </foreach>
+            </trim>
+			<trim prefix=" rb.update_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rb.id=#{i.id} THEN #{i.updateDate}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			rb.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="recyclerBill">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_recycler_bill rb
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rb.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(rb.id) 
+		FROM hl_recycler_bill rb
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND rb.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND rb.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="recyclerBill">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_recycler_bill rb
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND rb.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND rb.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY updateDate DESC,createDate DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="recyclerBill">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_recycler_bill rb
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND rb.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="recyclerBill">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_recycler_bill rb
+        <where>
+            rb.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND rb.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+</mapper>

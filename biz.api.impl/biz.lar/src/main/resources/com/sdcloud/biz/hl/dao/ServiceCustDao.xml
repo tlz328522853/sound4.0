@@ -1,0 +1,471 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2017-05-16
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.hl.dao.ServiceCustDao">
+	
+	<sql id="Base_Column_List">
+		sc.id, sc.sc_id, sc.nickname, sc.province, sc.city,
+		sc.county, sc.address, sc.potx, sc.poty, sc.description,
+		sc.ctime, sc.weight1, sc.weight2, sc.weight3, sc.weight4,
+		sc.weight5, sc.weight6, sc.weight7, sc.weight8, sc.weight9,
+		sc.flush_time, sc.create_date, sc.update_date
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, sc_id, nickname, province, city,
+		county, address, potx, poty, description,
+		ctime, weight1, weight2, weight3, weight4,
+		weight5, weight6, weight7, weight8, weight9,
+		flush_time, create_date, update_date
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{scId,jdbcType=INTEGER},
+		#{nickname,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR},
+		#{city,jdbcType=VARCHAR}, #{county,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR}, #{potx,jdbcType=VARCHAR},
+		#{poty,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR},
+		#{ctime,jdbcType=TIMESTAMP}, #{weight1,jdbcType=INTEGER},
+		#{weight2,jdbcType=INTEGER}, #{weight3,jdbcType=INTEGER},
+		#{weight4,jdbcType=INTEGER}, #{weight5,jdbcType=INTEGER},
+		#{weight6,jdbcType=INTEGER}, #{weight7,jdbcType=INTEGER},
+		#{weight8,jdbcType=INTEGER}, #{weight9,jdbcType=INTEGER},
+		#{flushTime,jdbcType=TIMESTAMP}, #{createDate,jdbcType=TIMESTAMP},
+		#{updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.scId,jdbcType=INTEGER},
+		#{item.nickname,jdbcType=VARCHAR}, #{item.province,jdbcType=VARCHAR},
+		#{item.city,jdbcType=VARCHAR}, #{item.county,jdbcType=VARCHAR},
+		#{item.address,jdbcType=VARCHAR}, #{item.potx,jdbcType=VARCHAR},
+		#{item.poty,jdbcType=VARCHAR}, #{item.description,jdbcType=VARCHAR},
+		#{item.ctime,jdbcType=TIMESTAMP}, #{item.weight1,jdbcType=INTEGER},
+		#{item.weight2,jdbcType=INTEGER}, #{item.weight3,jdbcType=INTEGER},
+		#{item.weight4,jdbcType=INTEGER}, #{item.weight5,jdbcType=INTEGER},
+		#{item.weight6,jdbcType=INTEGER}, #{item.weight7,jdbcType=INTEGER},
+		#{item.weight8,jdbcType=INTEGER}, #{item.weight9,jdbcType=INTEGER},
+		#{item.flushTime,jdbcType=TIMESTAMP}, #{item.createDate,jdbcType=TIMESTAMP},
+		#{item.updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<!-- <if test="scId!=null">
+				sc.sc_id=#{scId},
+			</if> -->
+			<if test="nickname!=null &amp;&amp; nickname!=''">
+				sc.nickname=#{nickname},
+			</if>
+			<if test="province!=null &amp;&amp; province!=''">
+				sc.province=#{province},
+			</if>
+			<if test="city!=null &amp;&amp; city!=''">
+				sc.city=#{city},
+			</if>
+			<if test="county!=null &amp;&amp; county!=''">
+				sc.county=#{county},
+			</if>
+			<if test="address!=null &amp;&amp; address!=''">
+				sc.address=#{address},
+			</if>
+			<if test="potx!=null &amp;&amp; potx!=''">
+				sc.potx=#{potx},
+			</if>
+			<if test="poty!=null &amp;&amp; poty!=''">
+				sc.poty=#{poty},
+			</if>
+			<if test="description!=null &amp;&amp; description!=''">
+				sc.description=#{description},
+			</if>
+			<if test="ctime!=null">
+				sc.ctime=#{ctime},
+			</if>
+			<if test="weight1!=null">
+				sc.weight1=#{weight1},
+			</if>
+			<if test="weight2!=null">
+				sc.weight2=#{weight2},
+			</if>
+			<if test="weight3!=null">
+				sc.weight3=#{weight3},
+			</if>
+			<if test="weight4!=null">
+				sc.weight4=#{weight4},
+			</if>
+			<if test="weight5!=null">
+				sc.weight5=#{weight5},
+			</if>
+			<if test="weight6!=null">
+				sc.weight6=#{weight6},
+			</if>
+			<if test="weight7!=null">
+				sc.weight7=#{weight7},
+			</if>
+			<if test="weight8!=null">
+				sc.weight8=#{weight8},
+			</if>
+			<if test="weight9!=null">
+				sc.weight9=#{weight9},
+			</if>
+			<if test="flushTime!=null">
+				sc.flush_time=#{flushTime},
+			</if>
+			<if test="createDate!=null">
+				sc.create_date=#{createDate},
+			</if>
+			<if test="updateDate!=null">
+				sc.update_date=#{updateDate},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="serviceCust" type="com.sdcloud.api.hl.entity.ServiceCust">
+        <id property="id" column="id"></id>
+		<result property="scId" column="sc_id"></result>
+		<result property="nickname" column="nickname"></result>
+		<result property="province" column="province"></result>
+		<result property="city" column="city"></result>
+		<result property="county" column="county"></result>
+		<result property="address" column="address"></result>
+		<result property="potx" column="potx"></result>
+		<result property="poty" column="poty"></result>
+		<result property="description" column="description"></result>
+		<result property="ctime" column="ctime"></result>
+		<result property="weight1" column="weight1"></result>
+		<result property="weight2" column="weight2"></result>
+		<result property="weight3" column="weight3"></result>
+		<result property="weight4" column="weight4"></result>
+		<result property="weight5" column="weight5"></result>
+		<result property="weight6" column="weight6"></result>
+		<result property="weight7" column="weight7"></result>
+		<result property="weight8" column="weight8"></result>
+		<result property="weight9" column="weight9"></result>
+		<result property="flushTime" column="flush_time"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateDate" column="update_date"></result>
+	</resultMap>
+	
+	<select id="countByScId" resultType="int">
+		SELECT COUNT(sc.id)
+		FROM hl_service_cust sc
+		WHERE sc.sc_id=#{scId}
+	</select>
+	
+	<select id="selectByScId" resultType="com.sdcloud.api.hl.entity.ServiceCust">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_service_cust sc
+		WHERE sc.sc_id=#{scId}
+	</select>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="serviceCust">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_service_cust sc
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND sc.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(sc.id)
+		FROM hl_service_cust sc
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND sc.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO hl_service_cust
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO hl_service_cust
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM hl_service_cust sc
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM hl_service_cust sc
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				sc.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	
+	<update id="update">
+		UPDATE hl_service_cust sc
+		<include refid="Update_Column"></include>
+		WHERE sc.sc_id=#{scId}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE hl_service_cust sc
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" sc.sc_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.scId}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.nickname = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.nickname}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.province = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.province}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.city = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.city}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.county = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.county}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.address = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.address}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.potx = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.potx}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.poty = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.poty}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.description = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.description}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.ctime = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.ctime}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight1 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight1}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight2 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight2}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight3 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight3}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight4 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight4}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight5 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight5}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight6 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight6}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight7 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight7}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight8 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight8}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.weight9 = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.weight9}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.flush_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.flushTime}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.create_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.createDate}
+               </foreach>
+            </trim>
+			<trim prefix=" sc.update_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN sc.id=#{i.id} THEN #{i.updateDate}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			sc.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="serviceCust">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_service_cust sc
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				sc.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(sc.id) 
+		FROM hl_service_cust sc
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND sc.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND sc.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="serviceCust">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_service_cust sc
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND sc.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND sc.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY updateDate DESC,createDate DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="serviceCust">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_service_cust sc
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND sc.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="serviceCust">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_service_cust sc
+        <where>
+            sc.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND sc.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+</mapper>

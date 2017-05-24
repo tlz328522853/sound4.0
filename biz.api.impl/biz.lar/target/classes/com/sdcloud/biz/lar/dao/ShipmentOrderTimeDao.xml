@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipmentOrderTimeDao">
+	
+	<sql id="column">
+		id,`no` as "no",startTime,endTime,createUser,createDate,updateUser,updateDate,CONCAT(DATE_FORMAT(startTime,'%H:%i'),'-',DATE_FORMAT(endTime,'%H:%i')) as 'time'
+	</sql>
+	<select id="getById" resultType="com.sdcloud.api.lar.entity.ShipmentOrderTime">
+		select
+		<include refid="column"/>
+		from lar_order_time a
+		<where>
+			id=#{id}
+		</where>
+	</select>
+	<select id="findAll" resultType="com.sdcloud.api.lar.entity.ShipmentOrderTime">
+		select
+		<include refid="column"/>
+		from lar_order_time
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  >
+				 and 	${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by startTime
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<insert id="save">
+		insert into lar_order_time (id,`no`,startTime,endTime,createUser,createDate,updateUser,updateDate)
+		values(
+		#{id},#{no},#{startTime},#{endTime},#{createUser},#{createDate},#{updateUser},#{updateDate}
+		)
+	</insert>
+	<update id="update">
+		update lar_order_time
+		<set>
+			<if test="startTime !=null and startTime !=''">
+				startTime=#{startTime},
+			</if>
+			<if test="no !=null and no !=''">
+				`no`=#{no},
+			</if>
+			<if test="endTime !=null and endTime !=''">
+				endTime=#{endTime},
+			</if>
+			<if test="createUser !=null and createUser !=''">
+				createUser=#{createUser},
+			</if>
+			<if test="createDate !=null and createDate !=''">
+				createDate=#{createDate},
+			</if>
+			<if test="updateUser !=null and updateUser !=''">
+				updateUser=#{updateUser},
+			</if>
+			<if test="updateDate !=null and updateDate !=''">
+				updateDate=#{updateDate}
+			</if>
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	<delete id="delete">
+		delete from lar_order_time where id=#{id}
+	</delete>
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id) from lar_order_time
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  >
+				and 	${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+</mapper> 

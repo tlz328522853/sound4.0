@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.ModuleDao">
+	
+	<!-- pf_module表的字段 -->
+	<sql id="moduleColumn">
+		moduleCode,moduleName,url,icon,status,sequence,creator,moduleUrl,createTime,editor,editTime 
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="moduleQueryCondition">
+		<where>
+			<if test="moduleName != null &amp;&amp; moduleName != ''">
+				moduleName like '%${moduleName}%' 
+			</if>
+			<if test="status != null">
+				and status = #{status} 
+			</if>
+			<if test="topMenu != null &amp;&amp; topMenu == 'topMenu'">
+				and status = 1
+			</if>
+			
+		</where>	
+		
+	</sql>
+	
+	<insert id="insert" parameterType="Module" >
+		insert into pf_module(
+			moduleId,<include refid="moduleColumn"/>
+		)values(
+			#{moduleId},#{moduleCode},#{moduleName},#{url},#{icon},
+			#{status},#{sequence},#{moduleUrl},#{creator},
+			now(),#{editor},now()
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from pf_module
+		<choose>
+			<when test="moduleIds != null &amp;&amp; moduleIds.size() != 0">
+				where moduleId in
+		      	<foreach item="item" index="index" collection="moduleIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="Module">
+		update pf_module 
+		<set>
+			<if test="moduleName != null &amp;&amp; moduleName != ''">moduleName=#{moduleName},</if>
+			<!-- <if test="url != null &amp;&amp; url != ''">url=#{url},</if>
+			<if test="icon != null &amp;&amp; icon != ''">url=#{icon},</if> -->
+			<if test="status != null">status=#{status},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+			<!-- <if test="creator != null">creator=#{creator},</if>
+			<if test="editor != null">editor=#{editor},</if> -->
+			<if test="2 > 1">editTime=now()</if>
+		</set>
+		where moduleId = #{moduleId}
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="Module">
+		select moduleId,<include refid="moduleColumn"/>
+		from pf_module
+		where moduleId=#{moduleId}
+	</select>
+	
+	<select id="findAll" resultType="Module">
+		select pm.moduleId, pm.moduleCode,pm.moduleName,pm.url,pm.icon,pm.status,pm.sequence,pm.creator,pm.moduleUrl,pm.createTime,pm.editor,pm.editTime
+		from pf_module pm
+		<include refid="moduleQueryCondition"/>
+		GROUP BY pm.`moduleId`  
+		<choose>
+			<when test="pager != null">
+				order by ${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+		    </when>
+			<when test="orderBy != null &amp;&amp; orderBy != ''">
+				order by ${orderBy}
+		    </when>
+		</choose>
+	</select>
+	<select id="findAllModule" resultType="Module">
+		select pm.moduleId, pm.moduleCode,pm.moduleName,pm.url,pm.icon,pm.status,pm.sequence,pm.creator,pm.moduleUrl,pm.createTime,pm.editor,pm.editTime
+		from pf_module pm
+		<where>
+		    <if test="outIds != null">
+				 pm.moduleId not in
+				<foreach item="item" index="index" collection="outIds" open="(" separator="," close=")">
+			      		#{item}
+			     </foreach>
+		    </if>
+		     
+		</where>	
+		order by pm.sequence
+	</select>
+	<select id="findModuleByAuthority" resultType="Module">
+		select pm.moduleId, pm.moduleCode,pm.moduleName,pm.url,pm.icon,pm.status,pm.sequence,pm.creator,pm.moduleUrl,pm.createTime,pm.editor,pm.editTime
+		from pf_module pm
+		<choose>
+			<when test="userId != null||roleIds != null||userGroupId != null">
+				LEFT JOIN pf_function pff
+				ON pff.`moduleId`=pm.`moduleId`
+				LEFT JOIN pf_func_right fr   
+				ON fr.`funcId` =pff.`funcId`   
+		    </when>
+		</choose> 
+		<where>
+			<if test="userId != null||roleIds!=null||userGroupId!=null">
+			(
+			<if test="userId != null&amp;&amp; userId != -1">
+			
+				( fr.ownerType = 2
+				AND fr.ownerId=#{userId}
+				)
+		    </if>
+		    <if test="roleIds != null">
+		       or (fr.ownerType = 1
+				AND fr.ownerId in
+				<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+			      		#{item}
+			     </foreach>
+				
+				)
+		    </if>
+		     <if test="userGroupId != null &amp;&amp; userGroupId != -1">
+		       or (fr.ownerType = 3
+				AND fr.ownerId=#{userGroupId})
+		    </if>
+		    )
+		    </if>
+		    <if test="moduleName != null &amp;&amp; moduleName != ''">
+				AND pm.moduleName like '%${moduleName}%' 
+			</if>
+			<if test="status != null">
+				AND pm.status = #{status} 
+			</if>
+			<if test="topMenu != null &amp;&amp; topMenu == 'topMenu'">
+				AND pm.status = 1
+			</if>
+		</where>	
+		GROUP BY pm.`moduleId`  
+		<choose>
+			<when test="pager != null">
+				order by ${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+		    </when>
+			<when test="orderBy != null &amp;&amp; orderBy != ''">
+				order by ${orderBy}
+		    </when>
+		</choose>
+	</select>
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(moduleId)
+		from 
+			pf_module
+		<include refid="moduleQueryCondition"/>
+	</select>
+	
+	<!-- 
+	<select id="getResult" parameterType="hashmap" resultType="Module">
+		select moduleId,<include refid="moduleColumn"/>
+		from pf_module 
+		<include refid="moduleQueryCondition"/>
+		<if test="index != null &amp;$amp; size != null">
+			limit #{index}, #{size}
+		</if>
+	</select>
+	 -->
+</mapper>

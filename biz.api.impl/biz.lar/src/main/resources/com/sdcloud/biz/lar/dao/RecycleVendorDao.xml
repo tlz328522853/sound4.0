@@ -1,0 +1,680 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	TLZ
+	date	:	2016-12-02
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleVendorDao">
+	
+	<sql id="Base_Column_List">
+		rv.id, rv.org_id, rv.org_name, rv.vendor, rv.vendor_short,rv.accurl_id,
+		rv.vendor_coding, rv.vendor_type, rv.area_id,rv.area_name, rv.linkman, rv.contact_number,
+		rv.address, rv.remark, rv.accessory, rv.create_time, rv.create_men,
+		rv.update_time, rv.update_men, rv.enable
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, org_id, org_name, vendor, vendor_short,accurl_id,
+		vendor_coding, vendor_type,area_id, area_name, linkman, contact_number,
+		address, remark, accessory, create_time, create_men,
+		update_time, update_men, enable
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id}, #{orgId},
+		#{orgName}, #{vendor},
+		#{vendorShort},#{accurlId}, #{vendorCoding},
+		#{vendorType}, #{areaId},#{areaName},
+		#{linkman}, #{contactNumber},
+		#{address}, #{remark},
+		#{accessory}, #{createTime},
+		#{createMen}, #{updateTime},
+		#{updateMen}, #{enable}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id}, #{item.orgId},#{item.accurlId},
+		#{item.orgName}, #{item.vendor},
+		#{item.vendorShort}, #{item.vendorCoding},
+		#{item.vendorType}, #{item.areaId},#{item.areaName},
+		#{item.linkman}, #{item.contactNumber},
+		#{item.address}, #{item.remark},
+		#{item.accessory}, #{item.createTime},
+		#{item.createMen}, #{item.updateTime},
+		#{item.updateMen}, #{item.enable}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="orgId!=null">
+				rv.org_id=#{orgId},
+			</if>
+			<if test="orgName!=null">
+				rv.org_name=#{orgName},
+			</if>
+			<if test="vendor!=null ">
+				rv.vendor=#{vendor},
+			</if>
+			<if test="vendorShort!=null ">
+				rv.vendor_short=#{vendorShort},
+			</if>
+			<if test="vendorCoding!=null ">
+				rv.vendor_coding=#{vendorCoding},
+			</if>
+			<if test="vendorType!=null ">
+				rv.vendor_type=#{vendorType},
+			</if>
+			<if test="areaId!=null">
+				rv.area_id=#{areaId},
+			</if>
+			<if test="areaName!=null">
+				rv.area_name=#{areaName},
+			</if>
+				rv.linkman=#{linkman},
+				rv.contact_number=#{contactNumber},
+				rv.address=#{address},
+				rv.remark=#{remark},
+			
+			<if test="accessory!=null ">
+				rv.accessory=#{accessory},
+			</if>
+			<if test="createTime!=null">
+				rv.create_time=#{createTime},
+			</if>
+			<if test="createMen!=null ">
+				rv.create_men=#{createMen},
+			</if>
+			<if test="updateTime!=null">
+				rv.update_time=#{updateTime},
+			</if>
+			<if test="updateMen!=null">
+				rv.update_men=#{updateMen},
+			</if>
+			<if test="accurlId!=null">
+				rv.accurl_id=#{accurlId},
+			</if>
+			<if test="enable!=null">
+				rv.enable=#{enable},
+			</if>
+		</set>
+	</sql>
+    
+   <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="recycleVendor" type="com.sdcloud.api.lar.entity.RecycleVendor">
+        <id property="id" column="id"></id>
+		<result property="orgId" column="org_id"></result>
+		<result property="orgName" column="org_name"></result>
+		<result property="vendor" column="vendor"></result>
+		<result property="vendorShort" column="vendor_short"></result>
+		<result property="vendorCoding" column="vendor_coding"></result>
+		<result property="vendorType" column="vendor_type"></result>
+		<result property="areaId" column="area_Id"></result>
+		<result property="areaName" column="area_name"></result>
+		<result property="linkman" column="linkman"></result>
+		<result property="contactNumber" column="contact_number"></result>
+		<result property="address" column="address"></result>
+		<result property="remark" column="remark"></result>
+		<result property="accessory" column="accessory"></result>
+		<result property="createTime" column="create_time"></result>
+		<result property="createMen" column="create_men"></result>
+		<result property="updateTime" column="update_time"></result>
+		<result property="updateMen" column="update_men"></result>
+		<result property="accurlId" column="accurl_id"></result>
+		<result property="enable" column="enable"></result>
+		<collection property="recycleVendorAccurl" ofType="com.sdcloud.api.lar.entity.RecycleVendorAccurl" javaType="java.util.List" column="accurl_id" select="getAccurlById"></collection>
+	</resultMap>
+
+	<select id="getAccurlById" resultType="com.sdcloud.api.lar.entity.RecycleVendorAccurl">
+		SELECT `name`,`url` FROM `lar_recycle_vendor_accurl` WHERE `vendor_id`=#{accurl_id}
+	</select>
+
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="recycleVendor">
+		SELECT
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_vendor rv
+		<!-- LEFT OUTER JOIN lar_recycle_vendor_accurl a
+		ON rv.accurl_id=a.vendor_id -->
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rv.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+				and rv.enable = 0 
+				and rv.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 供应商名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and vendor LIKE '%${larPager.params.name}%'
+				</if>
+				<!-- 供应商名称 -->
+				<if test="larPager.params.vendor != null and larPager.params.vendor !=''">
+					and vendor LIKE '%${larPager.params.vendor}%'
+				</if>
+				<!-- 供应商简称 -->
+				<if test="larPager.params.vendorShort != null and larPager.params.vendorShort !=''">
+					and vendor_short LIKE '%${larPager.params.vendorShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and contact_number=#{larPager.params.linkman}
+				</if>
+				<!-- 供应商类型 -->
+				<if test="larPager.params.vendorType != null and larPager.params.vendorType !=''">
+					and vendor_type=#{larPager.params.vendorType}
+				</if>
+		</where>
+		<choose>
+		<when test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</when>
+		<otherwise>
+           order by rv.create_time desc ,rv.update_time desc
+        </otherwise>
+        </choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(rv.id)
+		FROM lar_recycle_vendor rv
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rv.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+				and rv.enable = 0
+				and rv.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 供应商名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and vendor LIKE '%${larPager.params.name}%'
+				</if>
+				<!-- 供应商名称 -->
+				<if test="larPager.params.vendor != null and larPager.params.vendor !=''">
+					and vendor LIKE '%${larPager.params.vendor}%'
+				</if>
+				<!-- 供应商简称 -->
+				<if test="larPager.params.vendorShort != null and larPager.params.vendorShort !=''">
+					and vendor_short LIKE '%${larPager.params.vendorShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and linkman=#{larPager.params.linkman}
+				</if>
+				<!-- 供应商类型 -->
+				<if test="larPager.params.vendorType != null and larPager.params.vendorType !=''">
+					and vendor_type=#{larPager.params.vendorType}
+				</if>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO lar_recycle_vendor
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO lar_recycle_vendor
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM lar_recycle_vendor rv
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM lar_recycle_vendor rv
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rv.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	<update id="updateEnable">
+		UPDATE lar_recycle_vendor rv
+		<set>
+			enable=1,
+		</set>
+		WHERE rv.id=#{id}
+	</update>
+	
+	
+	<update id="update">
+		UPDATE lar_recycle_vendor rv
+		<include refid="Update_Column"></include>
+		WHERE rv.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE lar_recycle_vendor rv
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" rv.org_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.orgId}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.vendor = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.vendor}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.vendor_short = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.vendorShort}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.vendor_coding = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.vendorCoding}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.vendor_type = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.vendorType}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.area_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.areaName}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.linkman = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.linkman}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.contact_number = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.contactNumber}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.address = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.address}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.remark = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.remark}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.accessory = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.accessory}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.create_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.createTime}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.create_men = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.createMen}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.update_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.updateTime}
+               </foreach>
+            </trim>
+			<trim prefix=" rv.update_men = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rv.id=#{i.id} THEN #{i.updateMen}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			rv.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="recycleVendor">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_vendor rv
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rv.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(rv.id)
+		FROM lar_recycle_vendor rv
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rv.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+				<!-- and rv.enable = 0 -->
+				and rv.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 供应商名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and vendor LIKE '%${larPager.params.name}%'
+				</if>
+				<!-- 供应商名称 -->
+				<if test="larPager.params.vendor != null and larPager.params.vendor !=''">
+					and vendor LIKE '%${larPager.params.vendor}%'
+				</if>
+				<!-- 供应商简称 -->
+				<if test="larPager.params.vendorShort != null and larPager.params.vendorShort !=''">
+					and vendor_short LIKE '%${larPager.params.vendorShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and linkman=#{larPager.params.linkman}
+				</if>
+				<!-- 供应商类型 -->
+				<if test="larPager.params.vendorType != null and larPager.params.vendorType !=''">
+					and vendor_type=#{larPager.params.vendorType}
+				</if>
+		</where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="recycleVendor">
+        SELECT
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_vendor rv
+		<!-- LEFT OUTER JOIN lar_recycle_vendor_accurl a
+		ON rv.accurl_id=a.vendor_id -->
+		<where>
+			 
+			<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and rv.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+			</if>
+			
+			<if test="larPager.params.mechanismId !=null">
+				<!-- and rv.enable = 0  -->
+				and rv.org_id=#{larPager.params.mechanismId}
+			</if>
+			<!-- 创建时间 -->
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and create_time < #{larPager.params.endDate} and create_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 更改时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time > #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and update_time < #{larPager.params.endDate} and update_time> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 供应商名称模糊查询 -->
+				<if test="larPager.params.name != null and larPager.params.name !=''">
+					and vendor LIKE '%${larPager.params.name}%'
+				</if>
+				<!-- 供应商名称 -->
+				<if test="larPager.params.vendor != null and larPager.params.vendor !=''">
+					and vendor LIKE '%${larPager.params.vendor}%'
+				</if>
+				<!-- 供应商简称 -->
+				<if test="larPager.params.vendorShort != null and larPager.params.vendorShort !=''">
+					and vendor_short LIKE '%${larPager.params.vendorShort}%'
+				</if>
+				<!-- 联系电话 -->
+				<if test="larPager.params.linkman != null and larPager.params.linkman !=''">
+					and contact_number=#{larPager.params.linkman}
+				</if>
+				<!-- 供应商类型 -->
+				<if test="larPager.params.vendorType != null and larPager.params.vendorType !=''">
+					and vendor_type=#{larPager.params.vendorType}
+				</if>
+		</where>
+		<choose>
+		<when test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</when>
+		<otherwise>
+           order by rv.create_time desc ,rv.update_time desc
+        </otherwise>
+        </choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+    </select>
+	
+    <select id="exist" resultMap="recycleVendor">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_vendor rv
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND rv.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectById" resultType="int">
+        SELECT id
+		FROM lar_recycle_vendor rv
+        <where>
+            rv.id=#{id}
+        </where>
+    </select>
+	<select id="existByVendor"  resultMap="recycleVendor">
+   	 select id,vendor
+	   	 from lar_recycle_vendor rv
+	   	 where 
+	   	 	1=1
+	   	 	<if test="mechanismId !=null">
+				and rv.org_id=#{mechanismId}
+				<!-- 客户名称 -->
+				
+			</if>
+			<if test="vendor != null">
+				and rv.vendor=#{vendor}
+			</if>
+    </select>
+	
+	<select id="existByVendorShort"  resultMap="recycleVendor">
+   	 select id,vendor_short
+	   	 from lar_recycle_vendor rv
+	   	 where 
+	   	 	1=1
+	   	 	<if test="mechanismId !=null">
+				and rv.org_id=#{mechanismId}
+				<!-- 客户名称 -->
+				
+			</if>
+			<if test="vendorShort != null">
+				and rv.vendor_short=#{vendorShort}
+			</if>
+    </select>
+</mapper>

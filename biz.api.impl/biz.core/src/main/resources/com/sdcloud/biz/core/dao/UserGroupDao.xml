@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.UserGroupDao">
+
+	<sql id="tableColumn">
+		name, sequence, description, pId, creator, createTime, 
+		lastModifyTime,ownerCode,tenantId 
+	</sql>
+	
+	<insert id="insert">
+		insert into pf_user_group
+		(groupId,name, sequence, description, pId, creator, createTime, 
+		lastModifyTime,ownerCode,tenantId)
+		values
+		(#{groupId},#{name}, #{sequence}, #{description}, #{pId}, #{creator}, now(), now(),#{ownerCode}, #{tenantId})
+	</insert>
+	
+	<update id="update">
+		update pf_user_group
+		set lastModifyTime = now()
+		<if test="name != null">
+			,name=#{name}
+		</if>
+		<if test="sequence !=  null">
+			,sequence=#{sequence}
+		</if>
+		<if test="description != null">
+			,description = #{description}
+		</if>
+		<if test="pId != null">
+			,pId = #{pId}
+		</if>
+		<if test="createTime !=  null">
+			,createTime=#{createTime}
+		</if>
+		<if test="lastModifyTime !=  null">
+			,lastModifyTime=#{lastModifyTime}
+		</if>
+		<if test="ownerCode != null &amp;&amp; ownerCode != ''">
+			,ownerCode = #{ownerCode}
+		</if>
+		where groupId = #{groupId}
+	</update>
+	
+	<delete id="deleteById">
+	    delete 	
+	    from 	pf_user_group
+	    where 	groupId = #{groupId}	    
+	</delete>
+	
+	<select id="findById" resultType="UserGroup">
+	    select  groupId,
+	    		<include refid="tableColumn"/>
+	    from 	pf_user_group
+	    where 	
+	    <if test="groupIds != null">
+	        groupId in 
+	    	<foreach item="item" index="index" collection="groupIds"
+			      open="(" separator="," close=")">
+			        #{item}
+			</foreach>
+	    </if>
+	    <if test="groupIds == null">
+	        1=2
+	    </if>
+	</select>
+	
+	<select id="findParent" resultType="Long">
+	    select pId 
+	    from pf_user_group 
+	    where groupId = #{userGroupId}
+	</select>
+	
+	<select id="findChildren" resultType="Long">
+	    select 
+			groupId
+		from 
+			pf_user_group
+			<where>
+				<if test="parentIds != null">
+			         pId in 
+			    	<foreach item="item" index="index" collection="parentIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+		   </where>
+	</select>
+	<select id="findNewChildren" parameterType="string"  resultType="Long">
+	    select orgId from pf_user_group 
+	    where ownerCode like '%${owner}%'
+	</select>
+	<!-- <select id="findChildrenByIs" resultType="java.lang.String">
+	    select group_concat(ids separator ',') 
+	    from (
+			select @pv:=(
+				select group_concat(orgId separator ',') 
+				from pf_org where parentId in (@pv)
+				) as ids and isSubCompany=1
+			from pf_org
+			join
+			(select @pv:=#{parentId})tmp
+			where parentId in (@pv) and isSubCompany=1) a;
+	</select> -->
+	<select id="findAll" resultType="UserGroup">
+		select 
+			groupId, <include refid="tableColumn"/>
+		from 
+			pf_user_group 
+	</select>
+	<select id="findByParam" parameterType="map" resultType="UserGroup">
+		select 
+			groupId, <include refid="tableColumn"/>
+		from 
+			pf_user_group 
+			<where>
+				<if test="tenantId != null&amp;&amp; tenantId != -1">
+					 tenantId =#{tenantId}
+				</if>
+		      	<if test="pId != null&amp;&amp; pId != -1">
+					AND pId =#{pId}
+				</if>
+				<if test="pId != null&amp;&amp; pId == -1">
+					AND pId is null
+				</if>
+				<if test="groupIds != null">
+			        AND groupId in 
+			    	<foreach item="item" index="index" collection="groupIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+			    <if test="groupId != null">
+			        AND groupId =#{groupId} 
+			    </if>
+		   </where>
+	</select>
+	<select id="findOwnerCodeByParam" parameterType="map" resultType="String">
+		select 
+			ownerCode 
+		from 
+			pf_user_group 
+			<where>
+		      	<if test="pId != null&amp;&amp; pId != -1">
+					pId =#{pId}
+				</if>
+				<if test="pId != null&amp;&amp; pId == -1">
+					AND pId is null
+				</if>
+				<if test="tenantId != null&amp;&amp; tenantId != -1">
+					AND tenantId =#{tenantId}
+				</if>
+				<if test="groupIds != null">
+			        AND orgId in 
+			    	<foreach item="item" index="index" collection="groupIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+			    <if test="orgId != null">
+			        AND groupId =#{orgId} 
+			    </if>
+		   </where>
+	</select>
+	<select id="findNotFunctionGroupId" resultType="Long">
+		SELECT pug.groupId from pf_user_group pug
+		INNER JOIN pf_tenant pt
+		on pug.tenantId=pt.tenantId
+		INNER JOIN pf_sales_package_module pspm
+		on  pspm.salesPackageId=pt.salesPackageId
+		INNER JOIN pf_module pm
+		on pm.moduleId=pspm.moduleId
+		INNER JOIN pf_function pf
+		on pf.moduleId=pm.moduleId
+		<where>
+			<if test="functionId != null">
+			pf.funcId =#{functionId}
+			and pug.pId=1
+			and pug.groupId not In (
+			SELECT pfr.ownerId from pf_func_right  pfr 
+			INNER JOIN  pf_user_group pug
+			on pug.groupId=pfr.ownerId
+			INNER JOIN pf_tenant pt
+			on pug.tenantId=pt.tenantId
+			INNER JOIN pf_sales_package_module pspm
+			on  pspm.salesPackageId=pt.salesPackageId
+			INNER JOIN pf_module pm
+			on pm.moduleId=pspm.moduleId
+			INNER JOIN pf_function pf
+			on pf.moduleId=pm.moduleId
+			where pfr.funcId =#{functionId}
+			and pf.funcId=#{functionId}
+			and pug.pId=1
+			and pfr.ownerType=3
+			GROUP BY pfr.ownerId
+			)
+		    </if>
+		 </where>
+	</select>
+	<select id="findNotTopicGroupId" resultType="Long">
+		SELECT pug.groupId from pf_user_group pug
+		INNER JOIN pf_tenant pt
+		on pug.tenantId=pt.tenantId
+		INNER JOIN pf_sales_package_module pspm
+		on  pspm.salesPackageId=pt.salesPackageId
+		INNER JOIN pf_module pm
+		on pm.moduleId=pspm.moduleId
+		INNER JOIN pf_topic pf
+		on pf.moduleId=pm.moduleId
+		<where>
+			<if test="topicId != null">
+			pf.topicId =#{topicId}
+			and pug.pId=1
+			and pug.groupId not In (
+			SELECT pfr.ownerId from pf_topic_right  pfr 
+			INNER JOIN  pf_user_group pug
+			on pug.groupId=pfr.ownerId
+			INNER JOIN pf_tenant pt
+			on pug.tenantId=pt.tenantId
+			INNER JOIN pf_sales_package_module pspm
+			on  pspm.salesPackageId=pt.salesPackageId
+			INNER JOIN pf_module pm
+			on pm.moduleId=pspm.moduleId
+			INNER JOIN pf_topic pf
+			on pf.moduleId=pm.moduleId
+			where pfr.topicId =#{topicId}
+			and pf.topicId=#{topicId}
+			and pug.pId=1
+			and pfr.ownerType=3
+			GROUP BY pfr.ownerId
+			)
+		    </if>
+		 </where>
+	</select>
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.HistoryRecordDao">
+	
+	<select id="findById" resultType="HistoryRecord">
+		select recordId,employeeId,name,startDate,endDate,orgName,transferType,operate,operateTime
+		from pf_history_record
+		where employeeId = #{employeeId}
+		order by operateTime desc
+		<if test="pager != null">
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.sdcloud.api.core.entity.HistoryRecord">
+		insert into pf_history_record
+		(recordId,employeeId,name,startDate,endDate,orgName,transferType,operate,operateTime)
+		values(
+		#{recordId},#{employeeId},#{name},#{startDate},#{endDate},#{orgName},#{transferType},#{operate},#{operateTime}
+		)
+	</insert>
+	<select id="getTotalCount" resultType="java.lang.Long" parameterType="map">
+				select count(recordId)
+				from pf_history_record s
+				where employeeId = #{employeeId}
+	</select>
+	
+	<update id="update" parameterType="com.sdcloud.api.core.entity.HistoryRecord">
+		update pf_history_record
+		<set>
+			startDate=#{startDate},
+			operateTime=#{operateTime}
+		</set>
+		where  employeeId = #{employeeId} and transferType=#{transferType}
+	</update>
+</mapper> 

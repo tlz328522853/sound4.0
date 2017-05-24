@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.InventoryClientDao">
+
+	<sql id="inventoryClientColumn">
+		isClient,
+		clientName,
+		shortClientName,
+		province,
+		city,
+		county,
+		address,
+		contactPerson,
+		contactPhone,
+		mark,
+		createTime,
+		modifiedTime,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_inventory_client(
+			clientId, <include refid="inventoryClientColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="inventoryClients" separator=",">
+			(#{item.clientId},#{item.isClient},
+			#{item.clientName}, #{item.shortClientName},
+			#{item.province}, #{item.city},
+			#{item.county}, #{item.address},
+			#{item.contactPerson},#{item.contactPhone}, #{item.mark},
+			#{item.createTime},
+			#{item.modifiedTime},#{item.tenantId})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_inventory_client
+		<choose>
+			<when test="clientIds != null &amp;&amp; clientIds.size() != 0">
+				where clientId in
+		      	<foreach item="item" index="index" collection="clientIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="inventory">
+		update so_inventory_client
+		<set>
+		    <if test="isClient != null">isClient = #{isClient},</if>
+			<if test="clientName != null &amp;&amp; clientName != ''">clientName = #{clientName},</if>
+			<if test="shortClientName != null &amp;&amp; shortClientName != ''">shortClientName = #{shortClientName},</if>
+			<if test="province != null">province = #{province},</if>
+			<if test="city != null">city = #{city},</if>
+			<if test="county != null">county = #{county},</if>
+			<if test="address != null &amp;&amp; address != ''">address = #{address},</if>
+			<if test="contactPerson != null &amp;&amp; contactPerson != ''">contactPerson = #{contactPerson},</if>
+			<if test="contactPhone != null &amp;&amp; contactPhone != ''">contactPhone = #{contactPhone},</if>
+			<if test="mark != null &amp;&amp; mark != ''">mark = #{mark},</if>
+			<if test="createTime != null">createTime = #{createTime},</if>
+			<if test="modifiedTime != null">modifiedTime = #{modifiedTime},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where clientId = #{clientId}
+	</update>
+	
+	<sql id="inventoryClientCondition">
+		<where>
+			<if test="newOrgId != null ">
+				o.newOrgId = #{newOrgId}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.clientId)
+		from so_inventory_client c
+	   <where>
+	        <if test="isClient != null">
+	        	c.isClient = #{isClient}
+	        </if>
+	        <if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="clientName != null &amp;&amp; clientName != ''">
+				and c.clientName like '%${clientName}%' 
+			</if>
+			<if test="shortClientName != null &amp;&amp; shortClientName != ''">
+				and c.shortClientName like '%${shortClientName}%' 
+			</if>
+			<if test="province != null">
+				and c.province = #{province}
+			</if>
+			<if test="city != null">
+				and c.city = #{city}
+			</if>
+			<if test="county != null">
+				and c.county = #{county}
+			</if>
+			<if test="address != null &amp;&amp; address != ''">
+				and c.address  like '%${address}%'  
+			</if>
+			<if test="contactPerson != null &amp;&amp; contactPerson != ''">
+				and c.contactPerson like '%${contactPerson}%'  
+			</if>
+			<if test="contactPhone != null &amp;&amp; contactPhone != ''">
+				and c.contactPhone like '%${contactPhone}%'   
+			</if>
+			<if test="mark != null &amp;&amp; mark != ''">
+				and c.mark like '%${mark}%'  
+			</if>
+			<if test="startCreateTime != null&amp;&amp; endCreateTime!=null">
+				and c.createTime between #{startCreateTime} and #{endCreateTime} 
+			</if>
+			<if test="startModifiedTime != null&amp;&amp;endModifiedTime!=null">
+				and c.modifiedTime between #{startModifiedTime} and #{endModifiedTime}
+			</if>
+			
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="InventoryClient">
+	    select 	clientId,
+	    (SELECT pr.regionName from pf_region pr where pr.regionId=c.province) as "provinceName",
+		(SELECT pr.regionName from pf_region pr where pr.regionId=c.city) as "cityName",
+		(SELECT pr.regionName from pf_region pr where pr.regionId=c.county) as "countyName",
+	    <include refid="inventoryClientColumn"/>
+	    
+	    from so_inventory_client c
+	   <where>
+			 <if test="isClient != null">
+	        	c.isClient = #{isClient}
+	        </if>
+			<if test="clientName != null &amp;&amp; clientName != ''">
+				and c.clientName like '%${clientName}%' 
+			</if>
+			<if test="shortClientName != null &amp;&amp; shortClientName != ''">
+				and c.shortClientName like '%${shortClientName}%' 
+			</if>
+			<if test="province != null">
+				and c.province = #{province}
+			</if>
+			<if test="city != null">
+				and c.city = #{city}
+			</if>
+			<if test="county != null">
+				and c.county = #{county}
+			</if>
+			<if test="address != null &amp;&amp; address != ''">
+				and c.address  like '%${address}%'  
+			</if>
+			<if test="contactPerson != null &amp;&amp; contactPerson != ''">
+				and c.contactPerson like '%${contactPerson}%'  
+			</if>
+			<if test="contactPhone != null &amp;&amp; contactPhone != ''">
+				and c.contactPhone like '%${contactPhone}%'   
+			</if>
+			<if test="mark != null &amp;&amp; mark != ''">
+				and c.mark like '%${mark}%'  
+			</if>
+			<if test="startCreateTime != null&amp;&amp; endCreateTime!=null">
+				and c.createTime between #{startCreateTime} and #{endCreateTime} 
+			</if>
+			<if test="startModifiedTime != null&amp;&amp;endModifiedTime!=null">
+				and c.modifiedTime between #{startModifiedTime} and #{endModifiedTime}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+		</where>
+		<if test="pager != null">
+			order by c.createTime
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

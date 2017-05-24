@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.AssetStationDao">
+
+	<sql id="tableColumns">
+		assetTypeId,area,position,responsibility,state,stopSign,admin,
+		measureUnit,priceUnit,model,remark 
+	</sql>
+	
+	<insert id="insert" parameterType="AssetStation">
+		insert into so_asset_station(
+			assetId, <include refid="tableColumns"/>		
+		)values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			#{item.assetId}, #{item.assetTypeId}, #{item.area}, #{item.position}, #{item.responsibility}, #{item.state}, #{item.stopSign},#{item.admin},
+			#{item.measureUnit}, #{item.priceUnit}, #{item.model}, #{item.remark}
+		)
+		</foreach>
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from so_asset_station
+		<choose>
+			<when test="assetIds != null &amp;&amp; assetIds.size() != 0">
+				where assetId in
+		      	<foreach item="item" index="index" collection="assetIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="AssetStation">
+		update so_asset_station
+		<set>
+			<if test="area != null &amp;&amp; area != ''">area = #{area},</if>
+			position = #{position},
+			<if test="responsibility != null &amp;&amp; responsibility != ''">responsibility = #{responsibility},</if>
+			<if test="state != null">state = #{state},</if>
+			<if test="admin != null">admin = #{admin},</if>
+			<if test="stopSign != null">stopSign = #{stopSign},</if>
+			<if test="measureUnit != null">measureUnit = #{measureUnit},</if>
+			<if test="priceUnit != null">priceUnit = #{priceUnit},</if>
+			<if test="model != null &amp;&amp; model != ''">model = #{model},</if>
+			<if test="remark != null &amp;&amp; remark != ''">remark = #{remark},</if>
+		</set>
+		where assetId = #{assetId}
+	</update>
+	
+	<sql id="condition">
+		<where>
+		
+			<if test="includeSub == 'true' &amp;&amp; newOrgId != null">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false' &amp;&amp; newOrgId != null">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+			
+			<if test="responsibility != null &amp;&amp; responsibility != ''">
+				and responsibility LIKE '%${responsibility}%'
+			</if>
+			<if test="position != null &amp;&amp; position != ''">
+				and position LIKE '%${position}%'
+			</if>
+			<if test="newOrgIds != null &amp;&amp; Monitor != null &amp;&amp; (includeSub == null || includeSub == 'false')">
+				and newOrgId in
+				<foreach item="item" index="index" collection="newOrgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="newOrgId != null &amp;&amp; Monitor == null &amp;&amp; (includeSub == null || includeSub == 'false')">
+				and newOrgId = #{newOrgId}
+			</if>
+			<if test="stopSign != null ">
+				and stopSign = #{stopSign}
+			</if>
+			<if test="admin != null ">
+				and admin = #{admin}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(d.assetId)
+		from so_asset_station d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+		<include refid="condition"></include>
+		<!-- <where>
+	   		<if test="includeSub == 'true'">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false'">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+	   	</where> -->
+	</select>
+	
+	<select id="findAllBy" resultType="AssetStation">
+	    select 	
+	    	o.assetId,o.assetTypeId,o.assetName,o.assetCode,o.longitude,o.latitude,o.oldOrgId,
+			o.newOrgId,o.changeTime,o.produceDate,o.leaseOrganization,
+			o.leasePerson,o.leasePhone,o.tenantOrganization,o.tenantPerson,
+			o.tenantPhone,o.leaseBeginTime,o.leaseEndTime,o.leaseDays,
+			o.useOrganization,o.useBeginDate,o.useEndDate,o.oldOwnerCode,
+			o.ownerCode,o.tenantId,
+	    	
+	    	area,position,responsibility,state,stopSign,admin,
+			measureUnit,priceUnit,model,remark ,
+			
+			org.name as orgName,
+			
+			emp.name as adminName, emp.mobile as adminMobile
+	    from so_asset_station d
+	    left outer join so_asset_object o
+	    on d.assetId = o.assetId
+	    left outer join pf_org org
+	    on o.newOrgId = org.orgId
+	    left outer join pf_employee emp
+	    on d.admin = emp.employeeId
+	    <include refid="condition"></include>
+    	<!-- <where>
+	   		<if test="includeSub == 'true'">
+	   			newOrgId in (
+	   				select orgId from pf_org 
+	   				WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{newOrgId}), ownerCode) > 0
+	   			)
+	   		</if>
+	   		<if test="includeSub == 'false'">
+	   			and newOrgId = #{newOrgId} 
+	   		</if>
+	   	</where> -->
+		<if test="pager != null">
+			order by o.${pager.orderSql} 
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="findById" parameterType="long" resultType="AssetStation">
+	    select 	
+	    	o.assetId,o.assetTypeId,o.assetName,o.assetCode,o.longitude,o.latitude,o.oldOrgId,
+			o.newOrgId,o.changeTime,o.produceDate,o.leaseOrganization,
+			o.leasePerson,o.leasePhone,o.tenantOrganization,o.tenantPerson,
+			o.tenantPhone,o.leaseBeginTime,o.leaseEndTime,o.leaseDays,
+			o.useOrganization,o.useBeginDate,o.useEndDate,o.oldOwnerCode,
+			o.ownerCode,o.tenantId,
+	    	
+	    	area,position,admin,state,stopSign,
+			measureUnit,priceUnit,model,remark ,
+			
+			org.name as orgName,
+			
+			emp.name as adminName, emp.telephone as adminMobile
+	    from so_asset_station d
+	    LEFT OUTER JOIN so_asset_object o
+	    ON d.assetId = o.assetId
+	    LEFT OUTER JOIN pf_org org
+	    ON o.newOrgId = org.orgId
+	    LEFT OUTER JOIN pf_employee emp
+	    ON d.admin = emp.employeeId
+	    where o.assetId = #{assetId}
+	</select>
+	
+</mapper>

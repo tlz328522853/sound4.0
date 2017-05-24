@@ -1,0 +1,1889 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.OrderManagerDao">
+	
+	<sql id="Region_Sql">
+		regionId,regionCode,regionName,parentId,regionLevel,regionOrder,regionNameEn,regionShortNameEn 
+	</sql>
+	
+	
+	<sql id="Base_Column_List">
+		o.id AS "o_id",`orderId`,`businessTypeId`,`businessTypeName`,`areaSettingId`,`placeOrder`,`orderStatusId`,`orderStatusName`,`larClientUserAddressId`,
+		`distributeIllustrate`,`cancelOrderPersonId`,`cancelOrderPersonName`,`cancelOrderIllustrate`,`cancelDate`,`completionType`,`completionName`,
+		`cancelTakePersonId`,`cancelTakePersonName`,`cancelTakeIllustrate`,`cancelTakeDate`,`cancelSendPersonId`,`cancelSendPersonName`,
+		`cancelSendIllustrate`,`cancelSendDate`,`money`,`integral`,`salesmanId`,o.`createDate`,o.`enable`,`completionIllustrate`,`userId`,`userName`,
+		`paymentIllustrate`,`confirmPersionId`,`confirmPersionName`,`finishDate`,`evaluateId`,`takeDate`,`sendSingleId`,`sendSingleName`,
+		`distributeDate`,`maaDate`,`orderSourceId`,`orderSourceName`,`illustrate`,`paymentTypeId`,`paymentTypeName`,a.id AS "areaSetting.id",
+		`mechanism` AS "areaSetting.mechanism", `taskTime` AS "areaSetting.taskTime",`areaName` AS "areaSetting.areaName",
+		`acreage` AS "areaSetting.acreage", `areaPosition` AS "areaSetting.areaPosition",`startDate` AS "areaSetting.startDate",
+		`endDate` AS "areaSetting.endDate",`remarks` AS "areaSetting.remarks",a.`createDate` AS "areaSetting.createDate",
+		a.`enable` AS "areaSetting.enable",`mechanismId` AS "areaSetting.mechanismId",lengthService,failureTypeId,failureTypeName,appUserId,grab_order as "grabOrder",
+		grab_order_min as "grabOrderMin",grab_order_time as "grabOrderTime",check_status AS "checkStatus"   
+	</sql>
+	<sql id="Child_Column_List">
+		c.`id`,c.`number`,c.`orderManagerId` AS "orderManager.id",c.`enable`,c.`createDate`,r.`id` AS "recyclingMaterial.id",
+		r.`goodsId` AS "recyclingMaterial.goodsId",r.`goodsName` AS "recyclingMaterial.goodsName",confirmOrder,
+		r.`goodsDescribe` AS "recyclingMaterial.goodsDescribe",r.`meteringCompany` AS "recyclingMaterial.meteringCompany",
+		r.`imgUrl` AS "recyclingMaterial.imgUrl",r.`startUsing` AS "recyclingMaterial.startUsing",
+		r.`startUsingForApp` AS "recyclingMaterial.startUsingForApp",r.`enable` AS "recyclingMaterial.enable",
+		t.`id` AS "recyclingMaterial.recyclingTypeId.id",t.`typeName` AS "recyclingMaterial.recyclingTypeId.typeName",
+		t.`enable` AS "recyclingMaterial.recyclingTypeId.enable" 
+	</sql>
+
+	<update id="updateSalesmanId">
+		update lar_ordermanager
+		<set>
+			<if test="next_sales_man !=null">
+				salesmanId=#{next_sales_man},
+			</if>
+		</set>
+		<where>
+			<if test="ids != null">
+				orderId=#{ids}
+			</if>
+		</where>
+	</update>
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.OrderManager">
+		insert into lar_ordermanager
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="orderId != null">
+				orderId,
+			</if>
+			<if test="businessTypeId != null">
+				businessTypeId,
+			</if>
+			<if test="businessTypeName != null">
+				businessTypeName,
+			</if>
+			<if test="areaSetting != null and areaSetting.id!=null">
+				areaSettingId,
+			</if>
+			<if test="placeOrder != null">
+				placeOrder,
+			</if>
+			<if test="orderStatusId != null">
+				orderStatusId,
+			</if>
+			<if test="orderStatusName != null">
+				orderStatusName,
+			</if>
+			<if test="larClientUserAddress != null and larClientUserAddress.id!=null">
+				larClientUserAddressId,
+			</if>
+			<if test="maaDate != null">
+				maaDate,
+			</if>
+			<if test="orderSourceId != null">
+				orderSourceId,
+			</if>
+			<if test="orderSourceName != null">
+				orderSourceName,
+			</if>
+			<if test="illustrate != null">
+				illustrate,
+			</if>
+			<if test="paymentTypeId != null">
+				paymentTypeId,
+			</if>
+			<if test="paymentTypeName != null">
+				paymentTypeName,
+			</if>
+			<if test="money != null">
+				money,
+			</if>
+			<if test="integral != null">
+				integral,
+			</if>
+			<if test="paymentIllustrate != null">
+				paymentIllustrate,
+			</if>
+			<if test="confirmPersionId != null">
+				confirmPersionId,
+			</if>
+			<if test="confirmPersionName != null">
+				confirmPersionName,
+			</if>
+			<if test="finishDate != null">
+				finishDate,
+			</if>
+			<if test="completionType != null">
+				completionType,
+			</if>
+			<if test="completionName != null">
+				completionName,
+			</if>
+			<if test="completionIllustrate != null">
+				completionIllustrate,
+			</if>
+			<if test="userId != null">
+				userId,
+			</if>
+			<if test="userName != null">
+				userName,
+			</if>
+			<if test="takeDate != null">
+				takeDate,
+			</if>
+			<if test="sendSingleId != null">
+				sendSingleId,
+			</if>
+			<if test="sendSingleName != null">
+				sendSingleName,
+			</if>
+			<if test="distributeDate != null">
+				distributeDate,
+			</if>
+			<if test="distributeIllustrate != null">
+				distributeIllustrate,
+			</if>
+			<if test="cancelOrderPersonId != null">
+				cancelOrderPersonId,
+			</if>
+			<if test="cancelOrderPersonName != null">
+				cancelOrderPersonName,
+			</if>
+			<if test="cancelOrderIllustrate != null">
+				cancelOrderIllustrate,
+			</if>
+			<if test="cancelDate != null">
+				cancelDate,
+			</if>
+			<if test="cancelTakePersonId != null">
+				cancelTakePersonId,
+			</if>
+			<if test="cancelTakePersonName != null">
+				cancelTakePersonName,
+			</if>
+			<if test="cancelTakeIllustrate != null">
+				cancelTakeIllustrate,
+			</if>
+			<if test="cancelTakeDate != null">
+				cancelTakeDate,
+			</if>
+			<if test="cancelSendPersonName != null">
+				cancelSendPersonName,
+			</if>
+			<if test="cancelSendPersonId != null">
+				cancelSendPersonId,
+			</if>
+			<if test="cancelSendIllustrate != null">
+				cancelSendIllustrate,
+			</if>
+			<if test="cancelSendDate != null">
+				cancelSendDate,
+			</if>
+			<if test="salesman != null and salesman.id!=null">
+				salesmanId,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="evaluateId != null">
+				evaluateId,
+			</if>
+			<if test="lengthService != null">
+				lengthService,
+			</if>
+			<if test="failureTypeId != null">
+				failureTypeId,
+			</if>
+			<if test="failureTypeName != null">
+				failureTypeName,
+			</if>
+			<if test="appUserId != null">
+				appUserId,
+			</if>
+			
+			<if test="grabOrder != null">
+				grab_order,
+			</if>
+			<if test="grabOrderTime != null">
+				grab_order_time,
+			</if>
+			<if test="areaList != null">
+				area_list,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="orderId != null">
+				#{orderId},
+			</if>
+			<if test="businessTypeId != null">
+				#{businessTypeId},
+			</if>
+			<if test="businessTypeName != null">
+				#{businessTypeName},
+			</if>
+			<if test="areaSetting != null and areaSetting.id!=null">
+				#{areaSetting.id},
+			</if>
+			<if test="placeOrder != null">
+				#{placeOrder},
+			</if>
+			<if test="orderStatusId != null">
+				#{orderStatusId},
+			</if>
+			<if test="orderStatusName != null">
+				#{orderStatusName},
+			</if>
+			<if test="larClientUserAddress != null and larClientUserAddress.id!=null">
+				#{larClientUserAddress.id},
+			</if>
+			<if test="maaDate != null">
+				#{maaDate},
+			</if>
+			<if test="orderSourceId != null">
+				#{orderSourceId},
+			</if>
+			<if test="orderSourceName != null">
+				#{orderSourceName},
+			</if>
+			<if test="illustrate != null">
+				#{illustrate},
+			</if>
+			<if test="paymentTypeId != null">
+				#{paymentTypeId},
+			</if>
+			<if test="paymentTypeName != null">
+				#{paymentTypeName},
+			</if>
+			<if test="money != null">
+				#{money},
+			</if>
+			<if test="integral != null">
+				#{integral},
+			</if>
+			<if test="paymentIllustrate != null">
+				#{paymentIllustrate},
+			</if>
+			<if test="confirmPersionId != null">
+				#{confirmPersionId},
+			</if>
+			<if test="confirmPersionName != null">
+				#{confirmPersionName},
+			</if>
+			<if test="finishDate != null">
+				#{finishDate},
+			</if>
+			<if test="completionType != null">
+				#{completionType},
+			</if>
+			<if test="completionName != null">
+				#{completionName},
+			</if>
+			<if test="completionIllustrate != null">
+				#{completionIllustrate},
+			</if>
+			<if test="userId != null">
+				#{userId},
+			</if>
+			<if test="userName != null">
+				#{userName},
+			</if>
+			<if test="takeDate != null">
+				#{takeDate},
+			</if>
+			<if test="sendSingleId != null">
+				#{sendSingleId},
+			</if>
+			<if test="sendSingleName != null">
+				#{sendSingleName},
+			</if>
+			<if test="distributeDate != null">
+				#{distributeDate},
+			</if>
+			<if test="distributeIllustrate != null">
+				#{distributeIllustrate},
+			</if>
+			<if test="cancelOrderPersonId != null">
+				#{cancelOrderPersonId},
+			</if>
+			<if test="cancelOrderPersonName != null">
+				#{cancelOrderPersonName},
+			</if>
+			<if test="cancelOrderIllustrate != null">
+				#{cancelOrderIllustrate},
+			</if>
+			<if test="cancelDate != null">
+				#{cancelDate},
+			</if>
+			<if test="cancelTakePersonId != null">
+				#{cancelTakePersonId},
+			</if>
+			<if test="cancelTakePersonName != null">
+				#{cancelTakePersonName},
+			</if>
+			<if test="cancelTakeIllustrate != null">
+				#{cancelTakeIllustrate},
+			</if>
+			<if test="cancelTakeDate != null">
+				#{cancelTakeDate},
+			</if>
+			<if test="cancelSendPersonName != null">
+				#{cancelSendPersonName},
+			</if>
+			<if test="cancelSendPersonId != null">
+				#{cancelSendPersonId},
+			</if>
+			<if test="cancelSendIllustrate != null">
+				#{cancelSendIllustrate},
+			</if>
+			<if test="cancelSendDate != null">
+				#{cancelSendDate},
+			</if>
+			<if test="salesman != null and salesman.id!=null">
+				#{salesman.id},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="evaluateId != null">
+				#{evaluateId},
+			</if>
+			<if test="lengthService != null">
+				#{lengthService},
+			</if>
+			<if test="failureTypeId != null">
+				#{failureTypeId},
+			</if>
+			<if test="failureTypeName != null">
+				#{failureTypeName},
+			</if>
+			<if test="appUserId != null">
+				#{appUserId},
+			</if>
+			<if test="grabOrder != null">
+				#{grabOrder},
+			</if>
+			<if test="grabOrderTime != null">
+				#{grabOrderTime},
+			</if>
+			<if test="areaList != null">
+				#{areaList},
+			</if>
+		</trim>
+	</insert>
+	
+	<insert id="insertSelectiveImg" parameterType="com.sdcloud.api.lar.entity.RecyclingImg">
+		insert into lar_recyclingimg
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="imgUrl != null">
+				imgUrl,
+			</if>
+			<if test="orderManager != null and orderManager.id!=null">
+				orderManagerId,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="imgUrl != null">
+				#{imgUrl},
+			</if>
+			<if test="orderManager != null and orderManager.id!=null">
+				#{orderManager.id},
+			</if>
+		</trim>
+	</insert>
+	
+	<insert id="insertSelectiveChild" parameterType="com.sdcloud.api.lar.entity.ChildOrders">
+		insert into lar_childorders 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="recyclingMaterial != null and recyclingMaterial.id!=null">
+				recyclingMaterialId,
+			</if>
+			<if test="number != null">
+				number,
+			</if>
+			<if test="orderManager != null and orderManager.id!=null">
+				orderManagerId,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="confirmOrder != null">
+				confirmOrder,
+			</if>
+			<if test="recyclingSpec != null and recyclingSpec.id !=null">
+				specId,
+			</if>
+		    <if test="recyclingSpec != null and recyclingSpec.priceId !=null">
+				priceId,
+			</if>
+			<if test="recyclingSpec != null and recyclingSpec.price !=null">
+				price,
+			</if>
+			<if test="totalPrice !=null">
+				totalPrice,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="recyclingMaterial != null and recyclingMaterial.id!=null">
+				#{recyclingMaterial.id},
+			</if>
+			<if test="number != null">
+				#{number},
+			</if>
+			<if test="orderManager != null and orderManager.id!=null">
+				#{orderManager.id},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="confirmOrder != null">
+				#{confirmOrder},
+			</if>
+			<if test="recyclingSpec != null and recyclingSpec.id!=null">
+				#{recyclingSpec.id},
+			</if>
+		    <if test="recyclingSpec != null and recyclingSpec.priceId !=null">
+				#{recyclingSpec.priceId},
+			</if>
+			<if test="recyclingSpec != null and recyclingSpec.price !=null">
+				#{recyclingSpec.price},
+			</if>
+			<if test="totalPrice !=null">
+				#{totalPrice},
+			</if>
+		</trim>
+	</insert>
+	<select id="selectByExample" resultMap="listResult" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		from lar_ordermanager o left outer join lar_areasettings a  on(o.areaSettingId=a.id)
+			left join lar_order_check c on o.orderId=c.order_id
+		<where>
+			o.enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.orderStatusId!=null">
+					and orderStatusId=#{larPager.params.orderStatusId}
+				</if>
+				<if test="larPager.params.mechanismId!=null">
+					and a.mechanismId=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and a.mechanismId in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="larPager.params.orderStatusIds!=null and larPager.params.orderStatusIds.size>0">
+					and orderStatusId in 
+					<foreach item="item" index="index" collection="larPager.params.orderStatusIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="larPager.params.completionType != null">
+					and completionType=#{larPager.params.completionType}
+				</if>
+				<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and placeOrder> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and placeOrder < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and placeOrder < #{larPager.params.endDate} and placeOrder> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<if test="larPager.params.disOrder !=null and larPager.params.disOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and takeDate> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and takeDate < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and takeDate < #{larPager.params.endDate} and takeDate> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<if test="larPager.params.sendOrder !=null and larPager.params.sendOrder=='true'">
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and distributeDate> #{larPager.params.firstDate}
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and distributeDate < #{larPager.params.endDate}
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and distributeDate < #{larPager.params.endDate} and distributeDate> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<if test="larPager.params.evaluateId !=null">
+					and evaluateId = #{larPager.params.evaluateId}
+				</if>
+				<if test="larPager.params.orderId !=null">
+					and orderId = #{larPager.params.orderId}
+				</if>
+				<if test="larPager.params.paymentTypeId !=null">
+					and paymentTypeId = #{larPager.params.paymentTypeId}
+				</if>
+				<if test="larPager.params.salesman !=null">
+					and salesmanId = #{larPager.params.salesman}
+				</if>
+				<if test="larPager.params.areaSetting !=null">
+					and areaSettingId = #{larPager.params.areaSetting}
+				</if>
+				<if test="larPager.params.failureType !=null">
+					and failureTypeId = #{larPager.params.failureType}
+				</if>
+				<if test="larPager.params.childOrders !=null and larPager.params.childOrders.id !=null">
+					and id=#{larPager.params.childOrders.id}
+				</if>
+				<!-- 接单列表的条件 -->
+				<if test="larPager.params.taking !=null and larPager.params.taking == 'true'">
+					and (grab_order=10 or grab_order=22 or grab_order=33)
+				</if>
+				
+				<!-- 以下是根据对账的相关信息查询 -->
+				<!-- 对账时间 -->
+				<if test="larPager.params.checkOrder !=null and larPager.params.checkOrder=='true'">
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and c.check_date < #{larPager.params.endDate} and c.check_date> #{larPager.params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 对账状态 -->
+				<if test="larPager.params.check_status !=null">
+					and check_status = #{larPager.params.check_status}
+				</if>
+				<!-- 是否超标 -->
+				<if test="larPager.params.overproof !=null">
+					and c.overproof = #{larPager.params.overproof}
+				</if>
+				<!-- 对账人 -->
+				<if test="larPager.params.check_man !=null">
+					and c.check_man = #{larPager.params.check_man}
+				</if>
+				<!-- 完成类型 -->
+				<if test="larPager.params.completion !=null">
+					and completionType = #{larPager.params.completion}
+				</if>
+				
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<select id="selectOrderByExample" resultMap="listResult" parameterType="map">
+		select
+		o.id           AS "o_id",
+		`orderId`,
+		`businessTypeId`,
+		`businessTypeName`,
+		`areaSettingId`,
+		`placeOrder`,
+		`orderStatusId`,
+		`orderStatusName`,
+		`larClientUserAddressId`,
+		`distributeIllustrate`,
+		`cancelOrderPersonId`,
+		`cancelOrderPersonName`,
+		`cancelOrderIllustrate`,
+		`cancelDate`,
+		`completionType`,
+		`completionName`,
+		`cancelTakePersonId`,
+		`cancelTakePersonName`,
+		`cancelTakeIllustrate`,
+		`cancelTakeDate`,
+		`cancelSendPersonId`,
+		`cancelSendPersonName`,
+		`cancelSendIllustrate`,
+		`cancelSendDate`,
+		`money`,
+		`integral`,
+		`salesmanId`,
+		o.`createDate`,
+		o.`enable`,
+		`completionIllustrate`,
+		`userId`,
+		`userName`,
+		`paymentIllustrate`,
+		`confirmPersionId`,
+		`confirmPersionName`,
+		`finishDate`,
+		`evaluateId`,
+		`takeDate`,
+		`sendSingleId`,
+		`sendSingleName`,
+		`distributeDate`,
+		`maaDate`,
+		`orderSourceId`,
+		`orderSourceName`,
+		`illustrate`,
+		`paymentTypeId`,
+		`paymentTypeName`,
+		`area_list`    AS "areaList",
+		a.id           AS "areaSetting.id",
+		`mechanism`    AS "areaSetting.mechanism",
+		`taskTime`     AS "areaSetting.taskTime",
+		`areaName`     AS "areaSetting.areaName",
+		`acreage`      AS "areaSetting.acreage",
+		`areaPosition` AS "areaSetting.areaPosition",
+		`startDate`    AS "areaSetting.startDate",
+		`endDate`      AS "areaSetting.endDate",
+		`remarks`      AS "areaSetting.remarks",
+		a.`createDate` AS "areaSetting.createDate",
+		a.`enable`     AS "areaSetting.enable",
+		`mechanismId`  AS "areaSetting.mechanismId",
+		lengthService,
+		failureTypeId,
+		failureTypeName,
+		appUserId,
+		o.grab_order as "grabOrder",
+		o.grab_order_time as "grabOrderTime"
+		from lar_ordermanager o left outer join lar_areasettings a  on(o.areaSettingId=a.id)
+		<where>
+			o.enable=0
+				<if test="params.id!=null">
+					and o.id=#{params.id}
+				</if>
+				<if test="params.orderId!=null">
+					and o.orderId=#{params.orderId}
+				</if>
+		</where>
+	</select>
+	<resultMap type="com.sdcloud.api.lar.entity.OrderManager" id="listResult">
+		<id property="id" column="o_id"/>
+		<result property="orderId" column="orderId"/>
+		<association property="larClientUserAddress" column="larClientUserAddressId" javaType="com.sdcloud.api.lar.entity.LarClientUserAddress" select="com.sdcloud.biz.lar.dao.LarClientUserAddressDao.selectById"></association>
+		<association property="salesman" column="salesmanId" javaType="com.sdcloud.api.lar.entity.Salesman" select="selectSalesman"></association>
+		<association property="orderCheck" column="orderId" javaType="com.sdcloud.api.lar.entity.OrderCheck" select="selectCheck"></association>
+		<collection property="recyclingImg" ofType="com.sdcloud.api.lar.entity.RecyclingImg" javaType="java.util.List" column="o_id" select="selectRecyclingImg"></collection>
+		<collection property="childOrders" ofType="com.sdcloud.api.lar.entity.ChildOrders" javaType="java.util.List" column="o_id" select="selectChildOrder"></collection>
+		
+	</resultMap>
+	<select id="selectRecyclingImg" resultType="com.sdcloud.api.lar.entity.RecyclingImg">
+		select `id`,`imgUrl`,`orderManagerId` from lar_recyclingimg where orderManagerId=#{id}
+	</select>
+	<select id="selectSalesman" resultType="com.sdcloud.api.lar.entity.Salesman">
+		select `id`,`areaSettingId` as "areaSetting.id",`manId`,`manName`,`deviceId`,`ownedSupplierId`,`manDescribe`,
+		`personnelId` as "personnel.id",`createDate`,`enable` from lar_salesman where id=#{salesmanId}
+	</select>
+	
+	<!-- <select id="selectCildByExample" resultType="com.sdcloud.api.lar.entity.ChildOrders" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Child_Column_List" /> 
+		FROM `lar_childorders` c LEFT OUTER JOIN `lar_recyclingmaterial` r ON(c.recyclingMaterialId=r.id) 
+		LEFT OUTER JOIN `lar_recyclingtype` t ON(r.recyclingTypeId=t.id) 
+		<where>
+			c.enable=0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。
+				<if test="larPager.params.orderId!=null">
+					and orderManagerId=#{larPager.params.orderId}
+				</if>
+				<if test="larPager.params.confirmOrder!=null">
+					and confirmOrder=#{larPager.params.confirmOrder}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+	</select> -->
+	
+	<select id="selectCildByExample" resultType="com.sdcloud.api.lar.entity.ChildOrders" parameterType="com.sdcloud.framework.entity.LarPager">
+		SELECT c.`id`,`number`,`confirmOrder`, r.`id` AS "recyclingMaterial.id",`goodsName` AS "recyclingMaterial.goodsName",
+		`goodsDescribe` AS "recyclingMaterial.goodsDescribe",`meteringCompany` AS "recyclingMaterial.meteringCompany",
+		`imgUrl`  AS "recyclingMaterial.imgUrl", t.`id` AS "recyclingMaterial.recyclingTypeId.id",
+		`typeName` AS "recyclingMaterial.recyclingTypeId.typeName",c.`price` AS "recyclingSpec.price",e.`id` AS "recyclingSpec.id",
+		`totalPrice`,e.`spec_company` AS "recyclingSpec.specCompany",p.`id` AS "recyclingSpec.priceId",e.`spec_name` AS "recyclingSpec.specName"
+		 FROM `lar_childorders` c 
+		LEFT OUTER JOIN `lar_recyclingmaterial` r ON(c.`recyclingMaterialId`=r.id) 
+		LEFT OUTER JOIN `lar_recyclingtype` t ON(r.recyclingTypeId=t.id)
+		LEFT OUTER JOIN `lar_recyclingspec` e ON(c.specId=e.id) 
+		LEFT OUTER JOIN `lar_recyclingprice` p ON(p.id=c.priceId)
+		<where>
+			c.enable=0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.orderId!=null">
+					and c.orderManagerId=#{larPager.params.orderId}
+				</if>
+				<if test="larPager.params.confirmOrder!=null">
+					and c.confirmOrder=#{larPager.params.confirmOrder}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+	</select>
+
+	<update id="updateByExampleSelective" parameterType="map">
+		update lar_ordermanager
+		<set>
+			<if test="params.orderManager.businessTypeId != null">
+				businessTypeId = #{params.orderManager.businessTypeId},
+			</if>
+			<if test="params.orderManager.businessTypeName != null">
+				businessTypeName = #{params.orderManager.businessTypeName},
+			</if>
+			<if test="params.orderManager.areaSetting != null and params.orderManager.areaSetting.id != null">
+				areaSettingId = #{params.orderManager.areaSetting.id},
+			</if>
+			<if test="params.orderManager.placeOrder != null">
+				placeOrder = #{params.orderManager.placeOrder},
+			</if>
+			<if test="params.orderManager.orderStatusId != null">
+				orderStatusId = #{params.orderManager.orderStatusId},
+			</if>
+			<if test="params.orderManager.orderStatusName != null">
+				orderStatusName = #{params.orderManager.orderStatusName},
+			</if>
+			<if test="params.orderManager.larClientUserAddress != null and params.orderManager.larClientUserAddress.id != null">
+				larClientUserAddressId = #{params.orderManager.larClientUserAddress.id},
+			</if>
+			<if test="params.orderManager.maaDate != null">
+				maaDate = #{params.orderManager.maaDate},
+			</if>
+			<if test="params.orderManager.orderStatusId != null">
+				orderStatusId = #{params.orderManager.orderStatusId},
+			</if>
+			<if test="params.orderManager.orderStatusName != null">
+				orderStatusName = #{params.orderManager.orderStatusName},
+			</if>
+			<if test="params.orderManager.illustrate != null">
+				illustrate = #{params.orderManager.illustrate},
+			</if>
+			<if test="params.orderManager.paymentTypeId != null">
+				paymentTypeId = #{params.orderManager.paymentTypeId},
+			</if>
+			<if test="params.orderManager.paymentTypeName != null">
+				paymentTypeName = #{params.orderManager.paymentTypeName},
+			</if>
+			<if test="params.orderManager.money != null">
+				money = #{params.orderManager.money},
+			</if>
+			<if test="params.orderManager.integral != null">
+				integral = #{params.orderManager.integral},
+			</if>
+			<if test="params.orderManager.paymentIllustrate!= null">
+				paymentIllustrate = #{params.orderManager.paymentIllustrate},
+			</if>
+			<if test="params.orderManager.confirmPersionId!= null">
+				confirmPersionId = #{params.orderManager.confirmPersionId},
+			</if>
+			<if test="params.orderManager.confirmPersionName!= null">
+				confirmPersionName = #{params.orderManager.confirmPersionName},
+			</if>
+			<if test="params.orderManager.finishDate != null">
+				finishDate = #{params.orderManager.finishDate},
+			</if>
+			<if test="params.orderManager.completionType != null">
+				completionType = #{params.orderManager.completionType},
+			</if>
+			<if test="params.orderManager.completionName != null">
+				completionName = #{params.orderManager.completionName},
+			</if>
+			<if test="params.orderManager.completionIllustrate != null">
+				completionIllustrate = #{params.orderManager.completionIllustrate},
+			</if>
+			<if test="params.orderManager.userId != null">
+				userId = #{params.orderManager.userId},
+			</if>
+			<if test="params.orderManager.userName != null">
+				userName = #{params.orderManager.userName},
+			</if>
+			<if test="params.orderManager.takeDate != null">
+				takeDate = #{params.orderManager.takeDate},
+			</if>
+			<if test="params.orderManager.sendSingleId != null">
+				sendSingleId = #{params.orderManager.sendSingleId},
+			</if>
+			<if test="params.orderManager.sendSingleName != null">
+				sendSingleName = #{params.orderManager.sendSingleName},
+			</if>
+			<if test="params.orderManager.distributeDate != null">
+				distributeDate = #{params.orderManager.distributeDate},
+			</if>
+			<if test="params.orderManager.distributeIllustrate != null">
+				distributeIllustrate = #{params.orderManager.distributeIllustrate},
+			</if>
+			<if test="params.orderManager.cancelOrderPersonId != null">
+				cancelOrderPersonId = #{params.orderManager.cancelOrderPersonId},
+			</if>
+			<if test="params.orderManager.cancelOrderPersonName != null">
+				cancelOrderPersonName = #{params.orderManager.cancelOrderPersonName},
+			</if>
+			<if test="params.orderManager.cancelOrderIllustrate != null">
+				cancelOrderIllustrate = #{params.orderManager.cancelOrderIllustrate},
+			</if>
+			<if test="params.orderManager.cancelDate != null">
+				cancelDate = #{params.orderManager.cancelDate},
+			</if>
+			<if test="params.orderManager.cancelTakePersonId != null">
+				cancelTakePersonId = #{params.orderManager.cancelTakePersonId},
+			</if>
+			<if test="params.orderManager.cancelTakePersonName != null">
+				cancelTakePersonName = #{params.orderManager.cancelTakePersonName},
+			</if>
+			<if test="params.orderManager.cancelTakeIllustrate != null">
+				cancelTakeIllustrate = #{params.orderManager.cancelTakeIllustrate},
+			</if>
+			<if test="params.orderManager.cancelTakeDate != null">
+				cancelTakeDate = #{params.orderManager.cancelTakeDate},
+			</if>
+			<if test="params.orderManager.cancelSendPersonName != null">
+				cancelSendPersonName = #{params.orderManager.cancelSendPersonName},
+			</if>
+			<if test="params.orderManager.cancelSendPersonId != null">
+				cancelSendPersonId = #{params.orderManager.cancelSendPersonId},
+			</if>
+			<if test="params.orderManager.cancelSendIllustrate != null">
+				cancelSendIllustrate = #{params.orderManager.cancelSendIllustrate},
+			</if>
+			<if test="params.orderManager.cancelSendDate != null">
+				cancelSendDate = #{params.orderManager.cancelSendDate},
+			</if>
+			<if test="params.orderManager.salesman != null and params.orderManager.salesman.id != null">
+				salesmanId = #{params.orderManager.salesman.id},
+			</if>
+			<if test="params.orderManager.createDate != null">
+				createDate = #{params.orderManager.createDate},
+			</if>
+			<if test="params.orderManager.enable != null">
+				enable = #{params.orderManager.enable},
+			</if>
+			<if test="params.orderManager.evaluateId != null">
+				evaluateId = #{params.orderManager.evaluateId},
+			</if>
+			<if test="params.orderManager.lengthService != null">
+				lengthService = #{params.orderManager.lengthService},
+			</if>
+			<if test="params.orderManager.failureTypeId != null">
+				failureTypeId = #{params.orderManager.failureTypeId},
+			</if>
+			<if test="params.orderManager.failureTypeName != null">
+				failureTypeName = #{params.orderManager.failureTypeName},
+			</if>
+			<if test="params.orderManager.grabOrder != null">
+				grab_order = #{params.orderManager.grabOrder},
+			</if>
+			<if test="params.orderManager.grabOrderTime != null">
+				grab_order_time = #{params.orderManager.grabOrderTime},
+			</if>
+			<if test="params.orderManager.checkStatus != null">
+				check_status = #{params.orderManager.checkStatus},
+			</if>
+		</set>
+		<where>
+			<if test="params.orderManager.id !=null">
+				id=#{params.orderManager.id}
+			</if>
+		</where>
+	</update>
+	
+	<update id="updateGrab" >
+		update lar_ordermanager
+		<set>
+			<if test="params.orderManager.areaSetting != null and params.orderManager.areaSetting.id != null">
+				areaSettingId = #{params.orderManager.areaSetting.id},
+			</if>
+			<if test="params.orderManager.placeOrder != null">
+				placeOrder = #{params.orderManager.placeOrder},
+			</if>
+			<if test="params.orderManager.orderStatusId != null">
+				orderStatusId = #{params.orderManager.orderStatusId},
+			</if>
+			<if test="params.orderManager.orderStatusName != null">
+				orderStatusName = #{params.orderManager.orderStatusName},
+			</if>
+			<if test="params.orderManager.larClientUserAddress != null and params.orderManager.larClientUserAddress.id != null">
+				larClientUserAddressId = #{params.orderManager.larClientUserAddress.id},
+			</if>
+			<if test="params.orderManager.maaDate != null">
+				maaDate = #{params.orderManager.maaDate},
+			</if>
+			<if test="params.orderManager.orderStatusId != null">
+				orderStatusId = #{params.orderManager.orderStatusId},
+			</if>
+			<if test="params.orderManager.orderStatusName != null">
+				orderStatusName = #{params.orderManager.orderStatusName},
+			</if>
+			<if test="params.orderManager.illustrate != null">
+				illustrate = #{params.orderManager.illustrate},
+			</if>
+			<if test="params.orderManager.paymentTypeId != null">
+				paymentTypeId = #{params.orderManager.paymentTypeId},
+			</if>
+			<if test="params.orderManager.paymentTypeName != null">
+				paymentTypeName = #{params.orderManager.paymentTypeName},
+			</if>
+			<if test="params.orderManager.money != null">
+				money = #{params.orderManager.money},
+			</if>
+			<if test="params.orderManager.integral != null">
+				integral = #{params.orderManager.integral},
+			</if>
+			<if test="params.orderManager.paymentIllustrate!= null">
+				paymentIllustrate = #{params.orderManager.paymentIllustrate},
+			</if>
+			<if test="params.orderManager.confirmPersionId!= null">
+				confirmPersionId = #{params.orderManager.confirmPersionId},
+			</if>
+			<if test="params.orderManager.confirmPersionName!= null">
+				confirmPersionName = #{params.orderManager.confirmPersionName},
+			</if>
+			<if test="params.orderManager.finishDate != null">
+				finishDate = #{params.orderManager.finishDate},
+			</if>
+			<if test="params.orderManager.completionType != null">
+				completionType = #{params.orderManager.completionType},
+			</if>
+			<if test="params.orderManager.completionName != null">
+				completionName = #{params.orderManager.completionName},
+			</if>
+			<if test="params.orderManager.completionIllustrate != null">
+				completionIllustrate = #{params.orderManager.completionIllustrate},
+			</if>
+			<if test="params.orderManager.userId != null">
+				userId = #{params.orderManager.userId},
+			</if>
+			<if test="params.orderManager.userName != null">
+				userName = #{params.orderManager.userName},
+			</if>
+			<if test="params.orderManager.takeDate != null">
+				takeDate = #{params.orderManager.takeDate},
+			</if>
+			<if test="params.orderManager.sendSingleId != null">
+				sendSingleId = #{params.orderManager.sendSingleId},
+			</if>
+			<if test="params.orderManager.sendSingleName != null">
+				sendSingleName = #{params.orderManager.sendSingleName},
+			</if>
+			<if test="params.orderManager.distributeDate != null">
+				distributeDate = #{params.orderManager.distributeDate},
+			</if>
+			<if test="params.orderManager.distributeIllustrate != null">
+				distributeIllustrate = #{params.orderManager.distributeIllustrate},
+			</if>
+			<if test="params.orderManager.cancelOrderPersonId != null">
+				cancelOrderPersonId = #{params.orderManager.cancelOrderPersonId},
+			</if>
+			<if test="params.orderManager.cancelOrderPersonName != null">
+				cancelOrderPersonName = #{params.orderManager.cancelOrderPersonName},
+			</if>
+			<if test="params.orderManager.cancelOrderIllustrate != null">
+				cancelOrderIllustrate = #{params.orderManager.cancelOrderIllustrate},
+			</if>
+			<if test="params.orderManager.cancelDate != null">
+				cancelDate = #{params.orderManager.cancelDate},
+			</if>
+			<if test="params.orderManager.cancelTakePersonId != null">
+				cancelTakePersonId = #{params.orderManager.cancelTakePersonId},
+			</if>
+			<if test="params.orderManager.cancelTakePersonName != null">
+				cancelTakePersonName = #{params.orderManager.cancelTakePersonName},
+			</if>
+			<if test="params.orderManager.cancelTakeIllustrate != null">
+				cancelTakeIllustrate = #{params.orderManager.cancelTakeIllustrate},
+			</if>
+			<if test="params.orderManager.cancelTakeDate != null">
+				cancelTakeDate = #{params.orderManager.cancelTakeDate},
+			</if>
+			<if test="params.orderManager.cancelSendPersonName != null">
+				cancelSendPersonName = #{params.orderManager.cancelSendPersonName},
+			</if>
+			<if test="params.orderManager.cancelSendPersonId != null">
+				cancelSendPersonId = #{params.orderManager.cancelSendPersonId},
+			</if>
+			<if test="params.orderManager.cancelSendIllustrate != null">
+				cancelSendIllustrate = #{params.orderManager.cancelSendIllustrate},
+			</if>
+			<if test="params.orderManager.cancelSendDate != null">
+				cancelSendDate = #{params.orderManager.cancelSendDate},
+			</if>
+			<if test="params.orderManager.salesman != null and params.orderManager.salesman.id != null">
+				salesmanId = #{params.orderManager.salesman.id},
+			</if>
+			<if test="params.orderManager.createDate != null">
+				createDate = #{params.orderManager.createDate},
+			</if>
+			<if test="params.orderManager.enable != null">
+				enable = #{params.orderManager.enable},
+			</if>
+			<if test="params.orderManager.evaluateId != null">
+				evaluateId = #{params.orderManager.evaluateId},
+			</if>
+			<if test="params.orderManager.lengthService != null">
+				lengthService = #{params.orderManager.lengthService},
+			</if>
+			<if test="params.orderManager.failureTypeId != null">
+				failureTypeId = #{params.orderManager.failureTypeId},
+			</if>
+			<if test="params.orderManager.failureTypeName != null">
+				failureTypeName = #{params.orderManager.failureTypeName},
+			</if>
+			<if test="params.orderManager.grabOrder != null">
+				grab_order = #{params.orderManager.grabOrder},
+			</if>
+			<if test="params.orderManager.grabOrderTime != null">
+				grab_order_time = #{params.orderManager.grabOrderTime},
+			</if>
+			<if test="params.orderManager.grabOrderMin != null">
+				grab_order_min = #{params.orderManager.grabOrderMin},
+			</if>
+		</set>
+		<where>
+			<if test="params.orderManager.id !=null">
+				id=#{params.orderManager.id}
+			</if>
+			
+			<foreach collection="condition.keys" item="item" index="key">
+            	and ${item}=#{condition[${item}]}
+        	</foreach>
+        	
+		</where>
+	</update>
+	
+	<update id="updateByImgSelective" parameterType="map">
+		update lar_recyclingimg
+		<set>
+			<if test="params.recyclingImg.imgUrl != null">
+				imgUrl = #{params.recyclingImg.imgUrl},
+			</if>
+			<if test="params.recyclingImg.imgUrl != null and params.recyclingImg.id != null">
+				orderManagerId = #{params.recyclingImg.orderManager.id},
+			</if>
+		</set>
+		<where>
+			<if test="params.recyclingImg.id !=null">
+				id=#{params.recyclingImg.id}
+			</if>
+		</where>
+	</update>
+	
+	<update id="updateChildByExampleSelective" parameterType="map">
+		update lar_childorders
+		<set>
+			<if test="params.childOrders.recyclingMaterial != null and params.childOrders.recyclingMaterial.id != null">
+				recyclingMaterialId = #{params.childOrders.recyclingMaterial.id},
+			</if>
+			<if test="params.childOrders.number != null">
+				number = #{params.childOrders.number},
+			</if>
+			<if test="params.childOrders.orderManager != null and params.childOrders.orderManager.id != null">
+				orderManagerId = #{params.childOrders.orderManager.id},
+			</if>
+			<if test="params.childOrders.enable != null">
+				enable = #{params.childOrders.enable},
+			</if>
+		</set>
+		<where>
+			<if test="params.childOrders.id !=null">
+				id=#{params.childOrders.id}
+			</if>
+		</where>
+	</update>
+	
+	<select id="countByIds" parameterType="map" resultType="long">
+		select count(o.id) from lar_ordermanager o left outer join lar_areasettings a on(o.areaSettingId=a.id) 
+		left join lar_order_check c on o.orderId=c.order_id
+		<where>
+			o.enable = 0 
+			<if test="params.mechanismId!=null">
+				and a.mechanismId=#{params.mechanismId} 
+			</if>
+			<if test="params.orgIds!=null and params.orgIds.size>0">
+				and a.mechanismId in 
+				<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+                       #{item}
+               	</foreach>
+			</if>
+	        <if test="params.orderStatusIds!=null and params.orderStatusIds.size>0">
+	        	and orderStatusId in 
+				<foreach item="item" index="index" collection="params.orderStatusIds" open="(" separator="," close=")">
+		             #{item}
+		        </foreach>
+	        </if>
+			<if test="params.completionType != null">
+				and completionType=#{params.completionType}
+			</if>
+			<if test="params.upOrder !=null and params.upOrder=='true'">
+				<if test="params.endDate==null and params.firstDate!=null">
+					<![CDATA[
+						and placeOrder> #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.firstDate==null and params.endDate!=null">
+					<![CDATA[
+						and placeOrder < #{params.endDate}
+					]]>
+				</if>
+				<if test="params.endDate!=null and params.firstDate!=null">
+					<![CDATA[
+						and placeOrder < #{params.endDate} and placeOrder> #{params.firstDate}
+					]]>
+				</if>
+			</if>
+			<if test="params.disOrder !=null and params.disOrder=='true'">
+				<if test="params.endDate==null and params.firstDate!=null">
+					<![CDATA[
+						and takeDate> #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.firstDate==null and params.endDate!=null">
+					<![CDATA[
+						and takeDate < #{params.endDate}
+					]]>
+				</if>
+				<if test="params.endDate!=null and params.firstDate!=null">
+					<![CDATA[
+						and takeDate < #{params.endDate} and takeDate> #{params.firstDate}
+					]]>
+				</if>
+			</if>
+			<if test="params.sendOrder !=null and params.sendOrder=='true'">
+				<if test="params.endDate==null and params.firstDate!=null">
+					<![CDATA[
+						and distributeDate> #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.firstDate==null and params.endDate!=null">
+					<![CDATA[
+						and distributeDate < #{params.endDate}
+					]]>
+				</if>
+				<if test="params.endDate!=null and params.firstDate!=null">
+					<![CDATA[
+						and distributeDate < #{params.endDate} and distributeDate> #{params.firstDate}
+					]]>
+				</if>
+			</if>
+			<if test="params.evaluateId !=null">
+					and evaluateId = #{params.evaluateId}
+			</if>
+			<if test="params.orderId !=null">
+					and orderId = #{params.orderId}
+			</if>
+			<if test="params.paymentTypeId !=null">
+					and paymentTypeId = #{params.paymentTypeId}
+			</if>
+			<if test="params.salesman !=null">
+					and salesmanId = #{params.salesman}
+			</if>
+			<if test="params.areaSetting !=null">
+					and areaSettingId = #{params.areaSetting}
+			</if>
+			<if test="params.failureType !=null">
+					and failureTypeId = #{params.failureType}
+			</if>
+			<if test="params.childOrders !=null and params.childOrders.id !=null">
+					and id=#{params.childOrders.id}
+			</if>
+			<if test="params.orderStatusId!=null">
+					and orderStatusId=#{params.orderStatusId}
+			</if>
+			<!-- 接单列表的条件 -->
+			<if test="params.taking !=null and params.taking == 'true'">
+				and (grab_order=10 or grab_order=22 or grab_order=33)
+			</if>
+				
+			<!-- 以下是根据对账的相关信息查询 -->
+				<!-- 对账时间 -->
+				<if test="params.checkOrder !=null and params.checkOrder=='true'">
+					<if test="params.endDate!=null and params.firstDate!=null">
+						<![CDATA[
+							and c.check_date < #{params.endDate} and c.check_date> #{params.firstDate}
+						]]>
+					</if>
+				</if>
+				<!-- 对账状态 -->
+				<if test="params.check_status !=null">
+					and check_status = #{params.check_status}
+				</if>
+				<!-- 是否超标 -->
+				<if test="params.overproof !=null">
+					and c.overproof = #{params.overproof}
+				</if>
+				<!-- 对账人 -->
+				<if test="params.check_man !=null">
+					and c.check_man = #{params.check_man}
+				</if>
+				<!-- 完成类型 -->
+				<if test="params.completion !=null">
+					and completionType = #{params.completion}
+				</if>
+		</where>
+	</select>
+	
+	<select id="countByChildId" parameterType="map" resultType="int">
+		select count(id) from lar_childorders 
+		<where>
+			enable = 0 
+			<if test="params.orderId!=null">
+				and orderManagerId=#{params.orderId}
+			</if>
+			<if test="params.confirmOrder!=null">
+				and confirmOrder=#{params.confirmOrder}
+			</if>
+		</where>
+	</select>
+	
+	<select id="countTransaction" parameterType="map" resultType="long">
+		select count(f.orderId) 
+		FROM 
+		(select a.`manId` as `salesman.manId`,a.`manName` as `salesman.manName`,s.`mechanismId` as `areaSetting.mechanismId`,s.`mechanism` as `areaSetting.mechanism`,s.`areaName` as `areaSetting.areaName`,o.paymentTypeId AS paymentTypeId,
+		o.money AS money,o.`paymentTypeName`as `paymentTypeName`,o.confirmPersionId AS confirmPersionId,o.confirmPersionName AS confirmPersionName,o.finishDate AS finishDate,o.areaSettingId AS areaSettingId,o.completionIllustrate AS completionIllustrate,
+		o.`orderId` AS orderId,o.`integral` AS integral,o.appUserId AS appUserId,d.`name` as "larClientUser.name",d.`phone` as "larClientUser.phone",d.`address` as "larClientUser.address",o.createDate AS createDate
+		FROM `lar_ordermanager` o LEFT OUTER JOIN `lar_areasettings` s 
+		ON(CONCAT(o.`areaSettingId`,"")=s.`id`) LEFT OUTER JOIN `lar_salesman` a ON(CONCAT(o.`salesmanId`,"")=a.id) 
+	  	LEFT OUTER JOIN `lar_clientuser` d ON(CONCAT(o.`appUserId`,"") = d.`customerId`)
+		WHERE o.`enable`=0 and orderStatusId=4
+		UNION ALL 
+		SELECT a.`manId` as `salesman.manId`,a.`manName` as `salesman.manName`,r.org AS `areaSetting.mechanismId`,s.`mechanism` as `areaSetting.mechanismName`,s.areaName AS `areaSetting.areaName`,pay_type_id AS paymentTypeId,
+		r.money AS money,r.`pay_type_name` as `paymentTypeName`,a.manId AS confirmPersionId,a.manName AS confirmPersionName,create_date AS finishDate,r.area AS areaSettingId,r.remark AS completionIllustrate,
+		r.order_id AS orderId,r.integral AS integral,client_user AS appUserId,
+		d.`name` as "larClientUser.name",d.`phone` as "larClientUser.phone",d.`address` as "larClientUser.address",r.create_date AS createDate
+		FROM `lar_recycle_order` r LEFT OUTER JOIN `lar_areasettings` s ON(CONCAT(r.`area`,"")=s.`id`) 
+		LEFT OUTER JOIN `lar_salesman` a ON(CONCAT(r.`salesman_id`,"")=a.id)
+		LEFT OUTER JOIN `lar_clientuser` d ON(CONCAT(r.`client_user`,"") = d.`customerId`)) AS f
+		<where>
+			<if test="params!=null and params.size>0">
+				<if test="params.mechanismId!=null">
+					and f.`areaSetting.mechanismId`=#{params.mechanismId} 
+				</if>
+				<if test="params.orgIds!=null and params.orgIds.size>0">
+					and f.`areaSetting.mechanismId` in 
+					<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="params.endDate==null and params.firstDate!=null">
+					<![CDATA[
+						and f.finishDate> #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.firstDate==null and params.endDate!=null">
+					<![CDATA[
+						and f.finishDate < #{params.endDate}
+					]]>
+				</if>
+				<if test="params.endDate!=null and params.firstDate!=null">
+					<![CDATA[
+						and f.finishDate < #{params.endDate} and finishDate> #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.areaId!=null">
+					and f.areaSettingId=#{params.areaId} 
+				</if>
+				
+				<if test="params.confirmPersionId !=null">
+					and f.confirmPersionId = #{params.confirmPersionId}
+				</if>
+				<if test="params.orderId !=null">
+					and f.orderId = #{params.orderId}
+				</if>
+				<if test="params.salesmanId !=null">
+					and f.`salesman.manId` = #{params.salesmanId}
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectTransaction"  resultType="com.sdcloud.api.lar.entity.OrderManager" parameterType="com.sdcloud.framework.entity.LarPager">
+		SELECT  
+		<if test="larPager.distinct==true">
+			distinct 
+		</if> 
+		f.`salesman.manId`,f.`salesman.manName`,f.`areaSetting.mechanismId`,f.`areaSetting.mechanism`,f.`areaSetting.areaName`,f.paymentTypeId,f.money,f.`paymentTypeName`,f.confirmPersionId,f.confirmPersionName,f.finishDate,f.areaSettingId,
+		f.completionIllustrate,f.orderId,f.integral,f.appUserId,f.`larClientUser.name`,f.`larClientUser.phone`,f.`larClientUser.address`,f.createDate 
+		FROM 
+		(select a.`manId` as `salesman.manId`,a.`manName` as `salesman.manName`,s.`mechanismId` as `areaSetting.mechanismId`,s.`mechanism` as `areaSetting.mechanism`,s.`areaName` as `areaSetting.areaName`,o.paymentTypeId AS paymentTypeId,
+		o.money AS money,o.`paymentTypeName`as `paymentTypeName`,o.confirmPersionId AS confirmPersionId,o.confirmPersionName AS confirmPersionName,o.finishDate AS finishDate,o.areaSettingId AS areaSettingId,o.completionIllustrate AS completionIllustrate,
+		o.`orderId` AS orderId,o.`integral` AS integral,o.appUserId AS appUserId,d.`name` as "larClientUser.name",d.`phone` as "larClientUser.phone",d.`address` as "larClientUser.address",o.createDate AS createDate
+		FROM `lar_ordermanager` o LEFT OUTER JOIN `lar_areasettings` s 
+		ON(CONCAT(o.`areaSettingId`,"")=s.`id`) LEFT OUTER JOIN `lar_salesman` a ON(CONCAT(o.`salesmanId`,"")=a.id) 
+	  	LEFT OUTER JOIN `lar_clientuser` d ON(CONCAT(o.`appUserId`,"") = d.`customerId`)
+		WHERE o.`enable`=0 and orderStatusId=4
+		UNION ALL 
+		SELECT a.`manId` as `salesman.manId`,a.`manName` as `salesman.manName`,r.org AS `areaSetting.mechanismId`,s.`mechanism` as `areaSetting.mechanismName`,s.areaName AS `areaSetting.areaName`,pay_type_id AS paymentTypeId,
+		r.money AS money,r.`pay_type_name` as `paymentTypeName`,a.manId AS confirmPersionId,a.manName AS confirmPersionName,create_date AS finishDate,r.area AS areaSettingId,r.remark AS completionIllustrate,
+		r.order_id AS orderId,r.integral AS integral,client_user AS appUserId,
+		d.`name` as "larClientUser.name",d.`phone` as "larClientUser.phone",d.`address` as "larClientUser.address",r.create_date AS createDate
+		FROM `lar_recycle_order` r LEFT OUTER JOIN `lar_areasettings` s ON(CONCAT(r.`area`,"")=s.`id`) 
+		LEFT OUTER JOIN `lar_salesman` a ON(CONCAT(r.`salesman_id`,"")=a.id)
+		LEFT OUTER JOIN `lar_clientuser` d ON(CONCAT(r.`client_user`,"") = d.`customerId`)) AS f
+		<where>
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and f.`areaSetting.mechanismId`=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and f.`areaSetting.mechanismId` in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and f.finishDate> #{larPager.params.firstDate}
+					]]>
+				</if>
+				<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and f.finishDate < #{larPager.params.endDate}
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and f.finishDate < #{larPager.params.endDate} and finishDate> #{larPager.params.firstDate}
+					]]>
+				</if>
+				<if test="larPager.params.areaId!=null">
+					and f.areaSettingId=#{larPager.params.areaId} 
+				</if>
+				
+				<if test="larPager.params.confirmPersionId !=null">
+					and f.confirmPersionId = #{larPager.params.confirmPersionId}
+				</if>
+				<if test="larPager.params.orderId !=null">
+					and f.orderId = #{larPager.params.orderId}
+				</if>
+				<if test="larPager.params.salesmanId !=null">
+					and `salesman.manId` = #{larPager.params.salesmanId}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by f.${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT count(o.id) FROM `lar_ordermanager` o LEFT OUTER JOIN `lar_address` a ON(o.larClientUserAddressId=a.id) 
+		LEFT OUTER JOIN `lar_salesman` s ON(o.`salesmanId`=s.`id`) 
+		<where>
+			o.enable =0 
+			<if test="params.salesman!=null">
+				and s.`id`=#{params.salesman}
+			</if>
+			<if test="params.orderStatusId!=null">
+				and orderStatusId=#{params.orderStatusId}
+			</if>
+			<if test="params.customerId!=null">
+				and a.larClientUser=#{params.customerId}
+			</if>
+			<if test="params.orderId!=null">
+				and o.orderId=#{params.orderId}
+			</if>
+		</where> 
+	</select>
+	
+	<!-- 等待服务列表的接口，根据业务员，查询服务中订单加子单号的接口,因为后台派单的话是有指派业务员的 -->
+	<select id="getOrderByCustomerId" resultMap="queryOrders" parameterType="map">
+		SELECT o.id AS o_id,orderId,illustrate,completionIllustrate,cancelOrderIllustrate,placeOrder,businessTypeId,businessTypeName,finishDate,
+		orderStatusId,orderStatusName,maaDate,sendSingleId,sendSingleName,distributeDate,evaluateId,s.id AS s_id,
+		`manId`,`manName`,`personnelId`,deviceId,distributeIllustrate,a.id AS a_id,a.userName,contact,CONCAT(address,detail) AS "address",mechanismId,
+		paymentTypeId,paymentTypeName,money,o.integral AS "o_integral" 
+		FROM `lar_ordermanager` o LEFT OUTER JOIN `lar_address` a ON(o.larClientUserAddressId=a.id)  
+		LEFT OUTER JOIN `lar_salesman` s ON(o.`salesmanId`=s.`id`) 
+		LEFT OUTER JOIN `lar_areasettings` t ON(t.id=o.`areaSettingId`) 
+		<where>
+			o.enable =0 
+			<if test="params.salesman!=null">
+				and s.`id`=#{params.salesman} 
+			</if>
+			<if test="params.orderStatusId!=null">
+				and orderStatusId=#{params.orderStatusId}
+			</if>
+			<if test="params.customerId!=null">
+				and a.larClientUser=#{params.customerId}
+			</if>
+			<if test="params.evaluateId!=null &amp;&amp; params.evaluateId!=0">
+				<![CDATA[ and o.evaluateId <> 0 ]]> 
+			</if>
+			<if test="params.orderId!=null">
+				and o.orderId=#{params.orderId}
+			</if>
+			<!-- <if test="params.confirmOrder!=null and params.confirmOrder==0">
+				and confirmOrder=#{params.confirmOrder} || confirmOrder is null
+			</if> -->
+			
+			<if test="params.orderStatusIds!=null and params.orderStatusIds.size>0">
+				and orderStatusId in 
+				<foreach item="item" index="index" collection="params.orderStatusIds" open="(" separator="," close=")">
+                	#{item}
+               	</foreach>
+			</if>
+		</where> 
+		
+		ORDER BY
+		<choose>
+			<when test="null != params.orderBy ">
+				${params.orderBy}  
+			</when>
+			<otherwise>
+				o.maaDate DESC ,o.placeOrder DESC 
+			</otherwise>
+		</choose>
+		<if test="params.first!=null and params.pageSize!=null">
+			limit #{params.first}, #{params.pageSize}
+		</if> 
+	</select>
+	
+	<select id="getOrderByCustomerIds" resultMap="queryOrders" parameterType="map">
+		SELECT o.id AS o_id,orderId,illustrate,completionIllustrate,cancelOrderIllustrate,placeOrder,businessTypeId,businessTypeName,finishDate,
+		orderStatusId,orderStatusName,maaDate,sendSingleId,sendSingleName,distributeDate,evaluateId,s.id AS s_id,
+		`manId`,`manName`,`personnelId`,deviceId,distributeIllustrate,a.id AS a_id,a.userName,contact,CONCAT(address,detail) AS "address",mechanismId,
+		paymentTypeId,paymentTypeName,money,o.integral AS "o_integral",paymentIllustrate 
+		FROM `lar_ordermanager` o LEFT OUTER JOIN `lar_address` a ON(o.larClientUserAddressId=a.id)  
+		LEFT OUTER JOIN `lar_salesman` s ON(o.`salesmanId`=s.`id`) 
+		LEFT OUTER JOIN `lar_areasettings` t ON(t.id=o.`areaSettingId`) 
+		<where>
+			o.enable =0 
+			<if test="params.salesman!=null and params.salesman.size>0">
+				and s.`id` in
+				 <foreach item="item" index="index" collection="params.salesman" open="(" separator="," close=")">
+	                	#{item}
+	      		</foreach>
+			<!-- 	and s.`id`=#{params.salesman} -->
+			</if>
+			<if test="params.orderStatusId!=null">
+				and orderStatusId=#{params.orderStatusId}
+			</if>
+			<if test="params.customerId!=null">
+				and a.larClientUser=#{params.customerId}
+			</if>
+			<if test="params.evaluateId!=null &amp;&amp; params.evaluateId!=0">
+				<![CDATA[ and o.evaluateId <> 0 ]]> 
+			</if>
+			<if test="params.orderId!=null">
+				and o.orderId=#{params.orderId}
+			</if>
+			<!-- <if test="params.confirmOrder!=null and params.confirmOrder==0">
+				and confirmOrder=#{params.confirmOrder} || confirmOrder is null
+			</if> -->
+			
+			<if test="params.orderStatusIds!=null and params.orderStatusIds.size>0">
+				and orderStatusId in 
+				<foreach item="item" index="index" collection="params.orderStatusIds" open="(" separator="," close=")">
+                	#{item}
+               	</foreach>
+			</if>
+		</where> 
+		
+		ORDER BY
+		<choose>
+			<when test="null != params.orderBy ">
+				${params.orderBy}  
+			</when>
+			<otherwise>
+				o.maaDate DESC ,o.placeOrder DESC 
+			</otherwise>
+		</choose>
+		<if test="params.first!=null and params.pageSize!=null">
+			limit #{params.first}, #{params.pageSize}
+		</if> 
+	</select>
+	
+	<resultMap type="com.sdcloud.api.lar.entity.OrderManager" id="queryOrders">
+		<id property="id" column="o_id"/>
+		<result property="orderId" column="orderId" />
+		<result property="completionIllustrate" column="completionIllustrate" />
+		<result property="cancelOrderIllustrate" column="cancelOrderIllustrate" />
+		<result property="placeOrder" column="placeOrder" />
+		<result property="businessTypeId" column="businessTypeId" />
+		<result property="businessTypeName" column="businessTypeName" />
+		<result property="orderStatusId" column="orderStatusId" />
+		<result property="orderStatusName" column="orderStatusName" />
+		<result property="maaDate" column="maaDate" />
+		<result property="sendSingleId" column="sendSingleId" />
+		<result property="sendSingleName" column="sendSingleName" />
+		<result property="distributeDate" column="distributeDate" />
+		<result property="evaluateId" column="evaluateId" />
+		<result property="salesman.id" column="s_id" />
+		<result property="salesman.manId" column="manId" />
+		<result property="salesman.manName" column="manName" />
+		<result property="salesman.personnelId" column="personnelId" />
+		<result property="salesman.deviceId" column="deviceId" />
+		<result property="distributeIllustrate" column="distributeIllustrate" />
+		<result property="larClientUserAddress.id" column="a_id" />
+		<result property="larClientUserAddress.userName" column="userName" />
+		<result property="larClientUserAddress.contact" column="contact" />
+		<result property="larClientUserAddress.address" column="address" />
+		<!-- <result property="larClientUserAddress.detail" column="detail" /> -->
+		<result property="areaSetting.mechanismId" column="mechanismId" />
+		<result property="paymentTypeId" column="paymentTypeId" />
+		<result property="paymentTypeName" column="paymentTypeName" />
+		<result property="money" column="money" />
+		<result property="integral" column="o_integral" />
+		<result property="finishDate" column="finishDate" />
+		<collection property="childOrders" column="o_id" 
+		javaType="java.util.ArrayList" ofType="com.sdcloud.api.lar.entity.ChildOrders" select="childOrders">
+		
+		</collection>
+		<collection column="o_id" property="recyclingImg" javaType="java.util.ArrayList" ofType="com.sdcloud.api.lar.entity.RecyclingImg" select="getImgById"></collection>
+	</resultMap>
+	
+	
+	<select id="getImgById" resultType="com.sdcloud.api.lar.entity.RecyclingImg">
+		SELECT `imgUrl` FROM `lar_recyclingimg` WHERE `orderManagerId`=#{o_id}
+	</select>
+	
+	<select id="getOrderByUserId" resultMap="getChildOrderByUserId" parameterType="map">
+		SELECT o.id as "o_id",finishDate,orderSourceId,integral,paymentTypeId FROM `lar_ordermanager` o 
+		LEFT OUTER JOIN `lar_address` a ON(o.`larClientUserAddressId`=a.id) 
+		where o.enable=0 and `orderStatusId`= 4 and a.larClientUser=#{params.userId} order by finishDate desc,o.id 
+	</select>
+	<resultMap id="getChildOrderByUserId" type="com.sdcloud.api.lar.entity.MyPoints">
+		<id column="o_id" property="id" />
+		<result column="finishDate" property="finishDate" />
+		<result column="orderSourceId" property="orderSourceId"/>
+		<result column="integral" property="integral"/>
+		<result column="paymentTypeId" property="paymentTypeId"/>
+		<collection column="o_id" property="childOrders" javaType="java.util.ArrayList" ofType="com.sdcloud.api.lar.entity.ChildOrders" select="selectChildOrders" ></collection>
+	</resultMap>
+	<select id="selectChildOrders" resultType="com.sdcloud.api.lar.entity.ChildOrders">
+		SELECT c.`id`,`number`,`confirmOrder`, r.`id` AS "recyclingMaterial.id",`goodsName` AS "recyclingMaterial.goodsName",
+		`goodsDescribe` AS "recyclingMaterial.goodsDescribe",`meteringCompany` AS "recyclingMaterial.meteringCompany",
+		`imgUrl`  AS "recyclingMaterial.imgUrl", t.`id` AS "recyclingMaterial.recyclingTypeId.id",
+		`typeName` AS "recyclingMaterial.recyclingTypeId.typeName" FROM `lar_childorders` c 
+		LEFT OUTER JOIN `lar_recyclingmaterial` r ON(c.`recyclingMaterialId`=r.id) 
+		LEFT OUTER JOIN `lar_recyclingtype` t ON(r.recyclingTypeId=t.id) WHERE c.enable=0 AND confirmOrder=0 and c.`orderManagerId`=#{o_id}
+	</select>
+	<select id="childOrders" resultType="com.sdcloud.api.lar.entity.ChildOrders">
+		SELECT c.`id`,`number`,`confirmOrder`, r.`id` AS "recyclingMaterial.id",`goodsName` AS "recyclingMaterial.goodsName",
+		`goodsDescribe` AS "recyclingMaterial.goodsDescribe",`meteringCompany` AS "recyclingMaterial.meteringCompany",
+		`imgUrl`  AS "recyclingMaterial.imgUrl", t.`id` AS "recyclingMaterial.recyclingTypeId.id",e.`spec_name` as "recyclingSpec.specName",
+		`typeName` AS "recyclingMaterial.recyclingTypeId.typeName",e.`id` AS "recyclingSpec.id",c.`totalPrice`,
+		e.`spec_company` AS "recyclingSpec.specCompany",p.`id` AS "recyclingSpec.priceId",p.`price` AS "recyclingSpec.price"
+		 FROM `lar_childorders` c 
+		LEFT OUTER JOIN `lar_recyclingmaterial` r ON(c.`recyclingMaterialId`=r.id) 
+		LEFT OUTER JOIN `lar_recyclingtype` t ON(r.recyclingTypeId=t.id)
+		LEFT OUTER JOIN `lar_recyclingspec` e ON(c.specId=e.id) 
+		LEFT OUTER JOIN `lar_recyclingprice` p ON(p.id=c.priceId)
+		WHERE c.enable=0 and c.`orderManagerId`=#{o_id}
+	</select>
+	
+	<update id="appConfirmOrder" parameterType="map">
+		update lar_ordermanager
+		<set>
+			<if test="params.orderStatusId != null">
+				orderStatusId = #{params.orderStatusId},
+			</if>
+			<if test="params.orderStatusName != null">
+				orderStatusName = #{params.orderStatusName},
+			</if>
+			<if test="params.confirmPersionId !=null">
+				confirmPersionId = #{params.confirmPersionId},
+			</if>
+			<if test="params.confirmPersionName !=null">
+				confirmPersionName = #{params.confirmPersionName},
+			</if>
+			<if test="params.completionType != null">
+				completionType = #{params.completionType},
+			</if>
+			<if test="params.completionName != null">
+				completionName = #{params.completionName},
+			</if>
+			<if test="params.completionIllustrate !=null">
+				completionIllustrate = #{params.completionIllustrate},
+			</if>
+			<if test="params.finishDate != null">
+				finishDate = #{params.finishDate},
+			</if>
+			<if test="params.paymentTypeId != null">
+				paymentTypeId = #{params.paymentTypeId},
+			</if>
+			<if test="params.paymentTypeName != null">
+				paymentTypeName = #{params.paymentTypeName},
+			</if>
+			<if test="params.money != null">
+				money = #{params.money},
+			</if>
+			<if test="params.integral != null">
+				integral = #{params.integral},
+			</if>
+			<if test="params.lengthService != null">
+				lengthService = #{params.lengthService},
+			</if>
+			
+			<if test="params.paymentIllustrate != null">
+				paymentIllustrate = #{params.paymentIllustrate},
+			</if>
+			<if test="params.failureTypeId != null">
+				failureTypeId = #{params.failureTypeId},
+			</if>
+			<if test="params.failureTypeName != null">
+				failureTypeName = #{params.failureTypeName},
+			</if>
+			<if test="params.payableTotalPrice != null">
+				payableTotalPrice = #{params.payableTotalPrice},
+			</if>
+		</set>
+		<where>
+			<if test="params.orderId">
+				orderId=#{params.orderId}
+			</if>
+		</where>
+	</update>
+	
+	<update id="upateIntegralByOrderId">
+		update lar_ordermanager o,lar_clientuser c
+		<set>
+			<if test="integral != null">
+				c.historyPoints=c.historyPoints+#{integral},
+				c.nowPoints = c.nowPoints+#{integral}
+			</if>
+		</set> 
+		<where>
+			o.appUserId=c.id
+			<if test="orderId != null and orderId != ''">
+				and o.orderId = #{orderId}
+			</if>
+		</where>
+	</update>
+	
+	<select id="selectDisCount" resultType="int">
+	
+	SELECT COUNT(id) FROM `lar_ordermanager`
+	 WHERE `orderStatusId` = 3 
+	
+	 <if test="id !=null and id.size>0"></if>
+	  AND salesmanId in 
+		 <foreach item="item" index="index" collection="id" open="(" separator="," close=")">
+            	#{item}
+	      </foreach>
+	 AND ENABLE=0
+	</select>
+	
+	<select id = "selectCheck" resultType="com.sdcloud.api.lar.entity.OrderCheck">
+		select id,
+			order_id AS "orderId",
+			check_man AS "checkMan",
+			check_date AS "checkDate",
+			overproof,
+			overproof_name AS "overproofName",
+			trouble_type AS "troubleType",
+			trouble_name AS "troubleName",
+			check_remark AS "checkRemark"
+			from lar_order_check
+			WHERE order_id = #{orderId}
+	</select>
+	
+	<select id="selectChildOrder" resultType="com.sdcloud.api.lar.entity.ChildOrders" >
+		SELECT c.`id`,`number`,`confirmOrder`, r.`id` AS "recyclingMaterial.id",`goodsName` AS "recyclingMaterial.goodsName",
+		`goodsDescribe` AS "recyclingMaterial.goodsDescribe",`meteringCompany` AS "recyclingMaterial.meteringCompany",
+		`imgUrl`  AS "recyclingMaterial.imgUrl", t.`id` AS "recyclingMaterial.recyclingTypeId.id",
+		`typeName` AS "recyclingMaterial.recyclingTypeId.typeName",p.`price` AS "recyclingSpec.price",e.`id` AS "recyclingSpec.id",
+		`totalPrice`,e.`spec_company` AS "recyclingSpec.specCompany",p.`id` AS "recyclingSpec.priceId",e.`spec_name` AS "recyclingSpec.specName"
+		 FROM `lar_childorders` c 
+		LEFT OUTER JOIN `lar_recyclingmaterial` r ON(c.`recyclingMaterialId`=r.id) 
+		LEFT OUTER JOIN `lar_recyclingtype` t ON(r.recyclingTypeId=t.id)
+		LEFT OUTER JOIN `lar_recyclingspec` e ON(c.specId=e.id) 
+		LEFT OUTER JOIN `lar_recyclingprice` p ON(p.id=c.priceId)
+		<where>
+			c.enable=0
+			and c.`orderManagerId`=#{o_id}
+		</where>		
+		ORDER BY c.`createDate` DESC
+	</select>
+	
+	<!-- 自动派单 -->
+    <select id="findInvalidOrder" resultType="com.sdcloud.api.lar.entity.OrderManager">
+    	select 
+		 orderId,grabOrder,orderStatusId,orderStatusName,areaSettingId as 'areaSetting.id',
+		 personnelId as sendSingleId,id as 'salesman.id'
+		FROM
+		(
+			SELECT 
+			s.orderId,s.grab_order as grabOrder,s.orderStatusId,orderStatusName,
+			o.areaSettingId ,o.personnelId ,o.id 
+			FROM lar_ordermanager s
+			LEFT JOIN lar_salesman o
+			ON (o.`enable` = 0 AND FIND_IN_SET(o.areaSettingId,s.area_list) )
+			WHERE 
+			grab_order=31 and orderStatusId=1 and UNIX_TIMESTAMP(placeOrder) + ${time} &lt; UNIX_TIMESTAMP(#{date})
+			ORDER BY RAND()
+		) as ship
+		GROUP BY orderId
+	</select>
+	<update id="batchUpdate">
+		update lar_ordermanager
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" grab_order = case" suffix="end,">
+               <foreach collection="list" item="i">
+               	   <if test="i.grabOrder != null">
+                       when orderId=#{i.orderId} then #{i.grabOrder}
+                   </if>
+               </foreach>
+            </trim>
+            <trim prefix=" orderStatusId = case" suffix="end,">
+               <foreach collection="list" item="i">
+               	   <if test="i.orderStatusId != null">
+                       when orderId=#{i.orderId} then #{i.orderStatusId}
+                   </if>
+               </foreach>
+            </trim>
+            <trim prefix=" orderStatusName = case" suffix="end,">
+               <foreach collection="list" item="i">
+               	   <if test="i.orderStatusName != null">
+                       when orderId=#{i.orderId} then #{i.orderStatusName}
+                   </if>
+               </foreach>
+            </trim>
+            <trim prefix=" areaSettingId = case" suffix="end,">
+               <foreach collection="list" item="i">
+               	   <if test="i.areaSetting != null">
+                       when orderId=#{i.orderId} then #{i.areaSetting.id}
+                   </if>
+               </foreach>
+            </trim>
+            <trim prefix=" sendSingleId = case" suffix="end,">
+               <foreach collection="list" item="i">
+               	   <if test="i.salesman != null">
+                       when orderId=#{i.orderId} then #{i.sendSingleId}
+                   </if>
+               </foreach>
+            </trim>
+            <trim prefix=" salesmanId = case" suffix="end,">
+               <foreach collection="list" item="i">
+               	   <if test="i.salesman != null">
+                       when orderId=#{i.orderId} then #{i.salesman.id}
+                   </if>
+               </foreach>
+            </trim>
+            <trim prefix=" distributeDate = case" suffix="end,">
+               <foreach collection="list" item="i">
+               	   <if test="i.distributeDate != null">
+                       when orderId=#{i.orderId} then #{i.distributeDate}
+                   </if>
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			orderId in 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.orderId}
+          </foreach>
+		</where>
+	</update>
+	
+	<!-- SELECT confirmPersionId,confirmPersionName FROM `lar_ordermanager` o LEFT OUTER JOIN `lar_areasettings` a "
+			+ "ON(o.areaSettingId=a.id) WHERE o.enable=0  AND mechanismId=#{id} AND confirmPersionId IS NOT NULL GROUP BY confirmPersionId -->
+
+	<select id = "getConfirmationPersonById2" parameterType="list" resultType="com.sdcloud.api.lar.entity.OrderManager">
+		SELECT confirmPersionId,confirmPersionName
+		FROM `lar_ordermanager` o
+		LEFT OUTER JOIN `lar_areasettings` a
+		ON o.areaSettingId=a.id
+	<where>
+		o.enable=0
+		<if test="orgIds !=null and orgIds.size>0">
+			and
+			a.mechanismId in
+		<foreach collection="orgIds" item="item" index="index" open="(" close=")" separator=",">
+	         #{item}
+        </foreach>
+		</if>
+	</where>
+	AND confirmPersionId IS NOT NULL 
+	GROUP BY confirmPersionId
+		
+	</select>
+	
+	<!-- SELECT s.`id`,`manId`,`manName`,`deviceId`,`manDescribe`,s.`createDate`,s.`enable`
+	 FROM `lar_salesman` s LEFT OUTER JOIN `lar_areasettings` a ON(s.`areaSettingId`=a.id) 
+	 WHERE a.`mechanismId`=#{id} AND s.enable=0 -->
+	
+	<select id = "getSalesmansBymechanismId2" parameterType="list" resultType="com.sdcloud.api.lar.entity.Salesman">
+		SELECT s.`id`,`manId`,`manName`,`deviceId`,`manDescribe`,s.`createDate`,s.`enable`
+		FROM `lar_salesman` s
+		LEFT OUTER JOIN `lar_areasettings` a
+		ON s.areaSettingId=a.id
+	<where>
+		s.enable=0
+		<if test="orgIds !=null and orgIds.size>0">
+			and
+			a.mechanismId in
+		<foreach collection="orgIds" item="item" index="index" open="(" close=")" separator=",">
+	         #{item}
+        </foreach>
+		</if>
+	</where>
+	</select>
+	
+	<select id="getCheckMens" resultType="long">
+		select distinct c.`check_man`
+		from lar_ordermanager o 
+		left outer join lar_areasettings a  on(o.areaSettingId=a.id)
+		left join lar_order_check c on o.orderId=c.order_id
+		<where>
+			c.`check_man` is not null 
+			<if test="larPager !=null and larPager.params !=null and larPager.params.mechanismId!=null">
+				and a.mechanismId=#{larPager.params.mechanismId} 
+			</if>
+			<if test="larPager !=null and larPager.params !=null and larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+				and a.mechanismId in 
+				<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                     #{item}
+               	</foreach>
+			</if>
+		</where>
+	</select>
+
+</mapper>

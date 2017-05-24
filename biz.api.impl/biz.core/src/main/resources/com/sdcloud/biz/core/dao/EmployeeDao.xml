@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.EmployeeDao">
+	
+	<sql id="tableColumn">
+		name,telephone,email,description,orgId,ownerCode,tenantId,gender,
+		politicsStatus,employeeNo,birthday,identNo,entryDate,departDate,
+		jobTitle,techLevel,profession,major,education,gradDate,gradCollege,
+		mobile,address,weChat,mobileMac,emergeName,emergeMobile,isHeadquarters,isManager,national,status
+	</sql>
+	
+	<sql id="updateCondition">
+		
+	</sql>
+	
+	<insert id="insert" parameterType="Employee">
+		insert into pf_employee 
+			(employeeId, <include refid="tableColumn"/>)
+		values 
+		<foreach item="item" index="index" collection="list" separator=",">
+			(#{item.employeeId}, #{item.name}, #{item.telephone}, #{item.email}, #{item.description}, #{item.org.orgId}, #{item.ownerCode},
+			 #{item.tenantId}, #{item.gender}, #{item.politicsStatus}, #{item.employeeNo}, #{item.birthday}, #{item.identNo},
+			 #{item.entryDate}, #{item.departDate}, #{item.jobTitle}, #{item.techLevel}, #{item.profession}, #{item.major},
+			 #{item.education}, #{item.gradDate}, #{item.gradCollege}, #{item.mobile}, #{item.address}, #{item.weChat}, #{item.mobileMac},
+			 #{item.emergeName}, #{item.emergeMobile},#{item.isHeadquarters},#{item.isManager},#{item.national},#{item.status}
+			 )
+		</foreach>
+	</insert>
+
+	<select id="findByOrg" resultType="com.sdcloud.api.core.entity.Employee">
+		select 
+		e.employeeId,
+		e.name,
+		e.telephone,
+		e.email,
+		e.description,
+		e.orgId as "org.orgId",
+		o.name as "org.name",
+		o.companyId as "org.companyId",
+		co.name as "org.companyName",
+		co.fullName as "org.companyFullName",
+		e.gender,
+		e.politicsStatus,
+		e.employeeNo,
+		e.birthday,
+		e.identNo,
+		e.entryDate,
+		e.departDate,
+		e.jobTitle,
+		e.techLevel,
+		e.profession,
+		e.major,
+		e.education,
+		e.gradDate,
+		e.gradCollege,
+		e.mobile,
+		e.address,
+		e.weChat,
+		e.mobileMac,
+		e.emergeName,
+		e.emergeMobile,
+		e.ownerCode,
+		e.tenantId,
+		e.isHeadquarters,e.isManager,e.national,
+		e.status,
+		u.name as "userName" 
+		
+		from pf_employee e
+		left outer join pf_org o
+			on e.orgId = o.orgId
+		left outer join pf_org co
+			on co.orgId = o.companyId
+		left outer join pf_user u
+			on e.employeeId = u.employeeId
+			
+		<include refid="pagerCondition" />
+		<if test="isBinding != null &amp;&amp; isBinding == 1">
+			and u.userId is  null
+		</if>
+		
+		group by e.employeeId 
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+
+	<!-- 分页查询条件 -->
+	<sql id="pagerCondition">
+		<!-- 修改下面条件，需要同步修改到别的方法，通知下luomasi -->
+		<where>
+			<if test="name != null &amp;&amp; name != ''">
+				and LOCATE(#{name}, e.name) > 0
+			</if>
+			<if test="gender != null &amp;&amp; gender != ''">
+				and e.gender = #{gender}
+			</if>
+			<if test="isHeadquarters != null &amp;&amp; isHeadquarters != ''">
+				and e.isHeadquarters = #{isHeadquarters}
+			</if>
+			<if test="isManager != null &amp;&amp; isManager != ''">
+				and e.isManager = #{isManager}
+			</if>
+			<if test="national != null &amp;&amp; national != ''">
+				and e.national = #{national}
+			</if>
+			<if test="employeeNo != null &amp;&amp; employeeNo != ''">
+				and LOCATE(#{employeeNo}, e.employeeNo) > 0
+			</if>
+			<if test="mobile != null &amp;&amp; mobile != ''">
+				and LOCATE(#{mobile}, e.mobile) > 0
+			</if>
+			<if test="jobTitle != null">
+				and e.jobTitle = #{jobTitle}
+			</if>
+			<if test="politicsStatus != null">
+				and e.politicsStatus = #{politicsStatus}
+			</if>
+			<if test="identNo != null &amp;&amp; identNo != ''">
+				and LOCATE(#{identNo}, e.identNo) > 0
+			</if>
+			<if test="mobileMac != null &amp;&amp; mobileMac != ''">
+				and LOCATE(#{mobileMac}, e.mobileMac) > 0
+			</if>
+			<if test="birthdayFrom != null">
+				and e.birthday >= DATE_FORMAT(#{birthdayFrom}, '%Y-%m-%d')
+			</if>
+			<if test="birthdayTo != null">
+				<![CDATA[
+					and e.birthday <=DATE_FORMAT(#{birthdayTo}, '%Y-%m-%d')
+				]]>
+			</if>
+			<if test="entryDateFrom != null">
+				and e.entryDate >= DATE_FORMAT(#{entryDateFrom}, '%Y-%m-%d')
+			</if>
+			<if test="entryDateTo != null">
+				<![CDATA[
+					and e.entryDate <= DATE_FORMAT(#{entryDateTo}, '%Y-%m-%d')
+				]]>
+			</if>
+			<choose>
+				<!-- <when test="activeWork == 1">
+					and (e.departDate is null or e.departDate > now())
+				</when>
+				<when test="activeWork == 2">
+					and e.departDate &lt;=now()
+				</when> -->
+				<when test="activeWork == 1">
+					and status=1
+				</when>
+				<when test="activeWork == 2">
+					and status=2
+				</when>
+			</choose>
+			<if test="departDateFrom != null">
+				and e.departDate >= DATE_FORMAT(#{departDateFrom}, '%Y-%m-%d')
+			</if>
+			<if test="departDateTo != null">
+				<![CDATA[
+					and e.departDate <= DATE_FORMAT(#{departDateTo}, '%Y-%m-%d')
+				]]>
+			</if>
+			<!--  
+			<if test="orgIds != null">
+				and e.orgId in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orgIds == null">
+				and 1=2
+			</if>
+			<if test="pager.params.Monitor != null">
+				and mobileMac is not null
+			</if> -->
+			<choose>
+				<when test="Monitor != null &amp;&amp; Monitor == 'true'">
+					and e.mobileMac is not null and e.mobileMac != ''
+					and o.companyId = #{orgId}
+				</when>
+				<when test="orgId != null &amp;&amp; includeSub == 'true' &amp;&amp; findKey != null">
+					and o.ownerCode like  concat('',(select ownerCode from pf_org where ownerCode is not null and orgId = #{orgId}),'%')
+					and (e.name like concat('%',#{findKey},'%') 
+						or e.employeeNo like concat('%',#{findKey},'%') 
+						or e.mobile like concat('%',#{findKey},'%'))
+				</when>
+				<when test="orgId != null &amp;&amp; includeSub == 'true'">
+					and o.ownerCode like  concat('',(select ownerCode from pf_org where ownerCode is not null and orgId = #{orgId}),'%')
+				</when>
+				<when test="orgId != null &amp;&amp; findKey != null">
+					and e.orgId = #{orgId}
+					and (e.name like concat('%',#{findKey},'%') 
+						or e.employeeNo like concat('%',#{findKey},'%') 
+						or e.mobile like concat('%',#{findKey},'%'))
+				</when>
+				<when test="orgId != null">
+					and e.orgId = #{orgId}
+				</when>
+				<otherwise>
+					and 1=2
+				</otherwise>
+			</choose>			
+		</where>
+	</sql>
+
+	<select id="countByOrg" resultType="java.lang.Long">
+		select count(DISTINCT e.employeeId)
+		from pf_employee e
+		left outer join pf_org o
+			on e.orgId = o.orgId
+		left outer join pf_user u
+			on e.employeeId = u.employeeId
+		<include refid="pagerCondition" />
+		<if test="isBinding != null &amp;&amp; isBinding == 1">
+			and u.userId is  null
+		</if>
+	</select>
+
+	<delete id="delete">
+		delete
+		from pf_employee
+		where
+		<if test="employeeIds != null">
+			employeeId in
+			<foreach item="item" index="index" collection="employeeIds"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="employeeIds == null">
+			1=2
+		</if>
+	</delete>
+
+	<update id="updateInfo">
+		update pf_employee
+		set employeeId = #{employeeId}
+			,name=#{name}
+			,telephone=#{telephone}
+			,isHeadquarters=#{isHeadquarters}
+			,isManager=#{isManager}
+			,national=#{national}
+			,email=#{email}
+			,description=#{description}
+			,orgId=#{org.orgId}
+			,gender=#{gender}
+			,politicsStatus=#{politicsStatus}
+			,employeeNo=#{employeeNo}
+			,birthday=#{birthday}
+			,identNo=#{identNo}
+			,entryDate=#{entryDate}
+			,departDate=#{departDate}
+			,jobTitle=#{jobTitle}
+			,techLevel=#{techLevel}
+			,profession=#{profession}
+			,major=#{major}
+			,education=#{education}
+			,gradDate=#{gradDate}
+			,gradCollege=#{gradCollege}
+			,mobile=#{mobile}
+			,address=#{address}
+			,weChat=#{weChat}
+			,mobileMac=#{mobileMac}
+			,emergeName=#{emergeName}
+			,emergeMobile=#{emergeMobile}
+			,ownerCode=#{ownerCode}
+			,tenantId=#{tenantId}
+			,status=#{status}
+		where employeeId = #{employeeId}
+	</update>
+	
+	<update id="updateHireInfo">
+		update pf_employee
+		set employeeId = #{employeeId}
+			,name=#{name}
+			,orgId=#{org.orgId}
+			,entryDate=#{entryDate}
+			,jobTitle=#{jobTitle}
+			,status=#{status}
+			,mobileMac=#{mobileMac}
+		where employeeId = #{employeeId}
+	</update>
+	
+	<update id="updateInnerInfo">
+		update pf_employee
+		set orgId=#{orgId}
+			,jobTitle=#{jobTitle}
+		where employeeId = #{employeeId}
+	</update>
+	
+	<update id="updateOrg">
+	    update pf_employee
+	    	set orgId = #{newOrgId}
+	    where 
+	    <if test="employeeIds != null">
+			employeeId in
+			<foreach item="item" index="index" collection="employeeIds"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="employeeIds == null">
+			1=2
+		</if>
+	</update>
+	
+	<update id="batchUpdateEmps" parameterType="list">
+		    <foreach collection="employees" item="item" index="index" separator=";">
+		        update pf_employee
+		        <trim prefix="set" suffixOverrides=",">
+					name=#{item.name},
+					telephone=#{item.telephone},
+					isHeadquarters=#{item.isHeadquarters},
+					isManager=#{item.isManager},
+					national=#{item.national},
+					email=#{item.email},
+					description=#{item.description},
+					gender=#{item.gender},
+					politicsStatus=#{item.politicsStatus},
+					employeeNo=#{item.employeeNo},
+					birthday=#{item.birthday},
+					entryDate=#{item.entryDate},
+					departDate=#{item.departDate},
+					jobTitle=#{item.jobTitle},
+					techLevel=#{item.techLevel},
+					profession=#{item.profession},
+					major=#{item.major},
+					education=#{item.education},
+					gradDate=#{item.gradDate},
+					gradCollege=#{item.gradCollege},
+					mobile=#{item.mobile},
+					address=#{item.address},
+					weChat=#{item.weChat},
+					mobileMac=#{item.mobileMac},
+					emergeName=#{item.emergeName},
+					emergeMobile=#{item.emergeMobile},
+		        </trim>
+		        where identNo = #{item.identNo}
+		    </foreach>      
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="Employee">
+		select employeeId, <include refid="tableColumn" />
+		from pf_employee
+		where employeeId = #{employeeId}
+	</select>
+	
+	<select id="findByIds" parameterType="long" resultType="Employee">
+		select employeeId, <include refid="tableColumn" />
+		from pf_employee
+		<where>
+			<if test="employeeIds != null &amp;&amp; employeeIds.size()>0">
+				employeeId in
+				<foreach item="item" index="index" collection="employeeIds"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="employeeIds == null || employeeIds.size()==0">
+				1 = 2
+			</if>
+		</where>
+	</select>
+	<select id="findByEmployeeNo" parameterType="long" resultType="Employee">
+		select employeeId, <include refid="tableColumn" />
+		from pf_employee
+		<where>
+			<if test="employeeNo != null">
+				employeeNo =#{employeeNo}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findByIdentNo" parameterType="list" resultType="string">
+		select distinct identNo
+		from pf_employee
+		<where>
+			<if test="idents != null &amp;&amp; idents.size()>0">
+				identNo in
+				<foreach item="item" index="index" collection="idents"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="idents == null &amp;&amp; idents.size()==0">
+				1 = 2
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAll" resultType="com.sdcloud.api.core.entity.Employee">
+		select 
+		
+		e.employeeId, e.name, e.employeeNo, e.gender, e.mobile, e.telephone, e.email, e.address, 
+		e.ownerCode, e.orgId, e.tenantId, e.weChat, e.jobTitle, e.profession, e.techLevel, 
+		e.politicsStatus, e.identNo, e.birthday, e.entryDate, e.departDate, e.education, e.major, 
+		e.gradCollege, e.gradDate, e.mobileMac, e.emergeName, e.emergeMobile, e.description, 
+		e.isHeadquarters, e.isManager, e.national,  
+		
+		e.orgId
+		<!-- e.orgId as "org.orgId",
+		o.name as "org.name",
+		o.fullName as "org.fullName" -->
+		
+		from pf_employee e
+		left join pf_org o
+			on e.orgId = o.orgId
+		
+		<include refid="pagerCondition" />
+		order by CONVERT(o.name using gbk), CONVERT(e.name using gbk)
+	</select>
+	
+	<select id="findByCompanyIds" parameterType="long" resultType="Employee">
+		select t1.employeeId, t1.name, t1.identNo
+		from pf_employee t1
+		left join pf_org t2 on t1.orgId = t2.orgId 
+		<where>
+			<if test="companyIds != null &amp;&amp; companyIds.size() > 0">
+				t2.companyId in
+				<foreach item="item" index="index" collection="companyIds"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="companyIds == null || companyIds.size()==0">
+				1 = 2
+			</if>
+		</where>
+	</select>
+	
+	<select id="findEmployeeByParam" parameterType="map" resultType="Employee">
+		select employeeId, name, orgId, identNo
+		from pf_employee
+		<where>
+			<if test="employeeId != null">
+				and employeeId != #{employeeId}
+			</if>
+			<if test="identNo != null &amp;&amp; identNo != ''">
+				and identNo = #{identNo}
+			</if>
+			<if test="mobileMac != null &amp;&amp; mobileMac != ''">
+				and mobileMac = #{mobileMac}
+			</if>
+		</where>
+		<!-- where identNo = #{identNo} -->
+	</select>
+	
+</mapper> 

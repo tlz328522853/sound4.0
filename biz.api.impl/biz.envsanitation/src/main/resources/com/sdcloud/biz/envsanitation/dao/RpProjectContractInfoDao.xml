@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.RpProjectContractInfoDao">
+
+	<sql id="rpProjectContractInfoColumn">
+		id,companyId,projectAddress,contractName,isModifyPrice,bidDate,approachDate,startDate,endDate,
+		contractType,contractYear,yearTotalAmount,totalAmount,investAmount,clearArea,
+		mechanizationArea,clearFee,garbageRemove,garbageRemoveFee,waterCloset,waterClosetFee,
+		dryCloset,dryClosetFee,garbageCanClean,garbageCanCleanFee,psoriasisClean,psoriasisCleanFee,
+		greenBeltClean,greenBeltCleanFee,stationBuild,stationBuildFee,stationMaintainFee,
+		systemMaintain,systemMaintainFee,sprayCleanFee,snowClean,snowCleanFee,riverClean,
+		riverCleanFee,parkClean,parkCleanFee,isFile,tenantId,createUser,createTime,
+		updateUser,updateTime
+	</sql>
+	
+	<insert id="insert" parameterType="RpProjectContractInfo">
+		insert into rp_project_contract_info (
+			<include refid="rpProjectContractInfoColumn"/>		
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			#{item.id},#{item.companyId},#{item.projectAddress},#{item.contractName},#{item.isModifyPrice},#{item.bidDate},
+			#{item.approachDate},#{item.startDate},#{item.endDate},#{item.contractType},#{item.contractYear},
+			#{item.yearTotalAmount},#{item.totalAmount},#{item.investAmount},#{item.clearArea},
+			#{item.mechanizationArea},#{item.clearFee},#{item.garbageRemove},#{item.garbageRemoveFee},
+			#{item.waterCloset},#{item.waterClosetFee},#{item.dryCloset},#{item.dryClosetFee},
+			#{item.garbageCanClean},#{item.garbageCanCleanFee},#{item.psoriasisClean},#{item.psoriasisCleanFee},
+			#{item.greenBeltClean},#{item.greenBeltCleanFee},#{item.stationBuild},#{item.stationBuildFee},
+			#{item.stationMaintainFee},#{item.systemMaintain},#{item.systemMaintainFee},#{item.sprayCleanFee},
+			#{item.snowClean},#{item.snowCleanFee},#{item.riverClean},#{item.riverCleanFee},
+			#{item.parkClean},#{item.parkCleanFee},#{item.isFile},#{item.tenantId},
+			#{item.createUser},now(),#{item.updateUser},now()
+		)
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="RpProjectContractInfo">
+		update rp_project_contract_info
+		<set>
+		    projectAddress = #{projectAddress},contractName = #{contractName},isModifyPrice = #{isModifyPrice},bidDate = #{bidDate},
+		    approachDate = #{approachDate},startDate = #{startDate},endDate = #{endDate},
+		    contractType = #{contractType},contractYear = #{contractYear},yearTotalAmount = #{yearTotalAmount},
+		    totalAmount = #{totalAmount},investAmount = #{investAmount},clearArea = #{clearArea},
+		    mechanizationArea = #{mechanizationArea},clearFee = #{clearFee},garbageRemove = #{garbageRemove},
+		    garbageRemoveFee = #{garbageRemoveFee},waterCloset = #{waterCloset},waterClosetFee = #{waterClosetFee},
+		    dryCloset = #{dryCloset},dryClosetFee = #{dryClosetFee},garbageCanClean = #{garbageCanClean},
+		    garbageCanCleanFee = #{garbageCanCleanFee},psoriasisClean = #{psoriasisClean},psoriasisCleanFee = #{psoriasisCleanFee},
+		    greenBeltClean = #{greenBeltClean},greenBeltCleanFee = #{greenBeltCleanFee},stationBuild = #{stationBuild},
+		    stationBuildFee = #{stationBuildFee},stationMaintainFee = #{stationMaintainFee},systemMaintain = #{systemMaintain},
+		    systemMaintainFee = #{systemMaintainFee},sprayCleanFee = #{sprayCleanFee},snowClean = #{snowClean},
+		    snowCleanFee = #{snowCleanFee},riverClean = #{riverClean},riverCleanFee = #{riverCleanFee},
+		    parkClean = #{parkClean},parkCleanFee = #{parkCleanFee},updateUser = #{updateUser}, updateTime = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(r.id) from rp_project_contract_info r
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findAllBy" parameterType="map" resultType="RpProjectContractInfo">
+		select r.*, fe.name filePeopleName, ce.name createUserName, ue.name updateUserName, p.name companyName
+		from rp_project_contract_info r
+		left join pf_employee fe on r.filePeople = fe.employeeId
+		left join pf_employee ce on r.createUser = ce.employeeId
+		left join pf_employee ue on r.updateUser = ue.employeeId
+		left join pf_org p on p.orgId = r.companyId
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+		 	<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+				order by ${pager.orderBy}
+				<if test="pager.order!=null &amp;&amp; pager.order!=''">
+				  ${pager.order}
+				</if>
+			</if>
+			<if test="for_method_exportData == null">
+				limit #{pager.first}, #{pager.pageSize}
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+		 	<if test="companyIds != null &amp;&amp; companyIds.size() != 0">
+				and r.companyId in
+		      	<foreach item="item" index="index" collection="companyIds" open="(" separator="," close=")">
+		      		${item}
+		      	</foreach>
+	      	</if>
+	      	<if test="projectAddress != null &amp;&amp; projectAddress != ''">
+	      		and r.projectAddress like concat('%', #{projectAddress}, '%')
+	      	</if>
+	      	<if test="contractName != null &amp;&amp; contractName != ''">
+	      		and r.contractName like concat('%', #{contractName}, '%')
+	      	</if>
+	      	<if test="startBidDate !=null &amp;&amp; startBidDate !=''">
+	      		and r.bidDate &gt;= #{startBidDate}
+	      	</if>
+	      	<if test="endBidDate !=null &amp;&amp; endBidDate !=''">
+	      		and r.bidDate &lt;= #{endBidDate}
+	      	</if>
+	      	<if test="startApproachDate !=null &amp;&amp; startApproachDate !=''">
+	      		and r.approachDate &gt;= #{startApproachDate}
+	      	</if>
+	      	<if test="endApproachDate !=null &amp;&amp; endApproachDate !=''">
+	      		and r.approachDate &lt;= #{endApproachDate}
+	      	</if>
+	      	<if test="contractType !=null &amp;&amp; contractType !=''">
+	      		and r.contractType = #{contractType}
+	      	</if>
+	      	<if test="isFile !=null &amp;&amp; isFile !=''">
+	      		and r.isFile = #{isFile}
+	      	</if>
+	      	<if test="isModifyPrice != null &amp;&amp; isModifyPrice !=''">
+	      		and r.isModifyPrice = #{isModifyPrice}
+	      	</if>
+		</where>	
+	</sql>
+	
+	<delete id="delete">
+		delete from rp_project_contract_info
+		<choose>
+			<when test="ids != null &amp;&amp; ids.size() != 0">
+				where id in
+		      	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="file" parameterType="RpProjectContractInfo">
+		update rp_project_contract_info
+		<set>
+			isFile = #{isFile},filePeople = #{filePeople},fileTime = #{fileTime},
+			updateUser = #{updateUser}, updateTime = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+</mapper>

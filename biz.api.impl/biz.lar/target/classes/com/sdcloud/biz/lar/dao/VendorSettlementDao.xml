@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.VendorSettlementDao">
+    
+    
+    <select id="selectVendorSettlement"  resultType="com.sdcloud.api.lar.entity.VendorSettlement" parameterType="com.sdcloud.framework.entity.LarPager">
+		SELECT  
+		audit_date AS auditDate,
+		ROUND(IFNULL(ri.paid_money,0),2) AS totalMoney,rv.org_id as orgId,rv.vendor,rv.vendor_short as vendorShort,rv.vendor_coding as vendorCoding,ri.instock_no as instockNo,
+		ri.instock_type_name as instockTypeName,
+		rv.vendor_type as vendorType FROM lar_recycle_instock ri LEFT JOIN lar_recycle_vendor rv ON ri.vendor_id = rv.id 
+		<where>
+			ri.`enable` = 0 AND ri.audit_status=2
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and ri.org_id=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and ri.org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+					<![CDATA[
+						and DATE_FORMAT(now(),'%Y-%m-%d') = DATE_FORMAT(ri.audit_date,'%Y-%m-%d')
+					]]>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and ri.audit_date > #{larPager.params.firstDate}
+					]]>
+				</if>
+				<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and ri.audit_date < #{larPager.params.endDate}
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and ri.audit_date < #{larPager.params.endDate} and ri.audit_date > #{larPager.params.firstDate}
+					]]>
+				</if>
+				<if test="larPager.params.vendor!=null">
+					and rv.vendor like '%${larPager.params.vendor}%'
+				</if>
+				
+				<if test="larPager.params.vendorShort!=null">
+					and rv.vendor_short like '%${larPager.params.vendorShort}%'
+				</if>
+				<if test="larPager.params.vendorType !=null">
+					and rv.vendor_type = #{larPager.params.vendorType}
+				</if>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ri.${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+    <select id="countVendorSettlement" parameterType="map" resultType="long">
+    	SELECT COUNT(a.vendor) FROM
+	(	SELECT IFNULL(ri.paid_money,0) AS totalMoney,rv.org_id as orgId,rv.vendor,rv.vendor_short as vendorShort,rv.vendor_coding as vendorCoding,
+		rv.vendor_type as vendorType FROM lar_recycle_instock ri LEFT JOIN lar_recycle_vendor rv ON ri.vendor_id = rv.id 
+		<where>
+			ri.`enable` = 0 AND ri.audit_status=2
+			<if test="params!=null and params.size>0">
+				<if test="params.mechanismId!=null">
+					and ri.org_id=#{params.mechanismId} 
+				</if>
+				<if test="params.orgIds!=null and params.orgIds.size>0">
+					and ri.org_id in 
+					<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="params.endDate==null and params.firstDate==null">
+					<![CDATA[
+						and DATE_FORMAT(now(),'%Y-%m-%d') = DATE_FORMAT(ri.audit_date,'%Y-%m-%d')
+					]]>
+				</if>
+				<if test="params.endDate==null and params.firstDate!=null">
+					<![CDATA[
+						and ri.audit_date > #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.firstDate==null and params.endDate!=null">
+					<![CDATA[
+						and ri.audit_date < #{params.endDate}
+					]]>
+				</if>
+				<if test="params.endDate!=null and params.firstDate!=null">
+					<![CDATA[
+						and ri.audit_date < #{params.endDate} and ri.audit_date > #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.vendor!=null">
+					and rv.vendor like '%${params.vendor}%'
+				</if>
+				<if test="params.vendorShort!=null">
+					and rv.vendor_short like '%${params.vendorShort}%'
+				</if>
+				<if test="params.vendorType !=null">
+					and rv.vendor_type = #{params.vendorType}
+				</if>
+			</if>
+		</where>
+	) a
+	</select>
+    
+ </mapper>

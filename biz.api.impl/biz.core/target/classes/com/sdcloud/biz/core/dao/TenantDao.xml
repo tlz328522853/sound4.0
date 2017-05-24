@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.TenantDao">
+	<sql id="tenantColumn">
+		tenantId,name,country,province,city,address,telephone,salesPackageId,
+		tenantType,beginTime,endTime,status,ownerCode,databaseId,applicant,applicantMobile,description,pId 
+	</sql>
+	<insert id="insert" parameterType="com.sdcloud.api.core.entity.Tenant">
+		insert into pf_tenant
+		(tenantId,name,country,province,city,address,telephone,
+		salesPackageId,tenantType,beginTime,status,ownerCode,applicant,applicantMobile,description,databaseId,pId)
+		values
+		(#{tenantId},#{name},#{country},#{province},#{city},#{address},#{telephone},
+		#{salesPackageId},#{tenantType},now(),#{status},#{ownerCode},
+		#{applicant},#{applicantMobile},#{description},#{tenantDatabase.databaseId},#{pId})
+	</insert>
+
+	<update id="update" parameterType="com.sdcloud.api.core.entity.Tenant">
+		update pf_tenant set tenantId = #{tenantId}
+		<if test="name != null">
+			,name = #{name}
+		</if>
+		<if test="country != null">
+			,country = #{country}
+		</if>
+		<if test="province != null">
+			,province = #{province}
+		</if>
+		<if test="city != null">
+			,city = #{city}
+		</if>
+		<if test="address != null">
+			,address = #{address}
+		</if>
+		<if test="telephone != null">
+			,telephone = #{telephone}
+		</if>
+		<if test="salesPackageId != null">
+			,salesPackageId = #{salesPackageId}
+		</if>
+		<if test="tenantType != null">
+			,tenantType = #{tenantType}
+		</if>
+		<if test="endTime != null">
+			,endTime = #{endTime}
+		</if>
+		<if test="status != null">
+			,status = #{status}
+		</if>
+		<if test="ownerCode != null">
+			,ownerCode = #{ownerCode}
+		</if>
+		<if test="applicant != null">
+			,applicant = #{applicant}
+		</if>
+		<if test="applicantMobile != null">
+			,applicantMobile = #{applicantMobile}
+		</if>
+		<if test="description != null">
+			,description = #{description}
+		</if>
+		<if test="tenantDatabase != null and tenantDatabase.databaseId != null">
+			,description = #{tenantDatabase.databaseId}
+		</if>
+		where tenantId = #{tenantId}
+	</update>
+	<update id="upgradePackag" >
+		update pf_tenant set tenantId = #{tenantId}
+		<if test="packageId != null">
+			,salesPackageId = #{packageId}
+		</if>
+		where tenantId = #{tenantId}
+	</update>
+	<select id="findTenantByParam" parameterType="map" resultType="Tenant">
+		select 
+			 <include refid="tenantColumn"/>
+		from 
+			pf_tenant
+		<where>
+		      	<if test="status!= null">
+					 status=#{status}
+		      	</if>
+		      	<if test="name != null">
+					and name = #{name}
+				</if>
+		      	<if test="tenantId!= null&amp;&amp; tenantId != -1">
+					and tenantId=#{tenantId}
+		      	</if>
+		      	<if test="salesPackageId!= null">
+					and salesPackageId=#{salesPackageId}
+		      	</if>
+		   </where>
+	</select>
+	<delete id="delete">
+		delete from pf_tenant
+		where 
+		<if test="tenantId != null">
+		    tenantId =#{tenantId} 
+		</if>
+		<if test="tenantId == null">
+		    1 = 2
+		</if>
+	</delete>
+</mapper> 

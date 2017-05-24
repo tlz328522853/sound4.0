@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.GroupUserDao">
+	
+	<sql id="column">
+		
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="userId != null">
+				userId = #{userId} 
+			</if>
+			<if test="groupId != null">
+				groupId = #{groupId} 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<select id="findGroupIdByUser" resultType="long">
+		select 
+			groupId
+		from 
+			pf_group_user
+		<where>
+			<if test="userId != null">
+				userId = #{userId} 
+			</if>
+			
+		</where>	
+	</select>
+	<select id="hasGroupUser" resultType="GroupUser">
+		select 
+			groupUserId, userId, groupId, ownerCode, tenantId
+		from 
+			pf_group_user
+		<where>
+			<if test="userId != null">
+				userId = #{userId} 
+			</if>
+			<if test="groupId != null">
+				and groupId = #{groupId} 
+			</if>
+		</where>	
+	</select>
+	<select id="findUserIdByGroup" resultType="long">
+		select 
+			userId
+		from 
+			pf_group_user
+		<where>
+			<if test="groupId != null">
+				groupId = #{groupId} 
+			</if>
+		</where>	
+	</select>
+	<select id="findUserIdByGroups" resultType="long">
+		select 
+			userId
+		from 
+			pf_group_user
+		<where>
+			<if test="groupIds != null">
+				 groupId in 
+		    	<foreach item="item" index="index" collection="groupIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+			</if>
+		</where>	
+	</select>
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(pgu.groupUserId)
+		from 
+			pf_group_user pgu
+			LEFT JOIN pf_user u 
+		    on u.userId=pgu.userId
+		    LEFT JOIN pf_employee pem
+		    on pem.employeeId=u.employeeId
+		<where>
+			<if test="userId != null&amp;&amp; userId != -1">
+				 u.userId=#{userId}
+			</if>
+			<if test="groupIds != null">
+				AND pgu.groupId in 
+		    	<foreach item="item" index="index" collection="groupIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+			</if>
+			<if test="name != null &amp;&amp;name !=''">
+				AND u.name like '%${name}%'
+			</if>
+			<if test="employeeId != null &amp;&amp; employeeId !=0">
+				and u.employeeId = #{employeeId}
+			</if>
+			<if test="employeeNo != null &amp;&amp; employeeNo !=''">
+				and pem.employeeNo like '%${employeeNo}%'
+			</if>
+			<if test="empName != null &amp;&amp; empName !=''">
+				and pem.name like '%${empName}%'
+			</if>
+			<if test="telephone != null&amp;&amp; telephone !=''">
+				and u.telephone like '%${telephone}%'
+			</if>
+			<if test="userType != null">
+				and u.userType = #{userType}
+			</if>
+			<if test="email != null &amp;&amp;email !=''">
+				AND u.email=#{email}
+			</if>
+			<if test="groupId != null&amp;&amp; groupId != 0">
+				AND pgu.groupId=#{groupId}
+			</if>
+			<if test="firstDate != null &amp;&amp;endDate !=null">
+				and u.createTime between #{firstDate} and #{endDate}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insert" parameterType="GroupUser">
+		insert into pf_group_user
+			(groupUserId, userId, groupId, ownerCode, tenantId)
+		values
+			(#{groupUserId}, #{userId}, #{groupId}, #{ownerCode,jdbcType=BIGINT}, #{tenantId,jdbcType=BIGINT})
+	</insert>
+	
+	<delete id="deleteByUserId" parameterType="list">
+		delete from pf_group_user
+		where 
+		<if test="userIds != null">
+		    userId in 
+		    <foreach item="item" collection="userIds" open="(" separator="," close=")">
+		        #{item}
+		    </foreach>
+		</if>
+		<if test="userIds == null">
+		    1 = 2
+		</if>
+	</delete>
+	<delete id="deleteGroupUser">
+		delete from pf_group_user
+		<where>
+			<if test="userId != null">
+				userId = #{userId} 
+			</if>
+			<if test="groupId != null">
+				and groupId = #{groupId} 
+			</if>
+		</where>
+	</delete>
+</mapper>

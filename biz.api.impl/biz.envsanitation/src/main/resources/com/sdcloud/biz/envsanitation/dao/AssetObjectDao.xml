@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.AssetObjectDao">
+
+	<sql id="assetObjectColumn">
+		assetTypeId,assetName,assetCode,longitude,latitude,oldOrgId,
+		newOrgId,changeTime,produceDate,leaseOrganization,
+		leasePerson,leasePhone,tenantOrganization,tenantPerson,
+		tenantPhone,leaseBeginTime,leaseEndTime,leaseDays,
+		useOrganization,useBeginDate,useEndDate,oldOwnerCode,
+		ownerCode,createTime,tenantId 
+	</sql>
+	
+	<insert id="insert" parameterType="AssetObject">
+		insert into so_asset_object(
+			assetId, <include refid="assetObjectColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			#{item.assetId}, #{item.assetTypeId}, #{item.assetName}, #{item.assetCode},#{item.longitude},#{item.latitude}, #{item.oldOrgId},
+			#{item.newOrgId}, #{item.changeTime}, #{item.produceDate}, #{item.leaseOrganization},
+			#{item.leasePerson}, #{item.leasePhone}, #{item.tenantOrganization}, #{item.tenantPerson},
+			#{item.tenantPhone}, #{item.leaseBeginTime}, #{item.leaseEndTime}, #{item.leaseDays},
+			#{item.useOrganization}, #{item.useBeginDate}, #{item.useEndDate}, #{item.oldOwnerCode},
+			#{item.ownerCode}, now(),#{item.tenantId}
+		)
+		</foreach>
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from so_asset_object
+		<choose>
+			<when test="assetIds != null &amp;&amp; assetIds.size() != 0">
+				where assetId in
+		      	<foreach item="item" index="index" collection="assetIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="AssetObject">
+		update so_asset_object
+		<set>
+			<if test="assetName != null &amp;&amp; assetName != ''">assetName = #{assetName},</if>
+			<if test="assetCode != null &amp;&amp; assetCode != ''">assetCode = #{assetCode},</if>
+			longitude = #{longitude},
+			latitude = #{latitude},
+			<if test="oldOrgId != null">oldOrgId = #{oldOrgId},</if>
+			<if test="newOrgId != null">newOrgId = #{newOrgId},</if>
+			<if test="changeTime != null">changeTime = #{changeTime},</if>
+			<if test="produceDate != null">produceDate = #{produceDate},</if>
+			<if test="leaseOrganization != null">leaseOrganization = #{leaseOrganization},</if>
+			<if test="leasePerson != null &amp;&amp; leasePerson != ''">leasePerson = #{leasePerson},</if>
+			<if test="leasePhone != null &amp;&amp; leasePhone != ''">leasePhone = #{leasePhone},</if>
+			<if test="tenantOrganization != null">tenantOrganization = #{tenantOrganization},</if>
+			<if test="tenantPerson != null &amp;&amp; tenantPerson != ''">tenantPerson = #{tenantPerson},</if>
+			<if test="tenantPhone != null &amp;&amp; tenantPhone != ''">tenantPhone = #{tenantPhone},</if>
+			<if test="leaseBeginTime != null">leaseBeginTime = #{leaseBeginTime},</if>
+			<if test="leaseEndTime != null">leaseEndTime = #{leaseEndTime},</if>
+			<if test="leaseDays != null">leaseDays = #{leaseDays},</if>
+			<if test="useOrganization != null &amp;&amp; useOrganization != ''">useOrganization = #{useOrganization},</if>
+			<if test="useBeginDate != null">useBeginDate = #{useBeginDate},</if>
+			<if test="useEndDate != null">useEndDate = #{useEndDate},</if>
+			<if test="oldOwnerCode != null">oldOwnerCode = #{oldOwnerCode},</if>
+			<if test="ownerCode != null">ownerCode = #{ownerCode},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where assetId = #{assetId}
+	</update>
+	
+	<select id="findOrgAssetCount" resultType="com.sdcloud.api.envsanitation.entity.OrgAssetCount">
+		SELECT
+			count(assetId) AS count,
+			assetTypeId,
+			newOrgId,
+			assetName
+		FROM
+			so_asset_object
+		GROUP BY
+			assetTypeId,
+			newOrgId
+	</select>
+	
+</mapper>

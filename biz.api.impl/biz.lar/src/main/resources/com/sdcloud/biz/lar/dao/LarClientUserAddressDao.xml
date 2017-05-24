@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.LarClientUserAddressDao">
+	<sql id="Base_Column_List">
+		id, userName, contact, address, region, detail, provinceId,cityId,areaId,
+		defaultEnable,enable,larClientUser as "larClientUser.id",longitude,latitude,areaType
+	</sql>
+	<sql id="Region_Sql">
+		regionId,regionCode,regionName,parentId,regionLevel,regionOrder,regionNameEn,regionShortNameEn 
+	</sql>
+	
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.LarClientUserAddress">
+		insert into lar_address 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="userName != null">
+				userName,
+			</if>
+			<if test="contact != null">
+				contact,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="region != null">
+				region,
+			</if>
+			<if test="detail != null">
+				detail,
+			</if>
+			<if test="provinceId!=null and provinceId.regionId != null">
+				provinceId,
+			</if>
+			<if test="cityId!=null and cityId.regionId != null">
+				cityId,
+			</if>
+			<if test="areaId!=null and areaId.regionId != null">
+				areaId,
+			</if>
+			<if test="defaultEnable != null">
+				defaultEnable,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="larClientUser!=null and larClientUser.id!=null">
+				larClientUser,
+			</if>
+			<if test="longitude != null">
+				longitude,
+			</if>
+			<if test="latitude != null">
+				latitude,
+			</if>
+			<if test="areaType != null">
+				areaType,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="userName != null">
+				#{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="contact != null">
+				#{contact,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="region != null">
+				#{region,jdbcType=VARCHAR},
+			</if>
+			<if test="detail != null">
+				#{detail,jdbcType=VARCHAR},
+			</if>
+			<if test="provinceId!=null and provinceId.regionId != null">
+				#{provinceId.regionId},
+			</if>
+			<if test="cityId!=null and cityId.regionId != null">
+				#{cityId.regionId},
+			</if>
+			<if test="areaId!=null and areaId.regionId != null">
+				#{areaId.regionId},
+			</if>
+			<if test="defaultEnable != null">
+				#{defaultEnable,jdbcType=INTEGER},
+			</if>
+			<if test="enable != null">
+				#{enable,jdbcType=INTEGER},
+			</if>
+			<if test="larClientUser!=null and larClientUser.id!=null">
+				#{larClientUser.id},
+			</if>
+			<if test="longitude != null">
+				#{longitude},
+			</if>
+			<if test="latitude != null">
+				#{latitude},
+			</if>
+			<if test="areaType != null">
+				#{areaType,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="insertAddressGetId" parameterType="com.sdcloud.api.lar.entity.LarClientUserAddress"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into lar_address 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="userName != null">
+				userName,
+			</if>
+			<if test="contact != null">
+				contact,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="region != null">
+				region,
+			</if>
+			<if test="detail != null">
+				detail,
+			</if>
+			<if test="provinceId!=null and provinceId.regionId != null">
+				provinceId,
+			</if>
+			<if test="cityId!=null and cityId.regionId != null">
+				cityId,
+			</if>
+			<if test="areaId!=null and areaId.regionId != null">
+				areaId,
+			</if>
+			<if test="defaultEnable != null">
+				defaultEnable,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="larClientUser!=null and larClientUser.id!=null">
+				larClientUser,
+			</if>
+			<if test="longitude != null">
+				longitude,
+			</if>
+			<if test="latitude != null">
+				latitude,
+			</if>
+			<if test="areaType != null">
+				areaType,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="userName != null">
+				#{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="contact != null">
+				#{contact,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="region != null">
+				#{region,jdbcType=VARCHAR},
+			</if>
+			<if test="detail != null">
+				#{detail,jdbcType=VARCHAR},
+			</if>
+			<if test="provinceId!=null and provinceId.regionId != null">
+				#{provinceId.regionId},
+			</if>
+			<if test="cityId!=null and cityId.regionId != null">
+				#{cityId.regionId},
+			</if>
+			<if test="areaId!=null and areaId.regionId != null">
+				#{areaId.regionId},
+			</if>
+			<if test="defaultEnable != null">
+				#{defaultEnable,jdbcType=INTEGER},
+			</if>
+			<if test="enable != null">
+				#{enable,jdbcType=INTEGER},
+			</if>
+			<if test="larClientUser!=null and larClientUser.id!=null">
+				#{larClientUser.id},
+			</if>
+			<if test="longitude != null">
+				#{longitude},
+			</if>
+			<if test="latitude != null">
+				#{latitude},
+			</if>
+			<if test="areaType != null">
+				#{areaType,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	
+	<select id="selectClientAddress" resultMap="regionResult">
+		select <include refid="Base_Column_List" /> from lar_address where defaultEnable=1
+	</select>
+	
+	<select id="selectByExample"  resultMap="regionResult" parameterType="map">
+		select
+		<if test="larPager.distinct==true">
+			distinct
+		</if>
+		<include refid="Base_Column_List" />
+		 from lar_address 
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="selectByIds"  resultMap="regionResult" parameterType="map">
+		select
+		distinct
+		<include refid="Base_Column_List" />
+		 from lar_address 
+		<where>
+			<if test="ids != null and ids.size>0">
+				id in
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<resultMap type="com.sdcloud.api.lar.entity.LarClientUserAddress" id="regionResult">
+		<association property="provinceId" column="provinceId" javaType="com.sdcloud.api.lar.entity.LarRegion" select="queryProvince"></association>
+		<association property="cityId" column="cityId" javaType="com.sdcloud.api.lar.entity.LarRegion" select="queryCity"></association>
+		<association property="areaId" column="areaId" javaType="com.sdcloud.api.lar.entity.LarRegion" select="queryArea"></association>
+	</resultMap>
+	<select id="queryProvince" resultType="com.sdcloud.api.lar.entity.LarRegion">
+		select <include refid="Region_Sql"/> from lar_region where regionId=#{provinceId}
+	</select>
+	<select id="queryCity" resultType="com.sdcloud.api.lar.entity.LarRegion">
+		select <include refid="Region_Sql"/> from lar_region where regionId=#{cityId}
+	</select>
+	<select id="queryArea" resultType="com.sdcloud.api.lar.entity.LarRegion">
+		select <include refid="Region_Sql"/> from lar_region where regionId=#{areaId}
+	</select>
+	
+	<update id="updateByExampleSelective" parameterType="map">
+		update lar_address 
+		<set>
+			<if test="params.larClientUserAddress.userName != null">
+				userName = #{params.larClientUserAddress.userName,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUserAddress.contact != null">
+				contact = #{params.larClientUserAddress.contact,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUserAddress.address != null">
+				address = #{params.larClientUserAddress.address,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUserAddress.region != null">
+				region = #{params.larClientUserAddress.region,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUserAddress.detail != null">
+				detail = #{params.larClientUserAddress.detail,jdbcType=VARCHAR},
+			</if>
+			<if test="params.larClientUserAddress.provinceId != null and params.larClientUserAddress.provinceId.regionId!=null">
+				provinceId = #{params.larClientUserAddress.provinceId.regionId,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUserAddress.cityId!=null and params.larClientUserAddress.cityId.regionId != null">
+				cityId = #{params.larClientUserAddress.cityId.regionId,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUserAddress.areaId !=null and params.larClientUserAddress.areaId.regionId != null">
+				areaId = #{params.larClientUserAddress.areaId.regionId,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUserAddress.defaultEnable != null">
+				defaultEnable = #{params.larClientUserAddress.defaultEnable,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUserAddress.enable != null">
+				enable = #{params.larClientUserAddress.enable,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUserAddress.larClientUser != null and params.larClientUserAddress.larClientUser.id!=null">
+				larClientUser = #{params.larClientUserAddress.larClientUser.id,jdbcType=INTEGER},
+			</if>
+			<if test="params.larClientUserAddress.longitude != null">
+				longitude = #{params.larClientUserAddress.longitude},
+			</if>
+			<if test="params.larClientUserAddress.latitude != null">
+				latitude = #{params.larClientUserAddress.latitude},
+			</if>
+			<if test="params.larClientUserAddress.areaType != null">
+				areaType = #{params.larClientUserAddress.areaType},
+			</if>
+		</set>
+		<where>
+			<choose>
+				<when test="params.larClientUserAddress.id != null">
+					and id=#{params.larClientUserAddress.id}
+				</when>
+				<otherwise>
+					and 1=2
+				</otherwise>
+			</choose>
+		</where>
+	</update>
+	
+	<select id="selectByUserId" resultMap="regionResult" parameterType="map">
+		select
+		<if test="larPager.distinct==true">
+			distinct
+		</if>
+		<include refid="Base_Column_List" />
+		 from lar_address 
+		<where>
+			enable=0 
+			<if test="larPager.params.larClientUserId!=null">
+				and larClientUser=#{larPager.params.larClientUserId}
+			</if>
+			<if test="larPager.params.city!=null">
+				and cityId=#{larPager.params.city}
+			</if>
+			<if test="larPager.params.defaultEnable!=null">
+				and defaultEnable=#{larPager.params.defaultEnable}
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+	</select>
+	
+	<update id="updateBatch"  parameterType="java.util.List">
+	      <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+				update lar_address 
+				<set>
+				  areaType=${item.areaType}
+				</set>
+				where id = ${item.id}
+		  </foreach>
+    </update>
+	
+</mapper>

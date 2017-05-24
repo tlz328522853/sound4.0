@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.EmpInspecPlanDao">
+
+   <sql id="inspecCondition">
+   <where>
+   <if test="orgId != null &amp;&amp; includeSub != 'true'" >
+				and o.companyId = #{orgId}
+	</if>
+		<if test="orgId != null &amp;&amp; includeSub == 'true'">
+			and o.ownerCode like  concat('',(select ownerCode from pf_org where ownerCode is not null and orgId = #{orgId}),'%')
+		</if>
+		<if test="empName != null">
+			and b.name LIKE '%${empName}%'
+		</if>
+        <if test="workAreaName !=null">
+		and a.workAreaName LIKE '%${workAreaName}%'
+		</if>
+		
+		<if test="startTimeFrom !=null">
+		and a.startTime >=#{startTimeFrom}
+		</if>
+		
+		<if test="startTimeTo !=null">
+		<![CDATA[
+		and a.startTime <=#{startTimeTo}
+		]]>
+		</if>
+		
+		<if test="endTimeFrom !=null">
+		and a.endTime >=#{endTimeFrom}
+		</if>
+		
+		<if test="endTimeTo !=null">
+		<![CDATA[
+		and a.endTime <=#{endTimeTo}
+		]]>
+		</if>
+		
+		<if test="workAreaFrom !=null">
+		and a.workArea >=#{workAreaFrom}
+		</if>
+		
+		<if test="workPlanLengthTo !=null">
+		<![CDATA[
+		and a.workArea <=#{workAreaTo}
+		]]>
+		</if>
+		
+		<if test="bounds !=null">
+		and a.bounds=#{bounds}
+		</if>  
+   </where>
+   </sql>
+
+	<insert id="insert" parameterType="EmpInspecPlan">
+		insert into
+		so_emp_inspec_plan(empInspecPlanId,empId,workTime,workTimeStart,workTimeEnd,workAreaName,workArea,workAreaPosition,startTime,endTime,bounds,remark,creator,createTime,editTime,ownerCode,tenantId,extStr1,extStr2,extStr3,extStr4,extStr5,extStr6,extStr7,extDate1,extDate2,extDate3)
+		values(#{empInspecPlanId},#{empId},#{workTime},#{workTimeStart},#{workTimeEnd},#{workAreaName},#{workArea},#{workAreaPosition},#{startTime},#{endTime},#{bounds},#{remark},#{creator},now(),#{editTime},#{ownerCode},#{tenantId},#{extStr1},#{extStr2},#{extStr3},#{extStr4},#{extStr5},#{extStr6},#{extStr7},#{extDate1},#{extDate2},#{extDate3})
+	</insert>
+
+	<select id="findAll" resultType="EmpInspecPlan">
+		select a.empInspecPlanId,a.empId,b.name as empName,a.workTime,a.workTimeStart,a.workTimeEnd,a.workAreaName,
+		a.workArea,a.workAreaPosition,a.startTime,a.endTime,a.bounds,a.remark,a.creator,a.editor,a.ownerCode,a.tenantId,
+		a.extStr1,a.extStr2,a.extStr3,a.extStr4,a.extStr5,a.extStr6,a.extStr7,a.extDate1,a.extDate2,a.extDate3, o2.name as orgName
+		<!-- from so_emp_inspec_plan a, pf_employee b
+		where a.empId = b.employeeId -->
+		from so_emp_inspec_plan a
+		LEFT OUTER JOIN pf_employee b ON a.empId = b.employeeId 
+		LEFT OUTER JOIN pf_org o ON o.orgId = b.orgId
+		JOIN pf_org o2 ON o.companyId = o2.orgId
+		<!-- <if test="orgIds != null &amp;&amp; orgIds.size() != 0">
+		    and b.orgId in
+		    <foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		   		#{item}
+		    </foreach>
+		</if>
+		<if test="empIds != null &amp;&amp; empIds.size() != 0">
+		    and a.empId in
+		    <foreach item="item" index="index" collection="empIds" open="(" separator="," close=")">
+		   		#{item}
+		    </foreach>
+		</if> -->
+     <include refid="inspecCondition"></include>
+			
+			<if test="pager != null">
+			    <if test="pager.orderSql != null &amp;&amp; pager.orderSql != ''">
+					order by a.${pager.orderSql} 
+			    </if>
+			    <if test="for_method_exportData != 'true'">
+			    limit #{pager.first}, #{pager.pageSize}
+			    </if>
+			</if>
+	</select>
+	
+	<select id="getTotalNum" resultType="java.lang.Long">
+		select count(a.empInspecPlanId)
+		<!-- from so_emp_inspec_plan a, pf_employee b
+		where a.empId = b.employeeId -->
+		from so_emp_inspec_plan a
+		LEFT OUTER JOIN pf_employee b ON a.empId = b.employeeId
+		LEFT OUTER JOIN pf_org o ON o.orgId = b.orgId 
+		<!-- <if test="orgIds != null &amp;&amp; orgIds.size() != 0">
+		    and b.orgId in
+		    <foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		   		#{item}
+		    </foreach>
+		</if>
+		<if test="empIds != null &amp;&amp; empIds.size() != 0">
+		    and a.empId in
+		    <foreach item="item" index="index" collection="empIds" open="(" separator="," close=")">
+		   		#{item}
+		    </foreach>
+		</if> -->
+		<include refid="inspecCondition"></include>
+	</select>
+
+	<update id="update">
+		update so_emp_inspec_plan
+		<set>
+			empId = #{empId},
+			workTime = #{workTime},
+			workTimeStart = #{workTimeStart},
+			workTimeEnd = #{workTimeEnd},
+			workAreaName = #{workAreaName},
+			workArea = #{workArea},
+			workAreaPosition = #{workAreaPosition},
+			startTime = #{startTime},
+			endTime = #{endTime},
+			bounds = #{bounds},
+			remark = #{remark},
+			editor = #{editor},
+			editTime = now()
+		</set>
+		where empInspecPlanId = #{empInspecPlanId}
+	</update>
+
+	<delete id="delete">
+		delete from so_emp_inspec_plan
+		<choose>
+			<when test="empInspecPlanIds != null &amp;&amp; empInspecPlanIds.size() != 0">
+				where empInspecPlanId in
+		      	<foreach item="item" index="index" collection="empInspecPlanIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+
+</mapper>

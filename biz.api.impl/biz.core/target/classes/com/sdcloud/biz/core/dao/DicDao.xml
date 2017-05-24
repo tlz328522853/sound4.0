@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.DicDao">
+	
+	<!-- pf_dic表的字段 -->
+	<sql id="tableColumn">
+		name,code,level,hasSub,pid,type,sequence,description,tenantId  
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="dicQueryCondition">
+		<where>
+			<if test="name != null &amp;&amp; name != ''">
+				name like '%${name}%' 
+			</if>
+			<if test="code != null &amp;&amp; code != ''">
+				and code like '%${code}%' 
+			</if>
+			<if test="level != null">
+				and level = #{status} 
+			</if>
+			<if test="hasSub != null">
+				and hasSub = #{hasSub} 
+			</if>
+			<if test="pid != null">
+				and pid = #{pid} 
+			</if>
+			<if test="tenantIds != null &amp;&amp; tenantIds.size() != 0">
+				and tenantId in 
+		      	<foreach item="item" index="index" collection="tenantIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="types != null &amp;&amp; types.size() != 0">
+				and type in 
+		      	<foreach item="item" index="index" collection="types" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="description != null &amp;&amp; description != ''">
+				description like '%${description}%' 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<insert id="insert" parameterType="Dic" >
+		insert into pf_dic(
+			dicId,<include refid="tableColumn"/>
+		)values(
+			#{dicId},#{name},#{code},#{level},#{hasSub},
+			#{pid},#{type},#{sequence},#{description},#{tenantId}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="map" >
+		delete from pf_dic
+		<choose>
+			<when test="dicIds != null &amp;&amp; dicIds.size() != 0">
+				where dicId in
+		      	<foreach item="item" index="index" collection="dicIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		      	<if test="tenantId != null">
+					and tenantId = #{tenantId}
+				</if>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="map">
+		update pf_dic 
+		<set>
+			<if test="dic.name != null &amp;&amp; dic.name != ''">name=#{dic.name},</if>
+			<if test="dic.code != null &amp;&amp; dic.code != ''">code=#{dic.code},</if>
+			<if test="dic.level != null">level=#{dic.level},</if>
+			<if test="dic.hasSub != null">hasSub=#{dic.hasSub},</if>
+			<if test="dic.pid != null">pid=#{dic.pid},</if>
+			<if test="dic.type != null">type=#{dic.type},</if>
+			<if test="dic.sequence != null">sequence=#{dic.sequence},</if>
+			<if test="dic.description != null &amp;&amp; dic.description != ''">description=#{dic.description}</if>
+		</set>
+		where dicId = #{dic.dicId} 
+		<if test="tenantId != null">
+			and tenantId = #{tenantId}
+		</if>
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="Dic">
+		select dicId,<include refid="tableColumn"/>
+		from pf_dic
+		where dicId = #{dicId}
+	</select>
+	
+	<select id="findAll" resultType="Dic">
+		select 
+			dicId, <include refid="tableColumn"/>
+		from 
+			pf_dic 
+		<include refid="dicQueryCondition"/>
+		<!-- <if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if> -->
+		<choose>
+			<when test="pager != null">
+				order by ${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+		    </when>
+			<when test="orderBy != null &amp;&amp; orderBy != ''">
+				order by ${orderBy}
+		    </when>
+		</choose>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(dicId)
+		from 
+			pf_dic
+		<include refid="dicQueryCondition"/>
+	</select>
+	<select id="findByIds" parameterType="long" resultType="Dic">
+		select dicId,<include refid="tableColumn"/>
+		from pf_dic
+		<!-- <where>
+			<if test="ids != null&amp;&amp; ids.size() != 0">
+				dicId in 
+		      	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			order by sequence
+		</where> -->
+		<choose>
+			<when test="ids != null &amp;&amp; ids.size() != 0">
+				where dicId in 
+		      	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+		order by sequence
+	</select>
+	<select id="findByPid" parameterType="map" resultType="Dic">
+		select dicId, <include refid="tableColumn"/> 
+		from pf_dic
+		<!-- where pid = #{pid} -->
+		<include refid="dicQueryCondition" />
+		<choose>
+			<when test="pager != null">
+				order by ${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+		    </when>
+			<when test="orderBy != null &amp;&amp; orderBy != ''">
+				order by ${orderBy}
+		    </when>
+		</choose>
+	</select>
+	
+	<select id="findTenantDicByPid"  resultType="long">
+		select dicId, <include refid="tableColumn"/> 
+		from pf_dic
+		<where>
+			<if test="pIds != null&amp;&amp; pIds.size() != 0">
+				pid in 
+		      	<foreach item="item" index="index" collection="pIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="tenantIds != null &amp;&amp; tenantIds.size() != 0">
+				and tenantId in 
+		      	<foreach item="item" index="index" collection="tenantIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+		</where>	
+	</select>
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<url>http://maven.oschina.net/content/groups/public/</url>
+	<parent>
+		<artifactId>biz.api.impl</artifactId>
+		<groupId>com.sound.cloud</groupId>
+		<version>1.0</version>
+	</parent>
+	<groupId>com.sound.cloud.api.impl</groupId>
+	<artifactId>biz.watersupply</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.0</version>
+ 	<properties>
+        <mybatis-generator.version>1.3.2</mybatis-generator.version>
+        <commons-configuration.version>1.9</commons-configuration.version>
+    </properties>
+    
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sound.cloud.api</groupId>
+			<artifactId>biz.api.watersupply</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+            <groupId>org.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-core</artifactId>
+            <version>${mybatis-generator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>${commons-configuration.version}</version>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.mybatis.generator</groupId>
+					<artifactId>mybatis-generator-maven-plugin</artifactId>
+					<version>1.3.2</version>
+					<configuration>
+						<configurationFile>src/test/resources/generatorConfig.xml</configurationFile>
+						<verbose>true</verbose>
+						<overwrite>true</overwrite>
+					</configuration>
+					<executions>
+						<execution>
+							<id>Generate MyBatis Artifacts</id>
+							<goals>
+								<goal>generate</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>org.mybatis.generator</groupId>
+							<artifactId>mybatis-generator-core</artifactId>
+							<version>1.3.2</version>
+						</dependency>
+						<dependency>
+							<groupId>mysql</groupId>
+							<artifactId>mysql-connector-java</artifactId>
+							<version>${mysql.driver.version}</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

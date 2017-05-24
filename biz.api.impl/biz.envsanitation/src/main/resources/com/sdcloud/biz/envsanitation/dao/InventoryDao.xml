@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.InventoryDao">
+
+	<sql id="inventoryColumn">
+		
+		inventorySetId,
+		inventoryCode,
+		inventoryName ,
+		type,
+		unit,
+		startDate,
+		endDate,
+		categoryACB,
+		safeCount,
+		alertCount,
+		isBatched,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_inventory(
+			inventoryId, <include refid="inventoryColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="inventorys" separator=",">
+			(#{item.inventoryId},
+			#{item.inventorySetId}, #{item.inventoryCode},
+			#{item.inventoryName}, #{item.type},
+			#{item.unit}, #{item.startDate},
+			#{item.endDate},#{item.categoryACB}, #{item.safeCount},
+			#{item.alertCount},
+			#{item.isBatched},#{item.tenantId})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_inventory
+		<choose>
+			<when test="inventoryIds != null &amp;&amp; inventoryIds.size() != 0">
+				where inventoryId in
+		      	<foreach item="item" index="index" collection="inventoryIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="inventory">
+		update so_inventory
+		<set>
+			<if test="warehouseId != null &amp;&amp; warehouseId != ''">warehouseId = #{warehouseId},</if>
+			<if test="inventorySetId != null">inventorySetId = #{inventorySetId},</if>
+			<if test="inventoryCode != null &amp;&amp; inventoryCode != ''">inventoryCode = #{inventoryCode},</if>
+			<if test="inventoryName != null &amp;&amp; inventoryName != ''">inventoryName = #{inventoryName},</if>
+			<if test="type != null &amp;&amp; type != ''">type = #{type},</if>
+			<if test="unit != null &amp;&amp; unit != ''">unit = #{unit},</if>
+			<if test="startDate != null &amp;&amp; startDate != ''">startDate = #{startDate},</if>
+			<if test="endDate != null &amp;&amp; endDate != ''">endDate = #{endDate},</if>
+			<if test="categoryACB != null &amp;&amp; categoryACB != ''">categoryACB = #{categoryACB},</if>
+			<if test="safeCount != null ">safeCount = #{safeCount},</if>
+			<if test="isBatched != null">isBatched = #{isBatched},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where inventoryId = #{inventoryId}
+	</update>
+	
+	<sql id="inventoryCondition">
+		<where>
+			<if test="newOrgId != null ">
+				o.newOrgId = #{newOrgId}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.inventoryId)
+		from so_inventory c
+	   <where>
+			<if test="inventorySetId != null &amp;&amp;inventorySetId !=0">
+				c.inventorySetId = #{inventorySetId}
+			</if>
+			
+			<if test="inventoryCode != null &amp;&amp;inventoryCode !=''">
+				and c.inventoryCode like '%${inventoryCode}%'
+			</if>
+			<if test="inventoryName != null &amp;&amp;inventoryName !=''">
+				and c.inventoryName like '%${inventoryName}%'
+			</if>
+			<if test="alertCount != null &amp;&amp;alertCount !=''">
+				and c.alertCount like '%${alertCount}%'
+			</if>
+			<if test="type != null &amp;&amp;type !=''">
+				and c.type like '%${type}%'
+			</if>
+			<if test="unit != null &amp;&amp;unit !=''">
+				and c.unit like '%${unit}%'
+			</if>
+			<if test="isBatched != null">
+				and c.isBatched = #{isBatched}
+			</if>
+			<if test="safeCount != null">
+				and c.safeCount = #{safeCount}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="categoryACB != null &amp;&amp;categoryACB !=''">
+				and c.categoryACB like '%${categoryACB}%'
+			</if>
+			<if test="startFirstDate != null &amp;&amp;startEndDate !=null">
+				and c.startDate between #{startFirstDate} and #{startEndDate}
+			</if>
+			<if test="endFirstDate != null &amp;&amp;endEndDate !=null">
+				and c.endDate between #{endFirstDate} and #{endEndDate}
+			</if>
+			<if test="dicId != null&amp;&amp;dicId!=''">
+				and c.inventoryId not in (select siw.inventoryId from so_inventory_warehouse siw 
+					where siw.dicId=#{dicId})
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="Inventory">
+	    select 	inventoryId,<include refid="inventoryColumn"/>
+	    from so_inventory c
+	   <where>
+			<if test="inventorySetId != null &amp;&amp;inventorySetId !=0">
+				c.inventorySetId = #{inventorySetId}
+			</if>
+			<if test="inventoryCode != null &amp;&amp;inventoryCode !=''">
+				and c.inventoryCode like '%${inventoryCode}%'
+			</if>
+			<if test="inventoryName != null &amp;&amp;inventoryName !=''">
+				and c.inventoryName like '%${inventoryName}%'
+			</if>
+			<if test="alertCount != null &amp;&amp;alertCount !=''">
+				and c.alertCount like '%${alertCount}%'
+			</if>
+			<if test="type != null &amp;&amp;type !=''">
+				and c.type like '%${type}%'
+			</if>
+			<if test="unit != null &amp;&amp;unit !=''">
+				and c.unit like '%${unit}%'
+			</if>
+			<if test="isBatched != null">
+				and c.isBatched = #{isBatched}
+			</if>
+			<if test="safeCount != null">
+				and c.safeCount = #{safeCount}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="categoryACB != null &amp;&amp;categoryACB !=''">
+				and c.categoryACB like '%${categoryACB}%'
+			</if>
+			<if test="startFirstDate != null &amp;&amp;startEndDate !=null">
+				and c.startDate between #{startFirstDate} and #{startEndDate}
+			</if>
+			<if test="endFirstDate != null &amp;&amp;endEndDate !=null">
+				and c.endDate between #{endFirstDate} and #{endEndDate}
+			</if>
+			<if test="dicId != null&amp;&amp;dicId!=''">
+				and c.inventoryId not in (select siw.inventoryId from so_inventory_warehouse siw 
+					where siw.dicId=#{dicId})
+			</if>
+		</where>
+		<if test="pager != null">
+			<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation=" http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+      http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- Database config -->
+
+	
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	
+
+	<!-- test service impl -->
+	<!-- 
+	<bean id="testService" class="com.sdcloud.biz.core.service.impl.TestServiceImpl"/>
+	<bean id="salesPackService" class="com.sdcloud.biz.core.service.impl.SalesPackServiceImpl"/>
+	 -->
+	<dubbo:application name="dubbo-consumer" />
+	<dubbo:registry protocol="zookeeper" address="127.0.0.1:2181" />
+
+
+	<dubbo:reference id="userRoleAuthorityService" interface="com.sdcloud.api.core.service.UserRoleAuthorityService"/>
+	<dubbo:reference id="userLoginInfoService" interface="com.sdcloud.api.core.service.UserLoginInfoService"/>
+	</beans>

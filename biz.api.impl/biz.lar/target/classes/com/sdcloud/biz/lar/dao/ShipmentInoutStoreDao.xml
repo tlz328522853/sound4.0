@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipmentInoutStoreDao">
+
+    <sql id="shipmentInoutStoreColumns">
+		a.id AS "id",
+		a.order_no AS "orderNo",
+		a.biz_type AS "bizType",
+		a.order_time AS "orderTime",
+		a.order_state AS "orderState",
+		a.org AS "org",
+		a.area AS "area",
+		a.sales_man AS "salesMan",
+		a.previous_operation AS "previousOperation",
+		a.next_operation AS "nextOperation",
+		a.scan_time AS "scanTime",
+		a.scan_user AS "scanUser",
+		a.scan_type AS "scanType",
+		a.operation AS "operation",
+		a.remarks AS "remarks",
+		b.name AS "operationName",
+		c.name AS "previousOperationName",
+		d.name AS "salesManName",
+		e.name AS "areaName",
+		co.name AS "nextOperationName"
+	</sql>
+
+    <sql id="shipmentInoutStoreJoins">
+        left join lar_operation b on b.id=a.operation
+        left join lar_operation c on c.id=a.previous_operation
+        left join lar_operation co on co.id=a.next_operation
+        left join lar_operation d on d.id=a.sales_man
+        left join lar_shipmentArea e on e.id=a.area
+    </sql>
+    <insert id="save">
+		INSERT INTO lar_inout_store(
+			id,
+			order_no,
+			biz_type,
+			order_time,
+			order_state,
+			org,
+			area,
+			sales_man,
+			previous_operation,
+			next_operation,
+			scan_time,
+			scan_user,
+			scan_type,
+			operation,
+			remarks
+		) VALUES (
+			#{id},
+			#{orderNo},
+			#{bizType},
+			#{orderTime},
+			#{orderState},
+			#{org},
+			#{area},
+			#{salesMan},
+			#{previousOperation},
+			#{nextOperation},
+			#{scanTime},
+			#{scanUser},
+			#{scanType},
+			#{operation},
+			#{remarks}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE lar_inout_store
+        <set>
+            <if test="orderNo!=null and orderNo!=''">
+                order_no = #{orderNo},
+            </if>
+            <if test="bizType!=null and bizType!=''">
+                biz_type = #{bizType},
+            </if>
+            <if test="orderTime!=null and orderTime!=''">
+                order_time = #{orderTime},
+            </if>
+            <if test="orderState!=null and orderState!=''">
+                order_state = #{orderState},
+            </if>
+            <if test="org!=null and org!=''">
+                org = #{org},
+            </if>
+            <if test="area!=null and area!=''">
+                area = #{area},
+            </if>
+            <if test="salesMan!=null and salesMan!=''">
+                sales_man = #{salesMan},
+            </if>
+            <if test="previousOperation!=null and previousOperation!=''">
+                previous_operation = #{previousOperation},
+            </if>
+            <if test="nextOperation!=null and nextOperation!=''">
+                next_operation = #{nextOperation},
+            </if>
+            <if test="scanTime!=null and scanTime!=''">
+                scan_time = #{scanTime},
+            </if>
+            <if test="scanUser!=null and scanUser!=''">
+                scan_user = #{scanUser},
+            </if>
+            <if test="scanType!=null and scanType!=''">
+                scan_type = #{scanType},
+            </if>
+            <if test="operation!=null and operation!=''">
+                operation = #{operation},
+            </if>
+            <if test="remarks!=null and remarks!=''">
+                remarks = #{remarks}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM lar_inout_store
+		WHERE id = #{id}
+	</update>
+    <select id="getById" resultType="com.sdcloud.api.lar.entity.ShipmentInoutStore">
+        SELECT
+        <include refid="shipmentInoutStoreColumns"/>
+        FROM lar_inout_store a
+        <include refid="shipmentInoutStoreJoins"/>
+        <where>
+            a.id=#{id}
+        </where>
+    </select>
+    <select id="findAll" resultType="com.sdcloud.api.lar.entity.ShipmentInoutStore">
+        SELECT
+        <include refid="shipmentInoutStoreColumns"/>
+        FROM lar_inout_store a
+        <include refid="shipmentInoutStoreJoins"/>
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key">
+                    and a.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                order by ${larPager.orderSql}
+            </when>
+            <otherwise>
+                order by a.scan_time desc
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            limit #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+    <select id="totalCount" resultType="java.lang.Long">
+        select count(id) from lar_inout_store
+        <where>
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" separator="and">
+                    ${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="countByOrgIds" resultType="java.lang.Long">
+        select count(id) from lar_inout_store a
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key">
+                    and a.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                and a.org in
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.ShipmentInoutStore">
+        select
+        <include refid="shipmentInoutStoreColumns"/>
+        from lar_inout_store a
+        <include refid="shipmentInoutStoreJoins"/>
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key">
+                    and a.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="larPager.extendList!=null and larPager.extendList.size()>0">
+                <foreach collection="larPager.extendList" item="item">
+                    <if test="item.key=='order_start_time' and item.value!=null and item.value!=''">
+                        and a.order_time <![CDATA[>=]]> DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+                    </if>
+                    <if test="item.key=='order_end_time' and item.value!=null and item.value!=''">
+                        and a.order_time <![CDATA[<]]> DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+                    </if>
+                    <if test="item.key=='scan_start_time' and item.value!=null and item.value!=''">
+                        and a.scan_time <![CDATA[>=]]> DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+                    </if>
+                    <if test="item.key=='scan_end_time' and item.value!=null and item.value!=''">
+                        and a.scan_time <![CDATA[<]]> DATE_FORMAT(#{item.value}, '%Y-%m-%d')
+                    </if>
+                    <if test="item.key=='order_no' and item.value!=null and item.value!=''">
+                        and a.order_no = #{item.value}
+                    </if>
+                    <if test="item.key=='biz_type' and item.value!=null and item.value!=''">
+                        and a.biz_type = #{item.value}
+                    </if>
+                    <if test="item.key=='operation' and item.value!=null and item.value!=''">
+                        and a.operation = #{item.value}
+                    </if>
+                    <if test="item.key=='scan_type' and item.value!=null and item.value!=''">
+                        and a.scan_type = #{item.value}
+                    </if>
+                    <if test="item.key=='sales_man' and item.value!=null and item.value!=''">
+                        and a.sales_man = #{item.value}
+                    </if>
+                    <if test="item.key=='previous_operation' and item.value!=null and item.value!=''">
+                        and a.previous_operation = #{item.value}
+                    </if>
+                    <if test="item.key=='next_operation' and item.value!=null and item.value!=''">
+                        and a.next_operation = #{item.value}
+                    </if>
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                and a.org in
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                order by ${larPager.orderSql}
+            </when>
+            <otherwise>
+                order by a.scan_time desc
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            limit #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+</mapper>

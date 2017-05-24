@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.UserDao">
+
+	<!-- <insert id="insert"> insert into pf_user (userId,name,password,userType,telephone,email,employeeId, 
+		orgId,portalTypeId,description,beginTime,endTime,creator, createTime,ownerCode,tenantId) 
+		values (#{userId},#{name},#{password},#{userType},#{telephone},#{email},#{employee.employeeId}, 
+		#{orgId},#{portalTypeId},#{description},#{beginTime},#{endTime},#{creator}, 
+		now(),#{ownerCode},#{tenantId}) </insert> -->
+	<insert id="insert">
+		insert into pf_user
+		(userId,name,password,userType,telephone,email,employeeId,
+		portalTypeId,description,beginTime,endTime,creator,
+		createTime,ownerCode,tenantId)
+		values
+		(#{userId},#{name},#{password},#{userType},#{telephone},#{email},#{employee.employeeId},
+		#{portalTypeId},#{description},#{beginTime},#{endTime},#{creator},
+		now(),#{ownerCode},#{tenantId})
+	</insert>
+
+	<!-- <select id="findByOrg" resultType="com.sdcloud.api.core.entity.User"> 
+		select userId, name, password, userType, telephone, email, employeeId as 
+		"employee.employeeId", orgId, portalTypeId, description, beginTime, endTime, 
+		creator, createTime, editor, editTime, ownerCode, tenantId from pf_user where 
+		<if test="orgIds != null"> orgId in <foreach item="item" index="index" collection="orgIds" 
+		open="(" separator="," close=")"> #{item} </foreach> </if> <if test="orgIds 
+		== null"> 1=2 </if> <if test="pager != null"> order by ${pager.orderSql} 
+		limit #{pager.first}, #{pager.pageSize} </if> </select> -->
+
+	<select id="findByRole" resultType="User">
+		select u.userId,
+		u.name,
+		u.password,
+		u.userType,
+		u.telephone,
+		u.email,
+		u.employeeId as "employee.employeeId",
+		pem.name as "employee.name",
+		<!-- u.orgId, -->
+		u.portalTypeId,
+		u.description,
+		u.beginTime,
+		u.endTime,
+		u.creator,
+		u.createTime,
+		u.editor,
+		u.editTime,
+		u.ownerCode,
+		u.tenantId,
+		po.name as orgName,
+		pgu.groupId as groupId,
+		(SELECT pug.`name` from pf_user_group pug where pug.groupId=pgu.groupId)as
+		groupName,
+		pt.name as tenantName
+		from pf_user u
+		LEFT JOIN pf_user_role ur
+		on u.userId = ur.userId
+		<!-- LEFT JOIN pf_org po on u.orgId = po.orgId -->
+		LEFT JOIN pf_tenant pt
+		on pt.tenantId=u.tenantId
+		LEFT JOIN pf_employee pem
+		on pem.employeeId=u.employeeId
+		LEFT JOIN pf_org po
+		ON pem.orgId = po.orgId
+		LEFT JOIN pf_group_user pgu
+		on pgu.userId=u.userId
+		<where>
+			<if test="roleId != null&amp;&amp; roleId != -1">
+				ur.roleId = #{roleId}
+			</if>
+			<if test="groupIds != null">
+				AND pgu.groupId in
+				<foreach item="item" index="index" collection="groupIds"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="firstDate != null &amp;&amp;endDate !=null">
+				and u.createTime between #{firstDate} and #{endDate}
+			</if>
+			<if test="userId != null&amp;&amp; userId != -1">
+				AND u.userId=#{userId}
+			</if>
+			<if test="name != null &amp;&amp;name !=''">
+				AND u.name like '%${name}%'
+			</if>
+			<if test="employeeId != null &amp;&amp; employeeId !=0">
+				and u.employeeId = #{employeeId}
+			</if>
+
+			<if test="employeeNo != null &amp;&amp; employeeNo !=''">
+				and pem.employeeNo like '%${employeeNo}%'
+			</if>
+			<if test="empName != null &amp;&amp; empName !=''">
+				and pem.name like '%${empName}%'
+			</if>
+			<if test="telephone != null&amp;&amp; telephone !=''">
+				and u.telephone like '%${telephone}%'
+			</if>
+			<if test="userType != null">
+				and u.userType = #{userType}
+			</if>
+			<if test="email != null &amp;&amp;email !=''">
+				AND u.email=#{email}
+			</if>
+			<if test="groupId != null&amp;&amp; groupId !=0">
+				AND pgu.groupId=#{groupId}
+			</if>
+		</where>
+		group by u.userId
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first},
+			#{pager.pageSize}
+		</if>
+		<if test="pager == null">
+			and 1 = 2
+		</if>
+	</select>
+	<select id="findByRoleParam" parameterType="map" resultType="User">
+		select u.userId,
+		u.name,
+		u.password,
+		u.userType,
+		u.telephone,
+		u.email,
+		u.employeeId as "employee.employeeId",
+		<!-- u.orgId, -->
+		u.portalTypeId,
+		u.description,
+		u.beginTime,
+		u.endTime,
+		u.creator,
+		u.createTime,
+		u.editor,
+		u.editTime,
+		u.ownerCode,
+		u.tenantId,
+		po.name as orgName,
+		pgu.groupId as groupId,
+		(SELECT pug.`name` from pf_user_group pug where pug.groupId=pgu.groupId)as
+		groupName,
+		pt.name as tenantName
+		from pf_user u
+		LEFT JOIN pf_user_role ur
+		on u.userId = ur.userId
+		<!-- LEFT JOIN pf_org po on u.orgId = po.orgId -->
+		LEFT JOIN pf_employee pm
+		ON u.employeeId = pm.employeeId
+		LEFT JOIN pf_org po
+		ON pm.orgId = po.orgId
+		LEFT JOIN pf_tenant pt
+		on pt.tenantId=u.tenantId
+		LEFT JOIN pf_group_user pgu
+		on pgu.userId=u.userId
+		<where>
+			<if test="roleId != null&amp;&amp; roleId != -1">
+				ur.roleId = #{roleId}
+			</if>
+			<if test="groupId != null&amp;&amp; groupId != -1">
+				AND pgu.groupId=#{groupId}
+			</if>
+		</where>
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first},
+			#{pager.pageSize}
+		</if>
+		<if test="pager == null">
+			and 1 = 2
+		</if>
+	</select>
+	<!-- <select id="countByOrg" resultType="Long"> select count(userId) from 
+		pf_user where <if test="orgIds != null"> orgId in <foreach item="item" index="index" 
+		collection="orgIds" open="(" separator="," close=")"> #{item} </foreach> 
+		</if> <if test="orgIds == null"> 1=2 </if> </select> -->
+
+	<select id="findByEmployee" resultType="com.sdcloud.api.core.entity.User">
+		select userId,
+		name,
+		password,
+		userType,
+		telephone,
+		email,
+		employeeId as "employee.employeeId",
+		<!-- orgId, -->
+		portalTypeId,
+		description,
+		beginTime,
+		endTime,
+		creator,
+		createTime,
+		editor,
+		editTime,
+		ownerCode,
+		tenantId
+		from pf_user
+		where
+		<if test="employeeIds != null">
+			employeeId in
+			<foreach item="item" index="index" collection="employeeIds"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="employeeIds == null">
+			1=2
+		</if>
+	</select>
+
+	<delete id="deleteById">
+		delete from pf_user
+		where
+		<if test="userIds != null">
+			userId in
+			<foreach item="item" collection="userIds" open="(" separator=","
+				close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="userIds == null">
+			1 = 2
+		</if>
+	</delete>
+
+	<update id="update">
+		update pf_user
+		<set>
+			<if test="name != null &amp;&amp; name != ''">name=#{name},</if>
+			<if test="userType != null &amp;&amp; userType != ''">userType=#{userType},</if>
+			<if test="telephone != null &amp;&amp; telephone != ''">telephone=#{telephone},</if>
+			<if test="email != null &amp;&amp; email != ''">email=#{email},</if>
+			<if test="employee != null &amp;&amp; employee.employeeId != null">employeeId=#{employee.employeeId},</if>
+			<if test="description != null &amp;&amp; description != ''">description=#{description},</if>
+			<if test="beginTime != null">beginTime=#{beginTime},</if>
+			<if test="endTime != null">endTime=#{endTime},</if>
+			<if test="password != null">password=#{password},</if>
+			<if test="2 > 1">editTime=now()</if>
+		</set>
+		where userId = #{userId}
+	</update>
+
+	<select id="findByPwd" resultType="com.sdcloud.api.core.entity.User">
+		select u.userId,
+		u.name,
+		u.password,
+		u.userType,
+		u.telephone,
+		u.email,
+		u.employeeId as "employee.employeeId",
+		<!-- u.orgId, -->
+		u.portalTypeId,
+		u.description,
+		u.beginTime,
+		u.endTime,
+		u.creator,
+		u.createTime,
+		u.editor,
+		u.editTime,
+		u.ownerCode,
+		u.tenantId,
+		e.name as "employee.name",
+		e.telephone as "employee.telephone",
+		e.email as "employee.email",
+		e.description as "employee.description",
+		e.orgId as "employee.org.orgId",
+		e.gender as "employee.gender",
+		e.politicsStatus as "employee.politicsStatus",
+		e.employeeNo as "employee.employeeNo",
+		e.birthday as "employee.birthday",
+		e.identNo as "employee.identNo",
+		e.entryDate as "employee.entryDate",
+		e.departDate as "employee.departDate",
+		e.jobTitle as "employee.jobTitle",
+		e.techLevel as "employee.techLevel",
+		e.profession as "employee.profession",
+		e.major as "employee.major",
+		e.education as "employee.education",
+		e.gradDate as "employee.gradDate",
+		e.gradCollege as "employee.gradCollege",
+		e.mobile as "employee.mobile",
+		e.address as "employee.address",
+		e.weChat as "employee.weChat",
+		e.mobileMac as "employee.mobileMac",
+		e.emergeName as "employee.emergeName",
+		e.emergeMobile as "employee.emergeMobile",
+		e.ownerCode as "employee.ownerCode",
+		e.tenantId as "employee.tenantId"
+		from pf_user u
+		left join pf_employee e
+		on u.employeeId=e.employeeId
+		where u.name = #{userName} and u.password = #{pwd}
+	</select>
+
+	<select id="findByUserName" resultType="com.sdcloud.api.core.entity.User">
+		select userId,
+		name,
+		password,
+		userType,
+		telephone,
+		email,
+		employeeId as "employee.employeeId",
+		<!-- orgId, -->
+		portalTypeId,
+		description,
+		beginTime,
+		endTime,
+		creator,
+		createTime,
+		editor,
+		editTime,
+		ownerCode,
+		tenantId
+		from pf_user
+		where name = #{userName}
+	</select>
+	<select id="findByUserId" resultType="com.sdcloud.api.core.entity.User">
+		select u.userId,
+		u.name,
+		u.password,
+		u.userType,
+		u.telephone,
+		u.email,
+		u.employeeId as "employee.employeeId",
+		<!-- u.orgId, -->
+		u.portalTypeId,
+		u.description,
+		u.beginTime,
+		u.endTime,
+		u.creator,
+		u.createTime,
+		u.editor,
+		u.editTime,
+		u.ownerCode,
+		u.tenantId,
+		e.name as "employee.name",
+		e.telephone as "employee.telephone",
+		e.email as "employee.email",
+		e.description as "employee.description",
+		e.orgId as "employee.org.orgId",
+		e.gender as "employee.gender",
+		e.politicsStatus as "employee.politicsStatus",
+		e.employeeNo as "employee.employeeNo",
+		e.birthday as "employee.birthday",
+		e.identNo as "employee.identNo",
+		e.entryDate as "employee.entryDate",
+		e.departDate as "employee.departDate",
+		e.jobTitle as "employee.jobTitle",
+		e.techLevel as "employee.techLevel",
+		e.profession as "employee.profession",
+		e.major as "employee.major",
+		e.education as "employee.education",
+		e.gradDate as "employee.gradDate",
+		e.gradCollege as "employee.gradCollege",
+		e.mobile as "employee.mobile",
+		e.address as "employee.address",
+		e.weChat as "employee.weChat",
+		e.mobileMac as "employee.mobileMac",
+		e.emergeName as "employee.emergeName",
+		e.emergeMobile as "employee.emergeMobile",
+		e.ownerCode as "employee.ownerCode",
+		e.tenantId as "employee.tenantId"
+		from pf_user u
+		left outer join pf_employee e
+		on u.employeeId=e.employeeId
+		where u.userId=#{userId}
+	</select>
+
+	<select id="findByUser" resultType="com.sdcloud.api.core.entity.User">
+		select u.userId,
+		u.name,
+		u.password,
+		u.userType
+		from pf_user u
+		where u.userId=#{userId}
+	</select>
+	
+	
+	<select id="findUserByTenantId" resultType="Long">
+		select u.userId
+		from pf_user u
+		<where> 
+			<if test="tenantIds != null">
+				u.userId in
+				<foreach item="item" index="index" collection="tenantIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="findUserIdByEmployee" resultType="Long">
+		select u.userId
+		from pf_user u
+		<where> 
+			<if test="employeeIds != null">
+				u.employeeId in
+				<foreach item="item" index="index" collection="employeeIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findUserByOrgId" resultType="Long">
+		SELECT pu.userId from pf_user pu 
+		INNER JOIN pf_employee pe 
+		on pu.employeeId=pe.employeeId
+		INNER JOIN pf_org po
+		on po.orgId=pe.orgId
+		<where> 
+			<if test="orgIds != null">
+				po.orgId  in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+				or po.companyId in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="isTenantRootUser" resultType="Long">
+		SELECT pug.groupId from
+		pf_user_group pug
+		INNER JOIN pf_group_user pgu
+		on
+		pug.groupId=pgu.groupId
+		INNER JOIN pf_user pu
+		on pu.userId=pgu.userId
+		INNER JOIN pf_user_role pur
+		on pur.userId=pu.userId
+		INNER JOIN pf_role pr
+		on pr.roleId=pur.roleId
+		where pug.pId=1
+		and pu.userId=#{userId}
+		and
+		pr.roleType=0
+	</select>
+
+
+	<select id="findByUserIds" resultType="com.sdcloud.api.core.entity.User">
+		select u.userId,
+		u.name,
+		u.password,
+		u.userType,
+		u.telephone,
+		u.email,
+		u.employeeId as "employee.employeeId",
+		<!-- u.orgId, -->
+		u.portalTypeId,
+		u.description,
+		u.beginTime,
+		u.endTime,
+		u.creator,
+		u.createTime,
+		u.editor,
+		u.editTime,
+		u.ownerCode,
+		u.tenantId,
+		e.name as "employee.name",
+		e.telephone as "employee.telephone",
+		e.email as "employee.email",
+		e.description as "employee.description",
+		e.orgId as "employee.org.orgId",
+		e.gender as "employee.gender",
+		e.politicsStatus as "employee.politicsStatus",
+		e.employeeNo as "employee.employeeNo",
+		e.birthday as "employee.birthday",
+		e.identNo as "employee.identNo",
+		e.entryDate as "employee.entryDate",
+		e.departDate as "employee.departDate",
+		e.jobTitle as "employee.jobTitle",
+		e.techLevel as "employee.techLevel",
+		e.profession as "employee.profession",
+		e.major as "employee.major",
+		e.education as "employee.education",
+		e.gradDate as "employee.gradDate",
+		e.gradCollege as "employee.gradCollege",
+		e.mobile as "employee.mobile",
+		e.address as "employee.address",
+		e.weChat as "employee.weChat",
+		e.mobileMac as "employee.mobileMac",
+		e.emergeName as "employee.emergeName",
+		e.emergeMobile as "employee.emergeMobile",
+		e.ownerCode as "employee.ownerCode",
+		e.tenantId as "employee.tenantId"
+		from pf_user u
+		left join pf_employee e
+		on u.employeeId=e.employeeId
+		<where> 
+			<if test="userIds != null">
+				userId in
+				<foreach item="item" index="index" collection="userIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="userIds == null">
+				1=2
+			</if>
+		</where>
+	</select>
+	<select id="findUserByEmployee" parameterType="Employee" resultType="User">
+		select u.userId,
+		u.name,
+		u.password,
+		u.userType,
+		u.telephone,
+		u.email,
+		u.employeeId as "employee.employeeId",
+		u.portalTypeId,
+		u.description,
+		u.beginTime,
+		u.endTime,
+		u.creator,
+		u.createTime,
+		u.editor,
+		u.editTime,
+		u.ownerCode,
+		u.tenantId,
+		e.name as "employee.name",
+		e.telephone as "employee.telephone",
+		e.email as "employee.email",
+		e.description as "employee.description",
+		e.orgId as "employee.org.orgId",
+		e.gender as "employee.gender",
+		e.politicsStatus as "employee.politicsStatus",
+		e.employeeNo as "employee.employeeNo",
+		e.birthday as "employee.birthday",
+		e.identNo as "employee.identNo",
+		e.entryDate as "employee.entryDate",
+		e.departDate as "employee.departDate",
+		e.jobTitle as "employee.jobTitle",
+		e.techLevel as "employee.techLevel",
+		e.profession as "employee.profession",
+		e.major as "employee.major",
+		e.education as "employee.education",
+		e.gradDate as "employee.gradDate",
+		e.gradCollege as "employee.gradCollege",
+		e.mobile as "employee.mobile",
+		e.address as "employee.address",
+		e.weChat as "employee.weChat",
+		e.mobileMac as "employee.mobileMac",
+		e.emergeName as "employee.emergeName",
+		e.emergeMobile as "employee.emergeMobile",
+		e.ownerCode as "employee.ownerCode",
+		e.tenantId as "employee.tenantId"
+		from pf_user u
+		inner join pf_employee e
+		on u.employeeId=e.employeeId
+		<where>
+			<if test="name != null &amp;&amp; name != ''">
+				LOCATE(#{name}, e.name) > 0
+			</if>
+			<if test="employeeId != null">
+			   and  e.employeeId = #{employeeId}
+			</if>
+			<if test="gender != null &amp;&amp; gender != ''">
+				and e.gender = #{gender}
+			</if>
+			<if test="isHeadquarters != null &amp;&amp; isHeadquarters != ''">
+				and e.isHeadquarters = #{isHeadquarters}
+			</if>
+			<if test="isManager != null &amp;&amp; isManager != ''">
+				and e.isManager = #{isManager}
+			</if>
+			<if test="national != null &amp;&amp; national != ''">
+				and e.national = #{national}
+			</if>
+			<if test="employeeNo != null &amp;&amp; employeeNo != ''">
+				and LOCATE(#{employeeNo}, e.employeeNo) > 0
+			</if>
+			<if test="mobile != null &amp;&amp; mobile != ''">
+				and LOCATE(#{mobile}, e.mobile) > 0
+			</if>
+			<if test="jobTitle != null">
+				and e.jobTitle = #{jobTitle}
+			</if>
+			<if test="politicsStatus != null">
+				and e.politicsStatus = #{politicsStatus}
+			</if>
+			<if test="mobileMac != null &amp;&amp; mobileMac != ''">
+				and LOCATE(#{mobileMac}, e.mobileMac) > 0
+			</if>
+			
+			<if test="org!=null &amp;&amp; org.orgId != null">
+				and e.orgId = #{org.orgId}
+
+			</if>
+		</where>
+	</select>
+</mapper> 

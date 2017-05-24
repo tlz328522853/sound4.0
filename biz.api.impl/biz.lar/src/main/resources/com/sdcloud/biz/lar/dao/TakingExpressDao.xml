@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.TakingExpressDao">
+	<insert id="save" parameterType="com.sdcloud.api.lar.entity.TakingExpress">
+		insert into lar_ship_taking_express
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="orderNo != null">
+				order_no,
+			</if>
+			<if test="takingMan != null">
+				taking_man,
+			</if>
+			<if test="org != null">
+				org,
+			</if>
+			<if test="orgName != null">
+				org_name,
+			</if>
+			<if test="payWay != null">
+				pay_way,
+			</if>
+			<if test="money">
+				money,
+			</if>
+			<if test="toPay != null">
+				to_pay,
+			</if>
+			<if test="custom !=null and custom.id !=null">
+				custom,
+			</if>
+			<if test="express != null">
+				express,
+			</if>
+			<if test="expressName != null">
+				express_name,
+			</if>
+			<if test="takingDate != null">
+				taking_date,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="createUser != null">
+				create_user,
+			</if>
+			<if test="createDate != null">
+				create_date,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="orderNo != null">
+				#{orderNo},
+			</if>
+			<if test="takingMan != null">
+				#{takingMan},
+			</if>
+			<if test="org != null">
+				#{org},
+			</if>
+			<if test="orgName != null">
+				#{orgName},
+			</if>
+			<if test="payWay != null">
+				#{payWay},
+			</if>
+			<if test="money">
+				#{money},
+			</if>
+			<if test="toPay != null">
+				#{toPay},
+			</if>
+			<if test="custom !=null and custom.id !=null">
+				#{custom.id},
+			</if>
+			<if test="express != null">
+				#{express},
+			</if>
+			<if test="expressName != null">
+				#{expressName},
+			</if>
+			<if test="takingDate != null">
+				#{takingDate},
+			</if>
+			<if test="remark != null">
+				#{remark},
+			</if>
+			<if test="createUser != null">
+				#{createUser},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+		</trim>
+	</insert>
+	
+	<sql id="column">
+		t.id,
+		t.order_no AS "orderNo",
+		t.org,
+		org_name AS "orgName",
+		t.pay_way AS "payWay",
+		money,
+		to_pay AS "toPay",
+		c.name AS "custom.name",
+		c.phone  AS "custom.phone",
+		c.address  AS "custom.address",
+		c.addressDetail  AS "custom.addressDetail",
+		express,
+		express_name AS "expressName",
+		t.remark,
+		t.taking_man AS "takingMan",
+		taking_date AS "takingDate",
+		t.create_date AS "createDate",
+		t.create_user AS "createUser"
+	</sql>
+
+	<select id="findAll" resultType="com.sdcloud.api.lar.entity.TakingExpress">
+		select
+		<include refid="column" />
+		from lar_ship_taking_express t
+		LEFT JOIN lar_clientuser c on t.custom=c.id
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key">
+					and t.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by t.${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by t.create_date desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.TakingExpress">
+		select
+		<include refid="column" />
+		from lar_ship_taking_express t
+		LEFT JOIN lar_clientuser c on t.custom=c.id
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key">
+					and t.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and t.org in
+				<foreach collection="ids" item="id" close=")" open="("
+					separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="larPager.extendMap!=null">
+				<if test="larPager.extendMap.firstDate !=null and larPager.extendMap.endDate !=null">
+					and t.create_date between #{larPager.extendMap.firstDate} and #{larPager.extendMap.endDate}
+				</if>
+				<if test="larPager.extendMap.firstDate ==null and larPager.extendMap.endDate !=null">
+					<![CDATA[
+						and t.create_date <= #{larPager.extendMap.endDate}
+					]]>
+				</if>
+				<if test="larPager.extendMap.firstDate ==null and larPager.extendMap.endDate =null">
+					<![CDATA[
+						and t.create_date >= #{larPager.extendMap.firstDate}
+					]]>
+				</if>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by t.${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by t.create_date desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select
+		count(id)
+		from lar_ship_taking_express
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key">
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="("
+					separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="larPager.extendMap!=null and larPager.extendMap.firstDate !=null and larPager.extendMap.endDate !=null">
+				and create_date between #{larPager.extendMap.firstDate} and #{larPager.extendMap.endDate}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getByOrderNo" resultType="com.sdcloud.api.lar.entity.TakingExpress">
+		select
+		<include refid="column" />
+		from lar_ship_taking_express t
+		LEFT JOIN lar_clientuser c on t.custom=c.id
+		<where>
+			1=1
+			<if test="orderNos !=null and orderNos.size() >0">
+				and t.order_no in
+				<foreach collection="orderNos" item="orderNo" close=")" open="("
+					separator=",">
+					#{orderNo}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<select id="getById" parameterType="java.lang.Long" resultType="com.sdcloud.api.lar.entity.TakingExpress">
+		select
+		<include refid="column" />
+		from lar_ship_taking_express t
+		LEFT JOIN lar_clientuser c on t.custom=c.id
+		where t.id = #{id}
+	</select>
+	
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.TakingExpress">
+		update lar_ship_taking_express
+		<set>
+			<if test="orderNo != null">
+				order_no=#{orderNo},
+			</if>
+			<if test="takingMan != null">
+				taking_man=#{takingMan},
+			</if>
+			<if test="org != null">
+				org=#{org},
+			</if>
+			<if test="orgName != null">
+				org_name=#{orgName},
+			</if>
+			<if test="payWay != null">
+				pay_way=#{payWay},
+			</if>
+			<if test="money">
+				money=#{money},
+			</if>
+			<if test="toPay != null">
+				to_pay=#{toPay},
+			</if>
+			<if test="custom !=null and custom.id !=null">
+				custom=#{custom.id},
+			</if>
+			<if test="express != null">
+				express=#{express},
+			</if>
+			<if test="expressName != null">
+				express_name=#{expressName},
+			</if>
+			<if test="takingDate != null">
+				taking_date=#{takingDate},
+			</if>
+			<if test="remark != null">
+				remark=#{remark},
+			</if>
+			<if test="createUser != null">
+				create_user=#{createUser},
+			</if>
+			<if test="createDate != null">
+				create_date=#{createDate},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<insert id="batchExportSave">
+		insert into lar_ship_taking_express
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,order_no,taking_man,org,org_name,
+			pay_way,money,to_pay,express,source_type,
+			express_name,taking_date,create_user,create_date
+		</trim>
+		values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id}, #{item.orderNo},#{item.takingMan}, #{item.org}, #{item.orgName},
+            #{item.payWay}, #{item.money},#{item.toPay},#{item.express},#{item.sourceType},
+            #{item.expressName}, #{item.takingDate},#{item.createUser},#{item.createDate}
+            )
+        </foreach>
+    </insert>
+    
+    <select id="queryByOrderNos" resultType="java.lang.String">
+		select
+		order_no
+		from lar_ship_taking_express
+		<where>
+			order_no in
+			<foreach collection="orderNos" item="orderNo" open="(" close=")" separator=",">
+				#{orderNo}
+			</foreach>
+		</where>
+	</select>
+</mapper> 

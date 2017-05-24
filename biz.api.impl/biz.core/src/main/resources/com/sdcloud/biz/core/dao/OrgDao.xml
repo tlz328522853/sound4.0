@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.OrgDao">
+
+	<!-- <sql id="tableColumn">
+		name, fullName, sequence, description, parentId, creator, createTime, 
+		lastModifyTime, isSubCompany, subCompanyCode, ownerCode, 
+		tenantId, type, project, responsible, telephone, fax, zipCode, 
+		district, address, latitude, longitude, scaling, 
+		population,employee, sweepArea, mechOpRate, greenBeltArea, 
+		garbageCleanup, recycle, companyId
+	</sql> -->
+	<sql id="tableColumn">
+		name, fullName, sequence, description, parentId, 
+		isSubCompany, subCompanyCode, ownerCode, 
+		tenantId, companyId
+	</sql>
+	
+	<insert id="insert">
+		insert into pf_org (
+			orgId, <include refid="tableColumn" />
+		)
+		values (
+		#{orgId}, #{name}, #{fullName}, #{sequence}, #{description}, #{parentId},
+		#{isSubCompany}, #{subCompanyCode}, #{ownerCode}, 
+		#{tenantId}, #{companyId}
+		)
+	</insert>
+	
+	<update id="update">
+		update pf_org
+		<set>
+			name=#{name},
+			fullName=#{fullName},
+			sequence=#{sequence},
+			description=#{description},
+			isSubCompany=#{isSubCompany},
+			subCompanyCode=#{subCompanyCode},
+		</set>
+		<choose>
+			<when test="orgId != null">
+				where orgId = #{orgId}
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- <update id="update">
+		update pf_org
+		<set>
+			<if test="name != null &amp;&amp; name != ''">name=#{name},</if>
+			<if test="fullName != null &amp;&amp; fullName != ''">fullName=#{fullName},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+			<if test="description != null &amp;&amp; description != ''">description=#{description},</if>
+			<if test="isSubCompany != null">isSubCompany=#{isSubCompany},</if>
+			<if test="subCompanyCode != null &amp;&amp; subCompanyCode != ''">subCompanyCode=#{subCompanyCode},</if>
+		</set>
+		<choose>
+			<when test="orgId != null">
+				where orgId = #{orgId}
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+	</update> -->
+	
+	<delete id="deleteById">
+	    delete 	
+	    from 	pf_org
+	    where 	orgId = #{delOrgId}	    
+	</delete>
+	
+	<select id="findById" resultType="Org">
+	    select  
+	    o.orgId,
+		o.name,
+		o.fullName,
+		o.sequence,
+		o.description,
+		o.parentId,
+		o.isSubCompany,
+		o.subCompanyCode,
+		o.ownerCode,
+		o.tenantId,
+		o.companyId,
+		
+		p.latitude as "latitude",		
+		p.longitude as "longitude",		
+		p.scaling as "scaling" 
+	    
+	    from pf_org o 
+	    left join pf_project p 
+		on o.orgId = p.orgId 
+	    <choose>
+		    <when test="orgIds != null &amp;&amp; orgIds.size() != 0">
+		        where o.orgId in 
+		    	<foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+		    </when>
+		    <otherwise>
+		        where 1=2
+		    </otherwise>
+	    </choose>
+	    <choose>
+			<when test="pager != null">
+				order by o.${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+		    </when>
+			<when test="orderBy != null &amp;&amp; orderBy != ''">
+				order by ${orderBy}
+		    </when>
+		</choose>	
+	</select>
+	
+	<select id="findChildById" resultType="map">
+	    select  orgId,isSubCompany	
+	    from 	pf_org
+	    where 	
+	    <if test="orgIds != null">
+	        parentId in 
+	    	<foreach item="item" index="index" collection="orgIds"
+			      open="(" separator="," close=")">
+			        #{item}
+			</foreach>
+	    </if>
+	    <if test="1==1">
+			and orgId not in
+			 <foreach item="item" index="index" collection="orgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+			 </foreach>
+		</if>
+	    <if test="orgIds == null">
+	        1=2
+	    </if>
+	</select>
+	<select id="findParent" resultType="java.lang.Long">
+	    select parentId 
+	    from pf_org 
+	    where orgId = #{orgId}
+	</select>
+	
+	<select id="findChildren" resultType="java.lang.String">
+	    select group_concat(ids separator ',') 
+	    from (
+			select @pv:=(
+				select group_concat(orgId separator ',') 
+				from pf_org where parentId in (@pv)
+				) as ids 
+			from pf_org
+			join
+			(select @pv:=#{parentId})tmp
+			where parentId in (@pv)) a;
+	</select>
+	<select id="findNewChildren" parameterType="string"  resultType="Long">
+	    select orgId from pf_org 
+	    where ownerCode like '%${owner}%'
+	</select>
+	<!-- <select id="findChildrenByIs" resultType="java.lang.String">
+	    select group_concat(ids separator ',') 
+	    from (
+			select @pv:=(
+				select group_concat(orgId separator ',') 
+				from pf_org where parentId in (@pv)
+				) as ids and isSubCompany=1
+			from pf_org
+			join
+			(select @pv:=#{parentId})tmp
+			where parentId in (@pv) and isSubCompany=1) a;
+	</select> -->
+	<select id="findAll" resultType="Org">
+		select 
+		o.orgId,
+		o.name,
+		o.fullName,
+		o.sequence,
+		o.description,
+		o.parentId,
+		o.isSubCompany,
+		o.subCompanyCode,
+		o.ownerCode,
+		o.tenantId,
+		o.companyId,
+		
+		p.latitude as "latitude",		
+		p.longitude as "longitude",		
+		p.scaling as "scaling",
+		p.districtCode as "districtCode" 
+		
+		from 
+			pf_org o 
+		left join pf_project p 
+		on o.orgId = p.orgId 
+		<where>
+			<if test="tenantId != null">
+				o.tenantId = #{tenantId}			
+			</if>
+			<if test="parentId != null">
+				and o.parentId = #{parentId} OR o.`orgId`=#{parentId}		
+			</if>
+			<if test="orgIds != null &amp;&amp; orgIds.size()>0">
+			        AND o.orgId in 
+			    	<foreach item="item" index="index" collection="orgIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+			<!-- 只查询租户机构 -->
+			<if test="findTenantOrg != null &amp;&amp; findTenantOrg != ''">
+				and o.ownerCode like '${findTenantOrg}'
+			</if>
+		</where>
+	</select>
+	<select id="findByParam" parameterType="map" resultType="Org">
+		select 
+			<!-- orgId, <include refid="tableColumn"/> -->
+			o.orgId,
+			o.name,
+			o.fullName,
+			o.sequence,
+			o.description,
+			o.parentId,
+			o.isSubCompany,
+			o.subCompanyCode,
+			o.ownerCode,
+			o.tenantId,
+			o.companyId,
+			
+			p.latitude as "latitude",		
+			p.longitude as "longitude",		
+			p.scaling as "scaling" 
+		from 
+			pf_org o 
+			left join pf_project p 
+			on o.orgId = p.orgId 
+			<where>
+				<if test="tenantId != null&amp;&amp; tenantId != -1">
+					 o.tenantId =#{tenantId}
+				</if>
+		      	<if test="parentId != null&amp;&amp; parentId != -1">
+					AND o.parentId =#{parentId}
+				</if>
+				<if test="parentId != null&amp;&amp; parentId == -1">
+					AND o.parentId is null
+				</if>
+				
+				<if test="isSubCompany != null&amp;&amp; isSubCompany != -1">
+					AND o.isSubCompany =#{isSubCompany}
+				</if>
+				<if test="orgIds != null &amp;&amp; orgIds.size()>0">
+			        AND o.orgId in 
+			    	<foreach item="item" index="index" collection="orgIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+			    <if test="orgId != null">
+			        AND o.orgId =#{orgId} 
+			    </if>
+		   </where>
+	</select>
+	<select id="getTotalCount" resultType="java.lang.Long">
+		select 
+			count(orgId)
+		from 
+			pf_org 
+			<where>
+				<if test="tenantId != null&amp;&amp; tenantId != -1">
+					 tenantId =#{tenantId}
+				</if>
+				<if test="name != null &amp;&amp; name !=''">
+					AND name like '%${name}%'
+				</if>
+		      	<if test="parentId != null&amp;&amp; parentId != -1">
+					AND parentId =#{parentId}
+				</if>
+				<if test="parentId != null&amp;&amp; parentId == -1">
+					AND parentId is null
+				</if>
+				
+				<if test="isSubCompany != null&amp;&amp; isSubCompany != -1">
+					AND isSubCompany =#{isSubCompany}
+				</if>
+				<if test="orgIds != null &amp;&amp; orgIds.size()>0">
+			        AND orgId in 
+			    	<foreach item="item" index="index" collection="orgIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+			    <if test="orgId != null">
+			        AND orgId =#{orgId} 
+			    </if>
+			     
+		   </where>
+	</select>
+	<select id="findAllBy" parameterType="map" resultType="Org">
+		select 
+			po.orgId,
+			pfo.name as companyName,
+			pfo.fullName as companyFullName,
+			po.name, po.fullName, po.sequence, po.description, po.parentId, 
+			po.isSubCompany, po.subCompanyCode, po.ownerCode, 
+			po.tenantId, po.companyId
+		from 
+			pf_org po
+			INNER JOIN pf_org pfo
+			on pfo.orgId=po.companyId 
+			<where>
+				<if test="tenantId != null&amp;&amp; tenantId != -1">
+					 po.tenantId =#{tenantId}
+				</if>
+				<if test="name != null &amp;&amp; name !=''">
+					AND po.name like '%${name}%'
+				</if>
+		      	<if test="parentId != null&amp;&amp; parentId != -1">
+					AND po.parentId =#{parentId}
+				</if>
+				<if test="parentId != null&amp;&amp; parentId == -1">
+					AND po.parentId is null
+				</if>
+				
+				<if test="isSubCompany != null&amp;&amp; isSubCompany != -1">
+					AND po.isSubCompany =#{isSubCompany}
+				</if>
+				<if test="orgIds != null &amp;&amp; orgIds.size()>0">
+			        AND po.orgId in 
+			    	<foreach item="item" index="index" collection="orgIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+			    <if test="orgId != null">
+			        AND po.orgId =#{orgId} 
+			    </if>
+			    <if test="pager != null">
+				 group  by po.orgId
+					<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+						order by  ${pager.orderBy}
+						<if test="pager.order!=null &amp;&amp; pager.order!=''">
+						  ${pager.order}
+						</if>
+					</if>
+				limit #{pager.first}, #{pager.pageSize}
+				</if>
+		   </where>
+	</select>
+	<select id="findOwnerCodeByParam" parameterType="map" resultType="String">
+		select 
+			ownerCode 
+		from 
+			pf_org 
+			<where>
+		      	<if test="parentId != null&amp;&amp; parentId != -1">
+					parentId =#{parentId}
+				</if>
+				<if test="parentId != null&amp;&amp; parentId == -1">
+					AND parentId is null
+				</if>
+				<if test="tenantId != null&amp;&amp; tenantId != -1">
+					AND tenantId =#{tenantId}
+				</if>
+				<if test="isSubCompany != null&amp;&amp; isSubCompany != -1">
+					AND isSubCompany =#{isSubCompany}
+				</if>
+				<if test="orgIds != null &amp;&amp; orgIds.size()>0">
+			        AND orgId in 
+			    	<foreach item="item" index="index" collection="orgIds"
+					      open="(" separator="," close=")">
+					        #{item}
+					</foreach>
+			    </if>
+			    <if test="orgId != null">
+			        AND orgId =#{orgId} 
+			    </if>
+			    <if test="1 == 1">
+			         or  parentId is null
+			    </if>
+			   
+		   </where>
+	</select>
+	
+	<select id="findMonitorOrg" resultType="Org">
+		select 
+		o.orgId,
+		o.name,
+		o.fullName,
+		o.sequence,
+		o.description,
+		o.isSubCompany,
+		o.subCompanyCode,
+		o.ownerCode,
+		o.tenantId,
+		o.companyId,
+		<!-- p.employee as "project.employee",		
+		p.population as "project.population",		
+		p.sweepArea as "project.sweepArea",		
+		p.greenBeltArea as "project.greenBeltArea",		
+		p.mechOpRate as "project.mechOpRate",		
+		p.garbageCleanup as "project.garbageCleanup",		
+		p.recycle as "project.recycle",		
+		p.district as "project.district",		
+		p.province as "project.province",		
+		p.city as "project.city",		
+		p.county as "project.county",		
+		p.project as "project.project",		
+		p.stockRatio as "project.stockRatio",		
+		p.stockRatioDetail as "project.stockRatioDetail",		
+		p.registerCapital as "project.registerCapital",		
+		p.businessAddress as "project.businessAddress",		
+		p.registerTime as "project.registerTime",		
+		p.corporateRepresentative as "project.corporateRepresentative",		
+		p.generalManager as "project.generalManager",		
+		p.generalManagerTel as "project.generalManagerTel",		
+		p.viceGeneralManager as "project.viceGeneralManager",		
+		p.viceGeneralManagerTel as "project.viceGeneralManagerTel",		
+		p.telephone as "project.telephone",		
+		p.zipCode as "project.zipCode",		
+		p.fax as "project.fax",		
+		p.informant as "project.informant",		
+		p.informantTime as "project.informantTime",		
+		p.modifier as "project.modifier",		
+		p.modifierTime as "project.modifierTime",	 -->	
+		p.latitude as "latitude",		
+		p.longitude as "longitude",		
+		p.scaling as "scaling"
+				
+		from pf_org o 
+		right join pf_project p
+		on o.orgId = p.orgId 
+		<where>
+			<if test="orgIds != null &amp;&amp; orgIds.size() != 0">
+				and p.orgId in 
+				<foreach item="item" index="index" collection="orgIds"
+					      open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				and p.longitude is not null 
+				and p.latitude is not null
+			</if>
+			<if test="orgIds == null">
+				and 1 = 2
+			</if>
+		</where>
+	</select>
+	
+	<!-- <select id="findMonitorOrg" resultType="Org">
+		select orgId, <include refid="tableColumn"/>
+		from pf_org
+		<where>
+			<if test="orgIds != null">
+				And orgId in 
+				<foreach item="item" index="index" collection="orgIds"
+					      open="(" separator="," close=")">
+					#{item}
+				</foreach>
+				And longitude is not null And latitude is not null
+			</if>
+			<if test="orgIds == null">
+				And 1 = 2
+			</if>
+		</where>
+	</select> -->
+	
+	<select id="findAuthenOrgIds" resultType="Long">
+		select o.orgId from pf_user u 
+		left join pf_user_role r on u.userId = r.userId
+		left join pf_role re on re.roleId=r.roleId 
+		left join pf_org_right o on r.roleId = o.ownerId
+		where u.userId = #{userId} and o.ownerType = 1 and re.roleType != 2
+		union
+		select o.orgId from pf_org_right o where o.ownerId = #{userId} and o.ownerType = 2
+		union
+		SELECT pfor.orgId from pf_org_right pfor
+		INNER JOIN (SELECT pur.roleId from pf_user_role  pur
+		INNER JOIN pf_role pr
+		on pr.roleId=pur.roleId
+		where pur.userId=#{userId} and pr.roleType=2) trole
+		on trole.roleId=pfor.ownerId
+		INNER JOIN (
+		SELECT pfor2.orgId from pf_org_right  pfor2 
+		INNER JOIN pf_group_user pgu
+		on pgu.groupId=pfor2.ownerId
+		where pgu.userId=#{userId} and pfor2.ownerType=3
+		) as groupOrg
+		on groupOrg.orgId=pfor.orgId
+		where pfor.ownerType=1
+
+	</select>
+	
+	<update id="setOrgAsCompany">
+		update pf_org o1, pf_org o2  set o1.companyId = #{orgId}
+		where o1.companyId = o2.companyId and o2.orgId = #{orgId} and o1.ownerCode like  '${ownerCode}%'
+	</update>
+	
+	
+	<update id="setOrgAsDepart">
+		update pf_org
+		set companyId = #{companyId}
+		where companyId = #{orgId}
+	</update>
+	
+	<select id="findTotalProjectByOrgId" parameterType="long" resultType="int">
+		SELECT COUNT(orgId) FROM pf_org WHERE orgId IN (
+			SELECT o.orgId 
+			FROM pf_org o
+			INNER JOIN pf_project p 
+				ON o.orgId = p.orgId
+			WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{orgId}), o.ownerCode) > 0 
+				AND o.isSubCompany = 1 AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL
+		)
+	</select>
+	<!-- <select id="findTotalProjectByOrgId" parameterType="long" resultType="int">
+		SELECT COUNT(orgId) - 1 FROM pf_org WHERE orgId IN (
+			SELECT orgId FROM pf_org 
+			WHERE LOCATE((SELECT ownerCode FROM pf_org WHERE orgId = #{orgId}), ownerCode) > 0 
+			AND isSubCompany = 1
+		)
+	</select> -->
+	
+</mapper>

@@ -1,0 +1,971 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	luorongjie
+	date	:	2016-12-07
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleOutstockDao">
+	
+	
+		 
+	<sql id="Base_Column_List">
+		ro.id, ro.org_id , ro.retailer_id, ro.outstock_date, ro.outstock_no,ro.img_url,
+		ro.outstock_type, ro.outstock_type_name, ro.price_id, ro.pay_price, ro.num,
+		<!-- ro.pay_money, ro.paid_price, ro.paid_money, -->  
+		ro.presell_price,ro.presell_money,ro.sold_num,ro.sold_price,ro.sold_money,
+		ro.paid_type, ro.paid_type_name,ro.check_status,
+		ro.remark, ro.register_id, ro.register_name, ro.registe_date, ro.outstock_status,
+		ro.audit_status, ro.audit_user, ro.audit_user_name, ro.audit_date, ro.audit_remark,
+		ro.sale_total_money, ro.acce_id, ro.acce_name, ro.balance_name,
+		ro.balance_date,
+		ro.check_men,ro.check_men_name,ro.check_date,ro.trouble_type,ro.trouble_name,ro.check_remark,
+		ro.enable, ro.create_user, ro.create_user_name, ro.create_date, ro.update_user,
+		ro.update_user_name, ro.update_date,ro.version,ro.check_update_name,ro.check_update_date,
+		s.spec_name,s.spec_company,m.goodsName,t.typeName,p.spec_id,m.goodsId,rt.retailer,rt.retailer_short
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, org_id, retailer_id, outstock_date, outstock_no,
+		outstock_type, outstock_type_name, price_id, pay_price, num,
+		
+		sale_total_money, acce_id, acce_name, balance_name,
+		balance_date,img_url,
+		
+		presell_price,presell_money,sold_num,sold_price,sold_money,
+		paid_type, paid_type_name, check_status,
+		remark, register_id, register_name, registe_date, outstock_status,
+		audit_status, audit_user, audit_user_name, audit_date, audit_remark,
+		check_men,check_men_name,check_date,trouble_type,trouble_name,check_remark,
+		enable, create_user, create_user_name, create_date, update_user,
+		update_user_name, update_date,version,check_update_name,check_update_date
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{orgId,jdbcType=BIGINT},
+		#{retailerId,jdbcType=BIGINT}, #{outstockDate,jdbcType=TIMESTAMP},
+		#{outstockNo,jdbcType=VARCHAR}, #{outstockType,jdbcType=TINYINT},
+		#{outstockTypeName,jdbcType=VARCHAR}, #{priceId,jdbcType=BIGINT},
+		#{payPrice,jdbcType=DECIMAL}, #{num,jdbcType=DECIMAL},
+		
+		 #{saleTotalMoney,jdbcType=DECIMAL},
+		#{acceId,jdbcType=BIGINT}, #{acceName,jdbcType=VARCHAR},
+		#{balanceName,jdbcType=VARCHAR}, #{balanceDate,jdbcType=TIMESTAMP},#{imgUrl},
+		
+		#{presellPrice,jdbcType=DECIMAL}, #{presellMoney,jdbcType=DECIMAL},
+		#{soldNum,jdbcType=DECIMAL},#{soldPrice,jdbcType=DECIMAL},#{soldMoney,jdbcType=DECIMAL},
+		#{paidType,jdbcType=TINYINT},
+		#{paidTypeName,jdbcType=VARCHAR},#{checkStatus,jdbcType=TINYINT},
+		 #{remark,jdbcType=VARCHAR},
+		#{registerId,jdbcType=BIGINT}, #{registerName,jdbcType=VARCHAR},
+		#{registeDate,jdbcType=TIMESTAMP}, #{outstockStatus,jdbcType=TINYINT},
+		#{auditStatus,jdbcType=TINYINT}, #{auditUser,jdbcType=BIGINT},
+		#{auditUserName,jdbcType=VARCHAR}, #{auditDate,jdbcType=TIMESTAMP},
+		#{auditRemark,jdbcType=VARCHAR}, 
+		#{checkMen,jdbcType=BIGINT}, #{checkMenName,jdbcType=VARCHAR},
+		#{checkDate,jdbcType=TIMESTAMP},#{troubleType,jdbcType=TINYINT},
+		#{troubleName,jdbcType=VARCHAR}, #{checkRemark,jdbcType=VARCHAR},
+		#{enable,jdbcType=TINYINT},
+		#{createUser,jdbcType=BIGINT}, #{createUserName,jdbcType=VARCHAR},
+		#{createDate,jdbcType=TIMESTAMP}, #{updateUser,jdbcType=BIGINT},
+		#{updateUserName,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP}, #{version,jdbcType=BIGINT},
+		#{checkUpdateName,jdbcType=VARCHAR}, #{checkUpdateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="orgId!=null">
+				ro.org_id =#{orgId},
+			</if>
+			<if test="retailerId!=null">
+				ro.retailer_id=#{retailerId},
+			</if>
+			<if test="outstockDate!=null">
+				ro.outstock_date=#{outstockDate},
+			</if>
+			<if test="outstockNo!=null &amp;&amp; outstockNo!=''">
+				ro.outstock_no=#{outstockNo},
+			</if>
+			<if test="outstockType!=null">
+				ro.outstock_type=#{outstockType},
+			</if>
+			<if test="outstockTypeName!=null &amp;&amp; outstockTypeName!=''">
+				ro.outstock_type_name=#{outstockTypeName},
+			</if>
+			<if test="priceId!=null">
+				ro.price_id=#{priceId},
+			</if>
+			<if test="payPrice!=null">
+				ro.pay_price=#{payPrice},
+			</if>
+			<if test="num!=null">
+				ro.num=#{num},
+			</if>
+			<if test="presellPrice!=null">
+				ro.presell_price=#{presellPrice},
+			</if>
+			<if test="presellMoney!=null">
+				ro.presell_money=#{presellMoney},
+			</if>
+			<if test="soldNum!=null">
+				ro.sold_num=#{soldNum},
+			</if>
+			<if test="soldPrice!=null">
+				ro.sold_price=#{soldPrice},
+			</if>
+			<if test="soldMoney!=null">
+				ro.sold_money=#{soldMoney},
+			</if>
+			<if test="paidType!=null">
+				ro.paid_type=#{paidType},
+			</if>
+			<if test="paidTypeName!=null &amp;&amp; paidTypeName!=''">
+				ro.paid_type_name=#{paidTypeName},
+			</if>
+			<if test="checkStatus!=null">
+				ro.check_status=#{checkStatus},
+			</if>
+			<if test="remark!=null &amp;&amp; remark!=''">
+				ro.remark=#{remark},
+			</if>
+			<if test="registerId!=null">
+				ro.register_id=#{registerId},
+			</if>
+			<if test="registerName!=null &amp;&amp; registerName!=''">
+				ro.register_name=#{registerName},
+			</if>
+			<if test="registeDate!=null">
+				ro.registe_date=#{registeDate},
+			</if>
+			<if test="outstockStatus!=null">
+				ro.outstock_status=#{outstockStatus},
+			</if>
+			<if test="auditStatus!=null">
+				ro.audit_status=#{auditStatus},
+			</if>
+			<if test="auditUser!=null">
+				ro.audit_user=#{auditUser},
+			</if>
+			<if test="auditUserName!=null &amp;&amp; auditUserName!=''">
+				ro.audit_user_name=#{auditUserName},
+			</if>
+			<if test="auditDate!=null">
+				ro.audit_date=#{auditDate},
+			</if>
+			<if test="auditRemark!=null &amp;&amp; auditRemark!=''">
+				ro.audit_remark=#{auditRemark},
+			</if>
+			<if test="checkMen!=null">
+				ro.check_men=#{checkMen},
+			</if>
+			<if test="checkMenName!=null">
+				ro.check_men_name=#{checkMenName},
+			</if>
+			<if test="checkDate!=null">
+				ro.check_date=#{checkDate},
+			</if>
+			<if test="troubleType!=null">
+				ro.trouble_type=#{troubleType},
+			</if>
+			<if test="troubleName!=null">
+				ro.trouble_name=#{troubleName},
+			</if>
+			<if test="checkRemark!=null">
+				ro.check_remark=#{checkRemark},
+			</if>
+			<if test="enable!=null">
+				ro.enable=#{enable},
+			</if>
+			<if test="createUser!=null">
+				ro.create_user=#{createUser},
+			</if>
+			<if test="createUserName!=null &amp;&amp; createUserName!=''">
+				ro.create_user_name=#{createUserName},
+			</if>
+			<if test="createDate!=null">
+				ro.create_date=#{createDate},
+			</if>
+			<if test="updateUser!=null">
+				ro.update_user=#{updateUser},
+			</if>
+			<if test="updateUserName!=null &amp;&amp; updateUserName!=''">
+				ro.update_user_name=#{updateUserName},
+			</if>
+			<if test="saleTotalMoney!=null">
+				ro.sale_total_money=#{saleTotalMoney},
+			</if>
+			<if test="acceId!=null">
+				ro.acce_id=#{acceId},
+			</if>
+			<if test="acceName!=null &amp;&amp; acceName!=''">
+				ro.acce_name=#{acceName},
+			</if>
+			<if test="balanceName!=null &amp;&amp; balanceName!=''">
+				ro.balance_name=#{balanceName},
+			</if>
+			<if test="balanceDate!=null">
+				ro.balance_date=#{balanceDate},
+			</if>
+			<if test="imgUrl!=null">
+				ro.img_url=#{imgUrl},
+			</if>
+			<if test="updateDate!=null">
+				ro.update_date=#{updateDate},
+			</if>
+			<if test="checkUpdateName!=null &amp;&amp; checkUpdateName!=''">
+				ro.check_update_name=#{checkUpdateName},
+			</if>
+			<if test="checkUpdateDate!=null">
+				ro.check_update_date=#{checkUpdateDate},
+			</if>
+				ro.version = #{version}+1
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="recycleOutstock" type="com.sdcloud.api.lar.entity.RecycleOutstock">
+        <id property="id" column="id"></id>
+		<result property="orgId" column="org_id"></result>
+		<result property="retailerId" column="retailer_id"></result>
+		<result property="outstockDate" column="outstock_date"></result>
+		<result property="outstockNo" column="outstock_no"></result>
+		<result property="outstockType" column="outstock_type"></result>
+		<result property="outstockTypeName" column="outstock_type_name"></result>
+		<result property="priceId" column="price_id"></result>
+		<result property="payPrice" column="pay_price"></result>
+		<result property="num" column="num"></result>
+		<result property="presellPrice" column="presell_price"></result>
+		<result property="presellMoney" column="presell_money"></result>
+		<result property="soldNum" column="sold_num"></result>
+		<result property="soldPrice" column="sold_price"></result>
+		<result property="soldMoney" column="sold_money"></result>
+		<result property="paidType" column="paid_type"></result>
+		<result property="paidTypeName" column="paid_type_name"></result>
+		<result property="checkStatus" column="check_status"></result>
+		<result property="remark" column="remark"></result>
+		<result property="registerId" column="register_id"></result>
+		<result property="registerName" column="register_name"></result>
+		<result property="registeDate" column="registe_date"></result>
+		<result property="outstockStatus" column="outstock_status"></result>
+		<result property="auditStatus" column="audit_status"></result>
+		<result property="auditUser" column="audit_user"></result>
+		<result property="auditUserName" column="audit_user_name"></result>
+		<result property="auditDate" column="audit_date"></result>
+		<result property="auditRemark" column="audit_remark"></result>
+		<result property="checkMen" column="check_men"></result>
+		<result property="checkMenName" column="check_men_name"></result>
+		<result property="checkDate" column="check_date"></result>
+		<result property="troubleType" column="trouble_type"></result>
+		<result property="troubleName" column="trouble_name"></result>
+		<result property="checkRemark" column="check_remark"></result>
+		<result property="enable" column="enable"></result>
+		<result property="createUser" column="create_user"></result>
+		<result property="createUserName" column="create_user_name"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateUser" column="update_user"></result>
+		<result property="updateUserName" column="update_user_name"></result>
+		<result property="saleTotalMoney" column="sale_total_money"></result>
+		<result property="acceId" column="acce_id"></result>
+		<result property="acceName" column="acce_name"></result>
+		<result property="balanceName" column="balance_name"></result>
+		<result property="balanceDate" column="balance_date"></result>
+		<result property="updateDate" column="update_date"></result>
+		<result property="specName" column="spec_name"></result>
+		<result property="specUnit" column="spec_company"></result>
+		<result property="goodsName" column="goodsName"></result>
+		<result property="typeName" column="typeName"></result>
+		<result property="specId" column="spec_id"></result>
+		<result property="goodsId" column="goodsId"></result>
+		<result property="enable" column="enable"></result>
+		<result property="version" column="version"></result>
+		<result property="retailerName" column="retailer"></result>
+		<result property="retailerShort" column="retailer_short"></result>
+		<result property="checkUpdateName" column="check_update_name"></result>
+		<result property="checkUpdateDate" column="check_update_date"></result>
+		<result property="imgUrl" column="img_url"></result>
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="recycleOutstock">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_outstock ro
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ro.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(ro.id)
+		FROM lar_recycle_outstock ro
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND ro.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO lar_recycle_outstock
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<delete id="delete">
+		DELETE FROM lar_recycle_outstock ro
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM lar_recycle_outstock ro
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ro.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	<update id="disableByPrimary">
+		UPDATE lar_recycle_outstock ro
+		SET ro.enable = 1
+		WHERE ro.id=#{id} AND ro.version=#{version}
+	</update>
+	
+	<update id="disableByIds">
+		UPDATE lar_recycle_outstock ro
+		SET ro.enable = 1
+		<where>
+			<if test="list != null &amp;&amp; list.size() > 0">
+				ro.id IN
+				<foreach collection="list" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="list == null || list.size() == 0">
+				false
+			</if>
+		</where>
+	</update>
+	
+	<update id="update">
+		UPDATE lar_recycle_outstock ro
+		<include refid="Update_Column"></include>
+		WHERE ro.id=#{id} AND ro.version=#{version} AND ro.enable =0
+	</update>
+	
+	<update id="updateImg">
+		UPDATE lar_recycle_outstock
+		<set>
+		 	img_url=null,
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findByIds" resultMap="recycleOutstock">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_outstock ro
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				ro.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(ro.id) 
+		FROM lar_recycle_outstock ro
+		LEFT JOIN lar_recyclingprice p ON ro.price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN lar_recycle_retailer rt ON rt.id = ro.retailer_id
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND ro.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            
+            <!-- 出库时间 -->
+			<if test="larPager.extendMap.upOrder !=null and larPager.extendMap.upOrder=='true'">
+					<if test="larPager.extendMap.first!=null">
+						<![CDATA[
+							and outstock_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.end}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null and larPager.extendMap.first!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.end} and outstock_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+			</if>
+			<!-- 对账时间 -->
+			<if test="larPager.extendMap.checkOrder !=null and larPager.extendMap.checkOrder=='true'">
+					<if test="larPager.extendMap.first!=null">
+						<![CDATA[
+							and check_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null">
+						<![CDATA[
+							and check_date < #{larPager.extendMap.end}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null and larPager.extendMap.first!=null">
+						<![CDATA[
+							and check_date < #{larPager.extendMap.end} and check_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+			</if>
+				
+			<!-- 结算时间 -->
+			<if test="larPager.extendMap.balance !=null and larPager.extendMap.balance=='true'">
+					<if test="larPager.extendMap.first!=null">
+						<![CDATA[
+							and balance_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null">
+						<![CDATA[
+							and balance_date < #{larPager.extendMap.end}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null and larPager.extendMap.first!=null">
+						<![CDATA[
+							and balance_date < #{larPager.extendMap.end} and balance_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+			</if>
+				
+             <if test="larPager.extendMap !=null and larPager.extendMap.firstDate !=null">
+				and ro.outstock_date &gt; #{larPager.extendMap.firstDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.endDate !=null">
+				and ro.outstock_date &lt; #{larPager.extendMap.endDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.type_id !=null">
+				and  t.id = #{larPager.extendMap.type_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.goods_id !=null">
+				and  s.goods_id = #{larPager.extendMap.goods_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.spec_id !=null">
+				and  p.spec_id = #{larPager.extendMap.spec_id}
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.audit_user_name !=null">
+				and  ro.audit_user_name LIKE '%${larPager.extendMap.audit_user_name}%'
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.retailer !=null">
+				and  rt.retailer LIKE '%${larPager.extendMap.retailer}%'
+			</if>
+			
+			<if test="larPager.extendMap !=null  and larPager.extendMap.check_men_name !=null">
+				and  ro.check_men_name LIKE '%${larPager.extendMap.check_men_name}%'
+			</if>
+            <if test="ids !=null and ids.size() >0">
+                AND ro.org_id IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+            AND ro.enable=0
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="recycleOutstock">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_outstock ro
+		LEFT JOIN lar_recyclingprice p ON ro.price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN lar_recycle_retailer rt ON rt.id = ro.retailer_id
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND ro.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            
+            <!-- 出库时间 -->
+			<if test="larPager.extendMap.upOrder !=null and larPager.extendMap.upOrder=='true'">
+					<if test="larPager.extendMap.first!=null">
+						<![CDATA[
+							and outstock_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.end}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null and larPager.extendMap.first!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.end} and outstock_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+			</if>
+			<!-- 对账时间 -->
+			<if test="larPager.extendMap.checkOrder !=null and larPager.extendMap.checkOrder=='true'">
+					<if test="larPager.extendMap.first!=null">
+						<![CDATA[
+							and ro.check_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null">
+						<![CDATA[
+							and ro.check_date < #{larPager.extendMap.end}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null and larPager.extendMap.first!=null">
+						<![CDATA[
+							and ro.check_date < #{larPager.extendMap.end} and ro.check_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+			</if>
+				
+			<!-- 结算时间 -->
+			<if test="larPager.extendMap.balance !=null and larPager.extendMap.balance=='true'">
+					<if test="larPager.extendMap.first!=null">
+						<![CDATA[
+							and ro.balance_date > #{larPager.extendMap.first}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null">
+						<![CDATA[
+							and ro.balance_date < #{larPager.extendMap.end}
+						]]>
+					</if>
+					<if test="larPager.extendMap.end!=null and larPager.extendMap.first!=null">
+						<![CDATA[
+							and ro.balance_date < #{larPager.extendMap.end} and ro.balance_date> #{larPager.extendMap.first}
+						]]>
+					</if>
+			</if>
+				
+             <if test="larPager.extendMap !=null and larPager.extendMap.firstDate !=null">
+				and ro.outstock_date &gt; #{larPager.extendMap.firstDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.endDate !=null">
+				and ro.outstock_date &lt; #{larPager.extendMap.endDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.type_id !=null">
+				and  t.id = #{larPager.extendMap.type_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.goods_id !=null">
+				and  s.goods_id = #{larPager.extendMap.goods_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.spec_id !=null">
+				and  p.spec_id = #{larPager.extendMap.spec_id}
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.audit_user_name !=null">
+				and  ro.audit_user_name LIKE '%${larPager.extendMap.audit_user_name}%'
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.retailer !=null">
+				and  rt.retailer LIKE '%${larPager.extendMap.retailer}%'
+			</if>
+			
+			<if test="larPager.extendMap !=null  and larPager.extendMap.check_men_name !=null">
+				and  ro.check_men_name LIKE '%${larPager.extendMap.check_men_name}%'
+			</if>
+            <if test="ids !=null and ids.size() >0">
+                AND ro.org_id IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+            AND ro.enable=0
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY ro.create_date DESC ,ro.update_date DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+	
+	
+	<!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="recycleChenkExport" type="com.sdcloud.api.lar.entity.RecycleChenkExport">
+        <id property="id" column="id"></id>
+		<result property="orgId" column="org_id"></result>
+		<result property="retailerId" column="retailer_id"></result>
+		<result property="outstockDate" column="outstock_date"></result>
+		<result property="outstockNo" column="outstock_no"></result>
+		<result property="outstockType" column="outstock_type"></result>
+		<result property="outstockTypeName" column="outstock_type_name"></result>
+		<result property="priceId" column="price_id"></result>
+		<result property="payPrice" column="pay_price"></result>
+		<result property="num" column="num"></result>
+		<result property="presellPrice" column="presell_price"></result>
+		<result property="presellMoney" column="presell_money"></result>
+		<result property="soldNum" column="sold_num"></result>
+		<result property="soldPrice" column="sold_price"></result>
+		<result property="soldMoney" column="sold_money"></result>
+		<result property="paidType" column="paid_type"></result>
+		<result property="paidTypeName" column="paid_type_name"></result>
+		<result property="checkStatus" column="check_status"></result>
+		<result property="remark" column="remark"></result>
+		<result property="registerId" column="register_id"></result>
+		<result property="registerName" column="register_name"></result>
+		<result property="registeDate" column="registe_date"></result>
+		<result property="outstockStatus" column="outstock_status"></result>
+		<result property="auditStatus" column="audit_status"></result>
+		<result property="auditUser" column="audit_user"></result>
+		<result property="auditUserName" column="audit_user_name"></result>
+		<result property="auditDate" column="audit_date"></result>
+		<result property="auditRemark" column="audit_remark"></result>
+		<result property="checkMen" column="check_men"></result>
+		<result property="checkMenName" column="check_men_name"></result>
+		<result property="checkDate" column="check_date"></result>
+		<result property="troubleType" column="trouble_type"></result>
+		<result property="troubleName" column="trouble_name"></result>
+		<result property="checkRemark" column="check_remark"></result>
+		<result property="enable" column="enable"></result>
+		<result property="createUser" column="create_user"></result>
+		<result property="createUserName" column="create_user_name"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateUser" column="update_user"></result>
+		<result property="updateUserName" column="update_user_name"></result>
+		<result property="saleTotalMoney" column="sale_total_money"></result>
+		<result property="acceId" column="acce_id"></result>
+		<result property="acceName" column="acce_name"></result>
+		<result property="balanceName" column="balance_name"></result>
+		<result property="balanceDate" column="balance_date"></result>
+		<result property="updateDate" column="update_date"></result>
+		<result property="specName" column="spec_name"></result>
+		<result property="specUnit" column="spec_company"></result>
+		<result property="goodsName" column="goodsName"></result>
+		<result property="typeName" column="typeName"></result>
+		<result property="specId" column="spec_id"></result>
+		<result property="goodsId" column="goodsId"></result>
+		<result property="enable" column="enable"></result>
+		<result property="version" column="version"></result>
+		<result property="retailerName" column="retailer"></result>
+		<result property="retailerShort" column="retailer_short"></result>
+		<result property="checkUpdateName" column="check_update_name"></result>
+		<result property="checkUpdateDate" column="check_update_date"></result>
+	</resultMap>
+	
+	<select id="countChenkExport" resultType="java.lang.Long">
+		SELECT COUNT(ro.id) 
+		FROM lar_recycle_outstock ro
+		LEFT JOIN lar_recyclingprice p ON ro.price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN lar_recycle_retailer rt ON rt.id = ro.retailer_id
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND ro.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            
+             <!-- 出库时间 -->
+			<if test="larPager.extendMap.upOrder !=null and larPager.extendMap.upOrder=='true'">
+					<if test="larPager.extendMap.endDate==null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and outstock_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.firstDate==null and larPager.extendMap.endDate!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.endDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.endDate!=null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.endDate} and outstock_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+			</if>
+			<!-- 对账时间 -->
+			<if test="larPager.extendMap.checkOrder !=null and larPager.extendMap.checkOrder=='true'">
+					<if test="larPager.extendMap.endDate==null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and check_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.firstDate==null and larPager.extendMap.endDate!=null">
+						<![CDATA[
+							and check_date < #{larPager.extendMap.endDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.endDate!=null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and check_date < #{larPager.extendMap.endDate} and check_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+			</if>
+				
+			<!-- 结算时间 -->
+			<if test="larPager.extendMap.balance !=null and larPager.extendMap.balance=='true'">
+					<if test="larPager.extendMap.endDate==null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and balance_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.firstDate==null and larPager.extendMap.endDate!=null">
+						<![CDATA[
+							and balance_date < #{larPager.extendMap.endDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.endDate!=null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and balance_date < #{larPager.extendMap.endDate} and balance_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+			</if>
+            
+            <if test="larPager.extendMap !=null and larPager.extendMap.firstDate !=null">
+				and ro.outstock_date &gt; #{larPager.extendMap.firstDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.endDate !=null">
+				and ro.outstock_date &lt; #{larPager.extendMap.endDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.type_id !=null">
+				and  t.id = #{larPager.extendMap.type_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.goods_id !=null">
+				and  s.goods_id = #{larPager.extendMap.goods_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.spec_id !=null">
+				and  p.spec_id = #{larPager.extendMap.spec_id}
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.audit_user_name !=null">
+				and  ro.audit_user_name LIKE '%${larPager.extendMap.audit_user_name}%'
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.retailer !=null">
+				and  rt.retailer LIKE '%${larPager.extendMap.retailer}%'
+			</if>
+            <if test="ids !=null and ids.size() >0">
+                AND ro.org_id  IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+                AND ro.enable=0
+            </if>
+        </where>
+	</select>
+	
+    <select id="chenkExport" resultMap="recycleChenkExport">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_outstock ro
+		LEFT JOIN lar_recyclingprice p ON ro.price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN lar_recycle_retailer rt ON rt.id = ro.retailer_id
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND ro.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            
+            <!-- 出库时间 -->
+			<if test="larPager.extendMap.upOrder !=null and larPager.extendMap.upOrder=='true'">
+					<if test="larPager.extendMap.endDate==null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and outstock_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.firstDate==null and larPager.extendMap.endDate!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.endDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.endDate!=null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and outstock_date < #{larPager.extendMap.endDate} and outstock_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+			</if>
+			<!-- 对账时间 -->
+			<if test="larPager.extendMap.checkOrder !=null and larPager.extendMap.checkOrder=='true'">
+					<if test="larPager.extendMap.endDate==null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and check_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.firstDate==null and larPager.extendMap.endDate!=null">
+						<![CDATA[
+							and check_date < #{larPager.extendMap.endDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.endDate!=null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and check_date < #{larPager.extendMap.endDate} and check_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+			</if>
+				
+			<!-- 结算时间 -->
+			<if test="larPager.extendMap.balance !=null and larPager.extendMap.balance=='true'">
+					<if test="larPager.extendMap.endDate==null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and balance_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.firstDate==null and larPager.extendMap.endDate!=null">
+						<![CDATA[
+							and balance_date < #{larPager.extendMap.endDate}
+						]]>
+					</if>
+					<if test="larPager.extendMap.endDate!=null and larPager.extendMap.firstDate!=null">
+						<![CDATA[
+							and balance_date < #{larPager.extendMap.endDate} and balance_date> #{larPager.extendMap.firstDate}
+						]]>
+					</if>
+			</if>
+				
+             <if test="larPager.extendMap !=null and larPager.extendMap.firstDate !=null">
+				and ro.outstock_date &gt; #{larPager.extendMap.firstDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.endDate !=null">
+				and ro.outstock_date &lt; #{larPager.extendMap.endDate}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.type_id !=null">
+				and  t.id = #{larPager.extendMap.type_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.goods_id !=null">
+				and  s.goods_id = #{larPager.extendMap.goods_id}
+			</if>
+            <if test="larPager.extendMap !=null  and larPager.extendMap.spec_id !=null">
+				and  p.spec_id = #{larPager.extendMap.spec_id}
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.audit_user_name !=null">
+				and  ro.audit_user_name LIKE '%${larPager.extendMap.audit_user_name}%'
+			</if>
+			<if test="larPager.extendMap !=null  and larPager.extendMap.retailer !=null">
+				and  rt.retailer LIKE '%${larPager.extendMap.retailer}%'
+			</if>
+			
+			<if test="larPager.extendMap !=null  and larPager.extendMap.check_men_name !=null">
+				and  ro.check_men_name LIKE '%${larPager.extendMap.check_men_name}%'
+			</if>
+            <if test="ids !=null and ids.size() >0">
+                AND ro.org_id IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+            AND ro.enable=0
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY ro.create_date DESC ,ro.update_date DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+	
+    <select id="exist" resultMap="recycleOutstock">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_outstock ro
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ro.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="recycleOutstock">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_outstock ro
+		LEFT JOIN lar_recyclingprice p ON ro.price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN lar_recycle_retailer rt ON rt.id = ro.retailer_id
+        <where>
+            ro.id=#{id}
+            AND ro.enable=0
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND ro.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="existByOutstockNo"  resultType="int">
+   	 select count(id) 
+	   	 from lar_recycle_outstock 
+	   	 where 
+	   	 	enable=0
+	   	 	<if test="outstock_no != null">
+	   	 		and outstock_no =#{outstock_no} 
+	   	 	</if>
+	   	 	<if test="id != null ">
+	   		 	and id <![CDATA[ <> ]]> #{id}
+	   		</if>
+    </select>
+    
+	
+</mapper>

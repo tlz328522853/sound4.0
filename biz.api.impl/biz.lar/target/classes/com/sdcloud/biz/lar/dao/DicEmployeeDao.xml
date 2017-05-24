@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.DicEmployeeDao">
+	
+	<sql id="column">
+		name,telephone,email,description,orgId,ownerCode,tenantId,gender,politicsStatus,employeeNo,birthday,identNo,entryDate,departDate,jobTitle,techLevel,profession,major,education,gradDate,gradCollege,mobile,address,weChat,mobileMac,emergeName,emergeMobile
+	</sql>
+	
+	<select id="findByOrg" resultType="com.sdcloud.api.lar.entity.DicEmployee">
+		select id,last_name,email,birth,create_time 
+		from ssh_employee 
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+
+	<select id="countByOrg" resultType="java.lang.Long">
+		select count(id) 
+		from ssh_employee
+	</select>
+
+</mapper> 

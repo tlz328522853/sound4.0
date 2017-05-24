@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.TopicRightDao">
+	
+	<sql id="moduleColumn">
+		ownerId,ownerType,topicCode,topicId,tenantId 
+	</sql>
+	
+	<select id="findTopicIds" parameterType="long" resultType="long">
+		select topicId from pf_topic_right 
+		where ownerId = #{ownerId}
+	</select>
+	
+	<insert id="insert" parameterType="list">
+		insert into pf_topic_right(
+			topicRightId, <include refid="moduleColumn"/>
+		)values
+		<foreach item="item" index="index" collection="topicRights" separator=",">
+			(#{item.topicRightId}, #{item.ownerId}, #{item.ownerType}, #{item.topicCode}, #{item.topicId},
+			  #{item.tenantId})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByOwnerId" parameterType="long" >
+		delete from 
+			pf_topic_right
+		where 
+			ownerId = #{ownerId}
+	</delete>
+	<delete id="deleteByOwnerIds" parameterType="long" >
+		delete from 
+			pf_topic_right
+		<where>
+			<if test="ownerIds != null">
+		      ownerId in
+				<foreach item="item" index="index" collection="ownerIds" open="(" separator="," close=")">
+			      	#{item}
+			    </foreach>
+		    </if>
+			<if test="ownerType != null">
+		     	AND ownerType =#{ownerType}
+		   </if>
+		</where>
+	</delete>
+	<delete id="deleteOwnerIdAndTopic" >
+		delete from  pf_topic_right
+		<where>
+		    <if test="ownerIds != null">
+		      ownerId in
+				<foreach item="item" index="index" collection="ownerIds" open="(" separator="," close=")">
+			      	#{item}
+			    </foreach>
+		    </if>
+		   <if test="topicIds != null">
+		     AND topicId in
+			  <foreach item="item" index="index" collection="topicIds" open="(" separator="," close=")">
+		        #{item}
+		      </foreach>
+		   </if>
+		   <if test="ownerType != null">
+		     AND ownerType =#{ownerType}
+		   </if>
+		</where>
+	</delete>
+	<select id="findTopicRight" parameterType="map" resultType="TopicRight">
+		select * from pf_topic_right
+		<where>
+			<if test="userId != null&amp;&amp; userId != -1">
+				( ownerType = 2
+				AND ownerId=#{userId})
+		    </if>
+		    <if test="roleIds != null">
+		       or (ownerType = 1
+				AND ownerId in
+				<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+			      		#{item}
+			    </foreach>
+				
+				)
+		    </if>
+		    <if test="roleId != null">
+		       or (ownerType = 1
+				AND  ownerId=#{roleId})
+		    </if>
+		     <if test="groupId != null &amp;&amp; groupId != -1">
+		       or (ownerType = 3
+				AND ownerId=#{groupId})
+		    </if>
+		</where>
+		GROUP BY topicRightId
+	</select>
+	<select id="findGroupIdsByTopicId"  resultType="Long">
+		select ownerId from pf_topic_right
+		<where>
+			<if test="topicId != null &amp;&amp; topicId != -1">
+		         ownerType = 3
+				AND topicId=#{topicId}
+		    </if>
+		</where>
+		GROUP BY topicRightId
+	</select>
+	<select id="findUserIdsTopicId"  resultType="Long">
+		select ownerId from pf_topic_right
+		<where>
+			<if test="topicId != null &amp;&amp; topicId != -1">
+		         ownerType = 2
+				AND topicId=#{topicId}
+		    </if>
+		</where>
+		GROUP BY topicRightId
+	</select>
+	<select id="findRoleIdsByTopicId"  resultType="Long">
+		select ownerId from pf_topic_right
+		<where>
+			<if test="topicId != null &amp;&amp; topicId != -1">
+		         ownerType = 1
+				AND topicId=#{topicId}
+		    </if>
+		</where>
+		GROUP BY topicRightId
+	</select>
+	<select id="hasTopicRight" parameterType="map" resultType="TopicRight">
+		select * from pf_topic_right
+		<where>
+			<if test="userId != null&amp;&amp; userId != -1">
+				( ownerType = 2
+				AND ownerId=#{userId}
+				<if test="topicId != null">
+				AND topicId=#{topicId}
+				</if>
+				)
+		    </if>
+		    
+		    <if test="roleId != null">
+		       or (ownerType = 1
+				AND  ownerId=#{roleId}
+				<if test="topicId != null">
+				AND topicId=#{topicId}
+				</if>
+				)
+		    </if>
+		     <if test="groupId != null &amp;&amp; groupId != -1">
+		       or (ownerType = 3
+				AND ownerId=#{groupId}
+				<if test="topicId != null">
+				AND topicId=#{topicId}
+				</if>
+				)
+		    </if>
+		</where>
+		GROUP BY topicRightId
+	</select>
+	
+	<select id="needUpTopicByPackage" parameterType="map" resultType="Long">
+		SELECT pf.topicId from pf_topic pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		where  pspm.salesPackageId=#{packageId}
+		and pf.topicId not in (
+		SELECT pf.topicId from pf_topic pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		INNER JOIN pf_tenant pt
+		on pt.salesPackageId=pspm.salesPackageId
+		INNER JOIN pf_user pu 
+		on pu.tenantId=pt.tenantId
+		where  pu.userId=#{userId}
+		GROUP BY pf.topicId
+		)
+		GROUP BY pf.topicId
+	</select>
+	<select id="needUpTopicByRole" parameterType="map" resultType="Long">
+		SELECT pf.topicId from pf_topic pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		where  pspm.salesPackageId=#{packageId}
+		and pf.topicId not in (
+		SELECT pfr.topicId from pf_topic_right pfr
+		where pfr.ownerType=1 and pfr.ownerId=#{roleId}
+		GROUP BY pfr.topicId
+		)
+		GROUP BY pf.topicId
+	</select>
+	<select id="needUpTopicByGroup" parameterType="map" resultType="Long">
+		SELECT pf.topicId from pf_topic pf 
+		INNER JOIN pf_module pm  
+		on pm.moduleId=pf.moduleId
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.moduleId=pm.moduleId
+		where  pspm.salesPackageId=#{packageId}
+		and pf.topicId not in (
+		SELECT pfr.topicId from pf_topic_right pfr
+		where pfr.ownerType=3 and pfr.ownerId=#{groupId}
+		GROUP BY pfr.topicId
+		)
+		GROUP BY pf.topicId
+	</select>
+	<select id="findAuthenTopicIds" resultType="long">
+		SELECT por.topicId from pf_topic_right por
+		<where>
+		(
+		 <if test="userId != null">
+			  (por.ownerType=2
+			  and por.ownerId=#{userId}) 
+		 </if>
+		 <if test="includeRole != null&amp;&amp;includeRole==true">
+			    OR
+				(por.ownerType=1 and por.ownerId in (SELECT 
+				pur.roleId from pf_user_role pur
+				INNER JOIN pf_role prt
+				on prt.roleId=pur.roleId 
+				where pur.userId=#{userId}
+				))
+		 </if>
+		 )
+		</where>
+	</select>
+	<select id="findAuthenTopicCodes" resultType="String">
+		SELECT DISTINCT pft.`code` from pf_topic_right por
+		INNER JOIN pf_topic pft
+		on pft.topicId=por.topicId
+		<where>
+		(
+		 <if test="userId != null">
+			  (por.ownerType=2 
+			  and por.ownerId=#{userId} and pft.`code` is not null) 
+		 </if>
+		 <if test="includeRole != null&amp;&amp;includeRole==true">
+			    OR
+				(por.ownerType=1  and pft.`code` is not null and por.ownerId in (SELECT 
+				pur.roleId from pf_user_role pur
+				INNER JOIN pf_role prt
+				on prt.roleId=pur.roleId 
+				where pur.userId=#{userId}
+				))
+		 </if>
+		 )
+		</where>
+	</select>
+</mapper>

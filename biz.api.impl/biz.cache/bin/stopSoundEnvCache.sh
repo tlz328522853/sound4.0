@@ -1,0 +1,1 @@
+kill -9 $(ps -A |grep "EnvCache"| awk '{print $1}')

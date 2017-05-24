@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.LarEventDao">
+	<sql id="Base_Column_List">
+		id, eventId, clientUserId, integral,org,
+		createDate, updateDate
+	</sql>
+
+	<insert id="save" parameterType="com.sdcloud.api.lar.entity.LarEvent">
+		insert into lar_event
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="eventId != null">
+				eventId,
+			</if>
+			<if test="eventType != null">
+				eventType,
+			</if>
+			<if test="clientUserId != null">
+				clientUserId,
+			</if>
+			<if test="integral != null">
+				integral,
+			</if>
+			<if test="org != null">
+				org,
+			</if>
+			
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="updateDate != null ">
+				updateDate,
+			</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="eventId != null">
+				#{eventId},
+			</if>
+			<if test="eventType != null">
+				#{eventType},
+			</if>
+			<if test="clientUserId != null">
+				#{clientUserId},
+			</if>
+			<if test="integral != null">
+				#{integral},
+			</if>
+			<if test="org != null">
+				#{org},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="updateDate != null ">
+				#{updateDate},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.LarEvent">
+		update lar_event
+		<set>
+			<if test="clientUserId != null">
+				clientUserId = #{clientUserId},
+			</if>
+			<if test="eventType != null">
+				eventType = #{eventType},
+			</if>
+			<if test="integral != null">
+				integral = #{integral},
+			</if>
+			<if test="org != null">
+				org = #{org},
+			</if>
+			
+			<if test="updateDate != null ">
+				updateDate = #{updateDate}
+			</if>
+		</set>
+		where eventId = #{eventId}
+	</update>
+	
+	<select id="getOrderByUserId" resultType="com.sdcloud.api.lar.entity.MyPoints" parameterType="map">
+		SELECT id,updateDate AS "finishDate",integral,eventType,6 AS "orderSourceId"
+		
+		FROM `lar_event` 
+		where clientUserId=#{params.userId} and updateDate is not null
+		order by updateDate desc
+		
+	</select>
+	
+</mapper> 

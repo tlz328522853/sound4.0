@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.PointStatisticsDao">
+	<sql id="Base_Column_List">
+		e.`orderId`,e.`appUserId`,e.`mechanismId`,e.`maaDate`,e.`createDate`,e.`deliveryInfo`,e.`confirmDate`,e.`integral`,
+		c.`phone` AS "clientUserPhone",c.`name` AS "clientUserName",c.`addressDetail` AS "clientUserAddressDetail"
+	</sql>
+	
+	<select id="count" resultType="long">
+		select count(e.id) FROM `lar_exchangeinfo` e LEFT OUTER JOIN `lar_clientuser` c ON(e.`appUserId`=c.`customerId`) 
+		<where>
+			e.enable=0 and `OrderStatus` != 0 and e.integral != 0
+			<if test="params!=null and params.size>0">
+				<if test="params.mechanismId!=null">
+					and e.`mechanismId`=#{params.mechanismId}
+				</if>
+				<if test="params.orgIds!=null and params.orgIds.size>0">
+					and e.mechanismId in 
+					<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+	                       #{item}
+	               	</foreach>
+				</if>
+				<if test="params.deliveryInfo!=null">
+					and e.`deliveryInfo`=#{params.deliveryInfo}
+				</if>
+				<if test="params.orderId!=null">
+					and e.`orderId`=#{params.orderId}
+				</if>
+				<if test="params.clientUserName!=null">
+					and c.`name`=#{params.clientUserName}
+				</if>
+				<if test="params.clientUserPhone!=null">
+					and c.`phone`=#{params.clientUserPhone}
+				</if>
+				<if test="params.firstDate!=null">
+					<![CDATA[
+						and e.`createDate` > #{params.firstDate}
+					]]>
+				</if>
+				<if test="params.endDate!=null">
+					<![CDATA[
+						and e.`createDate` < #{params.endDate}
+					]]>
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectByExample" resultType="com.sdcloud.api.lar.entity.ExchangeInfo" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+			FROM `lar_exchangeinfo` e LEFT OUTER JOIN `lar_clientuser` c ON(e.`appUserId`=c.`customerId`) 
+		<where>
+			e.enable=0 and `OrderStatus` != 0 and e.integral != 0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and e.mechanismId=#{larPager.params.mechanismId}
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and e.mechanismId in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="larPager.params.deliveryInfo!=null">
+					and e.`deliveryInfo`=#{larPager.params.deliveryInfo}
+				</if>
+				<if test="larPager.params.orderId!=null">
+					and e.`orderId`=#{larPager.params.orderId}
+				</if>
+				<if test="larPager.params.clientUserName!=null">
+					and c.`name`=#{larPager.params.clientUserName}
+				</if>
+				<if test="larPager.params.clientUserPhone!=null">
+					and c.`phone`=#{larPager.params.clientUserPhone}
+				</if>
+				<if test="larPager.params.firstDate!=null">
+					<![CDATA[
+						and e.`createDate`> #{larPager.params.firstDate}
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null">
+					<![CDATA[
+						and e.`createDate` < #{larPager.params.endDate}
+					]]>
+				</if>
+				
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by e.${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+</mapper>

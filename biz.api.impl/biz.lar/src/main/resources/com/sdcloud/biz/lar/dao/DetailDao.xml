@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.DetailDao">
+	<sql id="Base_Column_List">
+		id, type, detail
+	</sql>
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultType="com.sdcloud.api.lar.entity.Detail">
+		select
+		<include refid="Base_Column_List"></include>
+		from lar_detail
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  separator="and">
+						${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id)
+		from lar_detail
+	</select>
+	<insert id="save" parameterType="com.sdcloud.api.lar.entity.Detail">
+		insert into lar_detail
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="detail != null">
+				detail,
+			</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="type != null">
+				#{type},
+			</if>
+			<if test="detail != null">
+				#{detail},
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.Detail">
+		update lar_detail
+		<set>
+			<if test="type != null">
+				type=#{type},
+			</if>
+			<if test="detail != null">
+				detail=#{detail},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from lar_detail
+		where id=#{id}
+	</delete>
+</mapper> 

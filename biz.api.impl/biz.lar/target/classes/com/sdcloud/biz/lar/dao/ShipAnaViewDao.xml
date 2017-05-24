@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipAnaViewDao">
+
+    <select id="getShipAndReco" resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String">
+        (SELECT
+        "ship_stock" AS "name",
+        p.prov_name AS "prov",
+																					        COUNT(CASE WHEN s.type = 1 AND DATE_FORMAT(s.create_time,"%Y-%m") <![CDATA[ < ]]>  #{month} THEN s.`code` ELSE NULL END) AS "total",
+        COUNT(CASE WHEN s.type = 1 AND DATE_FORMAT(s.create_time,"%Y-%m") = #{month} THEN s.`code` ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_stock s
+        RIGHT JOIN lar_shipanal_prov p ON   p.prov_name = s.prov_name
+        where  p.`level`=2
+        GROUP BY p.prov_code
+        ORDER BY p.prov_code)
+        UNION ALL
+        (SELECT
+        "recy_stock" AS "name",
+        p.prov_name AS "prov",
+        COUNT(CASE WHEN s.type = 2 AND DATE_FORMAT(s.create_time,"%Y-%m") <![CDATA[ < ]]>  #{month} THEN s.`code` ELSE NULL END) AS "total",
+        COUNT(CASE WHEN s.type = 2 AND DATE_FORMAT(s.create_time,"%Y-%m") = #{month} THEN s.`code` ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_stock s
+        RIGHT JOIN lar_shipanal_prov p ON   p.prov_name = s.prov_name
+        where  p.`level`=2
+        GROUP BY p.prov_code
+        ORDER BY p.prov_code)
+    </select>
+
+    <select id="getBrand" resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String" >
+        SELECT
+       "brand" AS "name",
+		p.prov_name AS "prov",
+        COUNT(CASE WHEN date_format(b.create_time,'%Y-%m') <![CDATA[ < ]]>  #{month} THEN b.`code` ELSE NULL END) AS "total",
+        COUNT(CASE WHEN date_format(b.create_time,'%Y-%m') = #{month} THEN b.`code` ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_brand b
+        LEFT JOIN lar_shipanal_stock s ON s.`code` = b.unit_code
+        RIGHT JOIN lar_shipanal_prov p on p.prov_name = s.prov_name
+        where p.`level`=2
+        GROUP BY p.prov_name
+        ORDER BY p.prov_code
+    </select>
+
+    <select id="getSku"  resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String" >
+        SELECT
+        "sku" AS "name",
+        p.prov_name AS "prov",
+        COUNT(CASE WHEN date_format(sk.create_time,'%Y-%m') <![CDATA[ < ]]>  #{month} THEN sk.sku_code ELSE NULL END) AS "total",
+        COUNT(CASE WHEN date_format(sk.create_time,'%Y-%m') = #{month} THEN sk.sku_code ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_sku sk
+        LEFT JOIN lar_shipanal_stock s ON s.`code` = sk.unit_code
+        RIGHT JOIN lar_shipanal_prov p ON s.prov_name = p.prov_name
+        Where p.`level` =2
+        GROUP BY p.prov_code
+        ORDER BY p.prov_code
+    </select>
+
+    <select id="getStockfee" resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String" >
+        SELECT
+        "stockfee" AS "name",
+        p.prov_name AS "prov",
+        IFNULL(sum(CASE WHEN date_format(s.create_time,'%Y-%m')  <![CDATA[ < ]]>  #{month} THEN s.rental_fee ELSE NULL END),0)/100 AS "total",
+        IFNULL(sum(CASE WHEN date_format(s.create_time,'%Y-%m') = #{month} THEN s.rental_fee ELSE NULL END),0)/100 AS "newTotal"
+        FROM
+        lar_shipanal_stockfee s
+        LEFT JOIN lar_shipanal_stock st ON st.`code` = s.unit_code
+        RIGHT JOIN lar_shipanal_prov p ON p.prov_name = st.prov_name
+        WHERE p.`level` = 2
+        GROUP BY p.prov_code
+        ORDER BY p.prov_code
+
+    </select>
+
+    <select id="getStockPrice"  resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String">
+        SELECT
+				"stockPrice" AS "name",p.prov_name AS "prov",
+        IFNULL(total,0)/100 AS "total",
+        IFNULL(newTotal,0)/100 AS "newTotal"
+        FROM
+        (SELECT
+        s.prov_name AS "prov",sum(ccc.need_qty*bbb.mon_price) AS "total", IFNULL(sum(aaa.need_qty*eee.mon_price),0)- IFNULL(sum(ccc.need_qty*bbb.mon_price),0) AS "newTotal"
+        FROM(
+						SELECT x.sku_code,sum(need_qty) AS "need_qty"
+										FROM
+										(SELECT id.sku_code, id.need_qty
+										FROM lar_shipanal_instockdetail id
+										LEFT JOIN lar_shipanal_instock  i ON i.asn_code = id.asn_code
+										where date_format(i.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month}
+
+										UNION ALL
+
+										SELECT od.sku_code,-od.need_qty
+										FROM lar_shipanal_outstockdetail od
+										LEFT JOIN lar_shipanal_outstock  o ON o.do_code = od.do_code
+										where date_format(o.delivery_time,'%Y-%m') <![CDATA[ <= ]]> #{month}
+								) x
+							GROUP BY x.sku_code
+        ) aaa #本月SKU所有
+        LEFT JOIN (
+									SELECT x.sku_code,sum(need_qty) AS "need_qty"
+										FROM
+										(SELECT id.sku_code, id.need_qty
+										FROM lar_shipanal_instockdetail id
+										LEFT JOIN lar_shipanal_instock  i ON i.asn_code = id.asn_code
+										where date_format(i.create_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+
+										UNION ALL
+
+										SELECT od.sku_code,-od.need_qty
+										FROM lar_shipanal_outstockdetail od
+										LEFT JOIN lar_shipanal_outstock  o ON o.do_code = od.do_code
+										where date_format(o.delivery_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+								) x
+							GROUP BY x.sku_code
+						) ccc #上月 SKU 数量
+						ON aaa.sku_code = ccc.sku_code
+
+        LEFT JOIN lar_shipanal_sku sku ON sku.sku_code = aaa.sku_code
+        LEFT JOIN lar_shipanal_stock s ON s.`code` = sku.unit_code
+        LEFT JOIN (
+					select aaa.sku_code,aaa.mon,sum(aaa.need_qty),sum(aaa.price) ,sum(aaa.flag) AS "flag",sum(aaa.price*aaa.need_qty)/sum(aaa.need_qty) AS "mon_price"
+					FROM(
+							select id2.sku_code, date_format(max(i2.create_time),'%Y-%m')  AS "mon",0 AS "need_qty" ,0 as "price",1 as "flag"
+							FROM
+							lar_shipanal_instockdetail id2
+							LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+							where date_format(i2.create_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+							GROUP BY id2.sku_code
+
+							UNION ALL
+
+							select id2.sku_code, date_format(i2.create_time,'%Y-%m') AS "mon",id2.need_qty, id2.price,0 as "flag"
+							FROM
+							lar_shipanal_instockdetail id2
+							LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+							where date_format(i2.create_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+					)aaa
+					GROUP By aaa.sku_code,aaa.mon
+        ) bbb # 上月平均单价
+        ON aaa.sku_code = bbb.sku_code and bbb.flag=1
+				LEFT JOIN (
+								select aaa.sku_code,aaa.mon,sum(aaa.need_qty),sum(aaa.price) ,sum(aaa.flag) AS "flag",sum(aaa.price*aaa.need_qty)/sum(aaa.need_qty) AS "mon_price"
+								FROM(
+								select id2.sku_code, date_format(max(i2.create_time),'%Y-%m')  AS "mon",0 AS "need_qty" ,0 as "price",1 as "flag"
+								FROM
+								lar_shipanal_instockdetail id2
+								LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+								where date_format(i2.create_time,'%Y-%m') <![CDATA[ <=  ]]> #{month}
+								GROUP BY id2.sku_code
+
+								UNION ALL
+
+								select id2.sku_code, date_format(i2.create_time,'%Y-%m') AS "mon",id2.need_qty, id2.price,0 as "flag"
+								FROM
+								lar_shipanal_instockdetail id2
+								LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+								where date_format(i2.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month}
+								)aaa
+								GROUP BY aaa.sku_code,aaa.mon
+        ) eee #本月平均单价
+        ON aaa.sku_code = eee.sku_code and eee.flag =1
+        GROUP BY s.`code`
+        ) f
+        RIGHT JOIN lar_shipanal_prov p ON f.prov =p.prov_name
+        where p.`level`=2
+        ORDER BY p.prov_code
+
+    </select>
+
+
+    <select id="getDelivery" resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String" >
+        SELECT * from (
+        (SELECT
+        aaa.prov_code,
+        "delivery_sum" AS "name",
+        aaa.prov_name AS "prov",
+        IFNULL(aaa.delivery_fee,0)/100 AS "total",
+        IFNULL(ccc.delivery_fee,0)/100 AS "newTotal"
+        FROM
+        (
+        SELECT p.prov_code,p.prov_name,sum(bbb.delivery_fee) AS "delivery_fee"
+        from
+        (SELECT
+        s.prov_name,
+        d.delivery_fee
+        FROM
+        lar_shipanal_delivery d
+        LEFT JOIN lar_shipanal_stock s ON d.unit_code = s.`code`
+
+        where
+        date_format(d.received_time,'%Y-%m') &lt; #{month}
+        ) bbb
+        RIGHT JOIN lar_shipanal_prov p ON p.prov_name = bbb.prov_name
+        where p.`level` =2
+        GROUP BY p.prov_code
+        )aaa
+        LEFT JOIN  (
+        SELECT bbb.prov_name,sum(bbb.delivery_fee) AS "delivery_fee"
+        from
+        (SELECT
+        s.prov_name,
+        d.delivery_fee
+        FROM
+        lar_shipanal_delivery d
+        LEFT JOIN lar_shipanal_stock s ON d.unit_code = s.`code`
+        where
+        date_format(d.received_time,'%Y-%m')=#{month}) bbb
+        GROUP BY bbb.prov_name
+        )ccc ON aaa. prov_name = ccc.prov_name
+        ORDER BY aaa.prov_code )
+
+        UNION ALL
+
+        (SELECT
+        aaa.prov_code,
+        "delivery_count" AS "name",
+        aaa.prov_name AS "prov",
+        IFNULL(aaa.delivery_fee,0) AS "total",
+        IFNULL(ccc.delivery_fee,0)  AS "newTotal"
+        FROM
+        (
+        SELECT p.prov_code,p.prov_name,count(bbb.delivery_fee) AS "delivery_fee"
+        from
+        (SELECT
+        s.prov_name,
+        d.delivery_fee
+        FROM
+        lar_shipanal_delivery d
+        LEFT JOIN lar_shipanal_stock s ON d.unit_code = s.`code`
+
+        where
+        date_format(d.received_time,'%Y-%m') &lt; #{month}
+        ) bbb
+        RIGHT JOIN lar_shipanal_prov p ON p.prov_name = bbb.prov_name
+        where p.`level` =2
+        GROUP BY p.prov_code
+        )aaa
+        LEFT JOIN  (
+        SELECT bbb.prov_name,count(bbb.delivery_fee) AS "delivery_fee"
+        from
+        (SELECT
+        s.prov_name,
+        d.delivery_fee
+        FROM
+        lar_shipanal_delivery d
+        LEFT JOIN lar_shipanal_stock s ON d.unit_code = s.`code`
+        where
+        date_format(d.received_time,'%Y-%m')=#{month}) bbb
+        GROUP BY bbb.prov_name
+        )ccc ON aaa. prov_name = ccc.prov_name
+        ORDER BY aaa.prov_code
+        )
+        )  f
+        ORDER BY f.prov_code
+    </select>
+
+    <select id="getCollect" resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String">
+        SELECT
+        "outstock_order" AS "NAME",
+        COUNT(CASE WHEN o.handle = 311 THEN o.do_code ELSE NULL END) "total",
+        COUNT(CASE WHEN o.handle = 1 THEN o.do_code ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_outstock o
+
+        UNION ALL
+
+        SELECT
+        "delivery_order" AS "name",
+        COUNT(CASE WHEN d.handle = 311 THEN d.to_code ELSE NULL END) AS "total",
+        COUNT(CASE WHEN d.handle = 1 THEN d.to_code ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_delivery d
+
+        UNION ALL
+
+        SELECT
+        "ship_stock" AS "name",
+        COUNT(CASE WHEN s.type = 1 AND DATE_FORMAT(s.create_time,"%Y-%m") <![CDATA[ <= ]]> #{month}  THEN s.`code` ELSE NULL END) AS "total",
+        COUNT(CASE WHEN s.type = 1 AND DATE_FORMAT(s.create_time,"%Y-%m") = #{month} THEN s.`code` ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_stock s
+
+        UNION ALL
+
+        SELECT
+        "recy_stock" AS "name",
+        COUNT(CASE WHEN s.type = 2 AND DATE_FORMAT(s.create_time,"%Y-%m") <![CDATA[ <= ]]> #{month} THEN s.`code` ELSE NULL END) AS "total",
+        COUNT(CASE WHEN s.type = 2 AND DATE_FORMAT(s.create_time,"%Y-%m") = #{month} THEN s.`code` ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_stock s
+
+        UNION ALL
+
+        SELECT
+        "brand_num" AS "name",
+        COUNT(CASE WHEN date_format(b.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month} THEN b.code ELSE NULL END) AS "total",
+        COUNT(CASE WHEN date_format(b.create_time,'%Y-%m')= #{month}  THEN b.code ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_brand b
+        UNION ALL
+        SELECT
+        "sku_num" AS "name",
+        COUNT(CASE WHEN date_format(s.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month} THEN s.sku_code ELSE NULL END) AS "total",
+        COUNT(CASE WHEN date_format(s.create_time,'%Y-%m')= #{month} THEN s.sku_code ELSE NULL END) AS "newTotal"
+        FROM
+        lar_shipanal_sku s
+
+        UNION ALL
+
+        SELECT
+        "stock_fee" AS "name",
+        sum(CASE WHEN date_format(s.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month} THEN s.rental_fee ELSE NULL END)/100 AS "total",
+        sum(CASE WHEN date_format(s.create_time,'%Y-%m')= #{month} THEN s.rental_fee ELSE NULL END)/100 AS "newTotal"
+        FROM
+        lar_shipanal_stockfee s
+
+        UNION ALL
+
+        SELECT
+        "delivery_fee" AS "name",
+        SUM(CASE WHEN DATE_FORMAT(d.received_time,"%Y-%m")   <![CDATA[ <= ]]> #{month}  THEN d.delivery_fee ELSE NULL END)/100 "total",
+        SUM(CASE WHEN DATE_FORMAT(d.received_time,"%Y-%m") = #{month} THEN d.delivery_fee ELSE NULL END)/100 "newTotal"
+        FROM
+        lar_shipanal_delivery d
+        where
+        d.handle = 311
+        UNION ALL
+        SELECT
+        "delivery_num" AS "name",
+        count(CASE WHEN DATE_FORMAT(d.received_time,"%Y-%m")  <![CDATA[ <= ]]> #{month}  THEN d.to_code ELSE NULL END) "total",
+        count(CASE WHEN DATE_FORMAT(d.received_time,"%Y-%m") = #{month} THEN d.to_code ELSE NULL END) "newTotal"
+        FROM
+        lar_shipanal_delivery d
+        where
+        d.handle = 311
+    </select>
+
+    <select id="getStockPriceCollect" resultType="com.sdcloud.api.lar.entity.ShipAnaView" parameterType="String">
+
+
+        #本月总货款
+        #本月新增货款 =  本月的总货款-上月的总货款
+        SELECT
+        "stock_price" AS "name",sum(aaa.need_qty*bbb.mon_price)/100 AS "total",IFNULL(sum(aaa.need_qty*bbb.mon_price)/100,0)-IFNULL(sum(ccc.need_qty*ddd.mon_price)/100,0) AS "new_total"
+        FROM(
+        SELECT x.sku_code,sum(need_qty) AS "need_qty"
+        FROM
+        (SELECT id.sku_code, id.need_qty
+        FROM lar_shipanal_instockdetail id
+        LEFT JOIN lar_shipanal_instock  i ON i.asn_code = id.asn_code
+        where date_format(i.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month}
+
+        UNION ALL
+
+        SELECT od.sku_code,-od.need_qty
+        FROM lar_shipanal_outstockdetail od
+        LEFT JOIN lar_shipanal_outstock  o ON o.do_code = od.do_code
+        where date_format(o.delivery_time,'%Y-%m') <![CDATA[ <= ]]> #{month}
+        ) x
+        GROUP BY x.sku_code
+        ) aaa #本月SKU所有
+        LEFT JOIN (
+        SELECT x.sku_code,sum(need_qty) AS "need_qty"
+        FROM
+        (SELECT id.sku_code, id.need_qty
+        FROM lar_shipanal_instockdetail id
+        LEFT JOIN lar_shipanal_instock  i ON i.asn_code = id.asn_code
+        where date_format(i.create_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+
+        UNION ALL
+
+        SELECT od.sku_code,-od.need_qty
+        FROM lar_shipanal_outstockdetail od
+        LEFT JOIN lar_shipanal_outstock  o ON o.do_code = od.do_code
+        where date_format(o.delivery_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+        ) x
+        GROUP BY x.sku_code
+        ) ccc #上月 SKU 数量
+        ON aaa.sku_code = ccc.sku_code
+        LEFT JOIN lar_shipanal_sku sku ON sku.sku_code = aaa.sku_code
+        LEFT JOIN lar_shipanal_stock s ON s.`code` = sku.unit_code
+        LEFT JOIN (
+        select aaa.sku_code,aaa.mon,sum(aaa.need_qty),sum(aaa.price) ,sum(aaa.flag) AS "flag",sum(aaa.price*aaa.need_qty)/sum(aaa.need_qty) AS "mon_price"
+        FROM(
+        select id2.sku_code, date_format(max(i2.create_time),'%Y-%m')  AS "mon",0 AS "need_qty" ,0 as "price",1 as "flag"
+        FROM
+        lar_shipanal_instockdetail id2
+        LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+        where date_format(i2.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month}
+        GROUP BY id2.sku_code
+
+        UNION ALL
+
+        select id2.sku_code, date_format(i2.create_time,'%Y-%m') AS "mon",id2.need_qty, id2.price,0 as "flag"
+        FROM
+        lar_shipanal_instockdetail id2
+        LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+        where date_format(i2.create_time,'%Y-%m') <![CDATA[ <= ]]> #{month}
+        )aaa
+        GROUP BY aaa.sku_code,aaa.mon
+        ) bbb  #本月平均回收单价
+        ON aaa.sku_code = bbb.sku_code and bbb.flag=1
+        LEFT JOIN (
+        select aaa.sku_code,aaa.mon,sum(aaa.need_qty),sum(aaa.price) ,sum(aaa.flag) AS "flag",sum(aaa.price*aaa.need_qty)/sum(aaa.need_qty) AS "mon_price"
+        FROM(
+        select id2.sku_code, date_format(max(i2.create_time),'%Y-%m')  AS "mon",0 AS "need_qty" ,0 as "price",1 as "flag"
+        FROM
+        lar_shipanal_instockdetail id2
+        LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+        where date_format(i2.create_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+        GROUP BY id2.sku_code
+
+        UNION ALL
+
+        select id2.sku_code, date_format(i2.create_time,'%Y-%m') AS "mon",id2.need_qty, id2.price,0 as "flag"
+        FROM
+        lar_shipanal_instockdetail id2
+        LEFT JOIN lar_shipanal_instock  i2 ON i2.asn_code = id2.asn_code
+        where date_format(i2.create_time,'%Y-%m') <![CDATA[ < ]]> #{month}
+        )aaa
+        GROUP BY aaa.sku_code,aaa.mon
+        ) ddd #上月的平均回收单价
+
+        ON aaa.sku_code = ddd.sku_code and ddd.flag=1
+
+    </select>
+
+
+
+
+</mapper>

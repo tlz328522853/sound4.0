@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.AppVersionDao">
+
+	<sql id="appVersionColumn">
+		versionNo,
+		oldVersionNo,
+		fileUlr,
+		fileUlrName,
+		createTime,
+		modifiedTime,
+		mark
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_appVersion(
+			versionId, <include refid="appVersionColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="appVersions" separator=",">
+			(
+			#{item.versionId},
+			#{item.versionNo},
+			#{item.oldVersionNo},
+			#{item.fileUlr},
+			#{item.fileUlrName},
+			now(),
+			now(),
+			#{item.mark}
+			)
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_appVersion
+		<choose>
+			<when test="appVersionIds != null &amp;&amp; appVersionIds.size() != 0">
+				where versionId in
+		      	<foreach item="item" index="index" collection="appVersionIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<update id="update" parameterType="appVersion">
+		update so_appVersion
+		<set>
+			<if test="versionNo != null &amp;&amp; versionNo != ''">versionNo = #{versionNo},</if>
+			<if test="oldVersionNo != null &amp;&amp; oldVersionNo != ''">oldVersionNo = #{oldVersionNo},</if>
+			<if test=" fileUlr != ''">fileUlr = #{fileUlr},</if>
+			<if test=" fileUlr != ''">fileUlrName = #{fileUlrName},</if>
+			<if test="createTime != null &amp;&amp; createTime != ''">createTime = #{createTime},</if>
+			<if test="modifiedTime != null &amp;&amp; modifiedTime != ''">modifiedTime = now(),</if>
+			<if test="mark != null &amp;&amp; mark != ''">mark = #{mark},</if>
+		</set>
+		where versionId = #{versionId}
+	</update>
+	
+	<select id="findById" resultType="AppVersion">
+	    select 	versionId,<include refid="appVersionColumn"/>
+	    from so_appVersion 
+	   <where>
+				versionId = #{versionId}
+		</where>
+	
+	</select> 
+	
+	<sql id="appVersionCondition">
+		<where>
+			<if test="newOrgId != null ">
+				o.newOrgId = #{newOrgId}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.versionId)
+		from so_appVersion c
+	   <where>
+			<if test="versionId != null &amp;&amp;versionId !=0">
+				c.versionId = #{versionId}
+			</if>
+			
+			<if test="versionNo != null &amp;&amp;versionNo !=''">
+				and c.versionNo like '%${versionNo}%'
+			</if>
+			<if test="oldVersionNo != null &amp;&amp;oldVersionNo !=''">
+				and c.oldVersionNo like '%${oldVersionNo}%'
+			</if>
+			<if test="fileUlr != null &amp;&amp;fileUlr !=''">
+				and c.fileUlr like '%${fileUlr}%'
+			</if>
+			<if test="fileUlrName != null &amp;&amp;fileUlrName !=''">
+				and c.fileUlrName like '%${fileUlrName}%'
+			</if>
+			<if test="mark != null &amp;&amp;mark !=''">
+				and c.mark like '%${mark}%'
+			</if>
+			<if test="startFirstDate != null &amp;&amp;startEndDate !=null">
+				and c.createTime between #{startFirstDate} and #{startEndDate}
+			</if>
+			<if test="endFirstDate != null &amp;&amp;endEndDate !=null">
+				and c.modifiedTime between #{endFirstDate} and #{endEndDate}
+			</if>
+			
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="AppVersion">
+	    select 	versionId,<include refid="appVersionColumn"/>
+	    from so_appVersion c
+	   <where>
+			<if test="versionId != null &amp;&amp;versionId !=0">
+				c.versionId = #{versionId}
+			</if>
+			<if test="versionNo != null &amp;&amp;versionNo !=''">
+				and c.versionNo like '%${versionNo}%'
+			</if>
+			<if test="oldVersionNo != null &amp;&amp;oldVersionNo !=''">
+				and c.oldVersionNo like '%${oldVersionNo}%'
+			</if>
+			<if test="fileUlr != null &amp;&amp;fileUlr !=''">
+				and c.fileUlr like '%${fileUlr}%'
+			</if>
+			<if test="fileUlrName != null &amp;&amp;fileUlrName !=''">
+				and c.fileUlrName like '%${fileUlrName}%'
+			</if>
+			<if test="mark != null &amp;&amp;mark !=''">
+				and c.mark like '%${mark}%'
+			</if>
+			<if test="startFirstDate != null &amp;&amp;startEndDate !=null">
+				and c.createTime between #{startFirstDate} and #{startEndDate}
+			</if>
+			<if test="endFirstDate != null &amp;&amp;endEndDate !=null">
+				and c.modifiedTime between #{endFirstDate} and #{endEndDate}
+			</if>
+		</where>
+		<if test="pager != null">
+			<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

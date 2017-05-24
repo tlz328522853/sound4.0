@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.CarOilAnomalyDao">
+	
+	<sql id="tableColumn">
+		assetId, carNumber, driver, day, 
+		oilAnomalyStartTime, oilAnomalyEndTime, oilAnomalyStartNumber, 
+		oilAnomalyEndNumber, oilReduce, oilAnomalyPlace, travelMileage, 
+		reason, measure, collectTime, ownerCode, tenantId 
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="oilAnomalyId != null">
+				and oilAnomalyId = #{oilAnomalyId} 
+			</if>
+			<if test="carNumber != null &amp;&amp; carNumber != ''">
+				carNumber like '%${carNumber}%' 
+			</if>
+			<if test="day != null">
+				and day = #{day} 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	<insert id="insert" parameterType="CarOilAnomaly" >
+		insert into so_car_oil_anomaly(
+			oilAnomalyId,<include refid="tableColumn"/>
+		)values(
+			#{oilAnomalyId},#{assetId},#{carNumber},#{driver},#{day},
+			#{oilAnomalyStartTime},#{oilAnomalyEndTime},#{oilAnomalyStartNumber},
+			#{oilAnomalyEndNumber},#{oilReduce},#{oilAnomalyPlace},#{travelMileage},
+			#{reason},#{measure},#{collectTime},#{ownerCode},#{tenantId}
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="list" >
+		delete from so_car_oil_anomaly
+		<choose>
+			<when test="oilAnomalyIds != null &amp;&amp; oilAnomalyIds.size() != 0">
+				where oilAnomalyId in
+		      	<foreach item="item" index="index" collection="oilAnomalyIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="CarOilAnomaly">
+		update so_car_oil_anomaly 
+		<set>
+			<if test="day != null">day=#{day},</if>
+			<if test="reason != null &amp;&amp; reason != ''">reason=#{reason},</if>
+			<if test="measure != null &amp;&amp; measure != ''">measure=#{measure},</if>
+		</set>
+		where oilAnomalyId = #{oilAnomalyId}
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="CarOilAnomaly">
+		select oilAnomalyId,<include refid="tableColumn"/>
+		from so_car_oil_anomaly
+		where oilAnomalyId = #{oilAnomalyId}
+	</select>
+	
+	<select id="findAll" resultType="CarOilAnomaly">
+		select 
+			oilAnomalyId, <include refid="tableColumn"/>
+		from 
+			so_car_oil_anomaly 
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(oilAnomalyId)
+		from 
+			so_car_oil_anomaly
+		<include refid="queryCondition"/>
+	</select>
+	
+</mapper>

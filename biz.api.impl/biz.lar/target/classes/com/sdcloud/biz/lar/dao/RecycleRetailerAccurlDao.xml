@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	TLZ
+	date	:	2016-12-28
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleRetailerAccurlDao">
+	
+	<sql id="Base_Column_List">
+		rra.id, rra.name, rra.url, rra.enable, rra.file_size,rra.retailer_id
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, name, url, enable, file_size,retailer_id
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id}, #{name},
+		#{url}, #{enable},
+		#{fileSize},#{retailerId}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.name,jdbcType=VARCHAR},
+		#{item.url,jdbcType=VARCHAR}, #{item.enable,jdbcType=INTEGER},
+		#{item.fileSize,jdbcType=BIGINT},#{retailerId}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="name!=null &amp;&amp; name!=''">
+				rra.name=#{name},
+			</if>
+			<if test="url!=null &amp;&amp; url!=''">
+				rra.url=#{url},
+			</if>
+			<if test="enable!=null">
+				rra.enable=#{enable},
+			</if>
+			<if test="fileSize!=null">
+				rra.file_size=#{fileSize},
+			</if>
+			<if test="retailerId!=null">
+				rra.retailer_id=#{retailerId},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="recycleRetailerAccurl" type="com.sdcloud.api.lar.entity.RecycleRetailerAccurl">
+        <id property="id" column="id"></id>
+		<result property="name" column="name"></result>
+		<result property="url" column="url"></result>
+		<result property="enable" column="enable"></result>
+		<result property="fileSize" column="file_size"></result>
+		<result property="retailerId" column="retailer_id"></result>
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="recycleRetailerAccurl">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer_accurl rra
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND rra.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(rra.id)
+		FROM lar_recycle_retailer_accurl rra
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND rra.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO lar_recycle_retailer_accurl
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO lar_recycle_retailer_accurl
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM lar_recycle_retailer_accurl
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM lar_recycle_retailer_accurl rra
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rra.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	<update id="disableByPrimary">
+		UPDATE lar_recycle_retailer_accurl rra
+		SET rra.enable = 1
+		WHERE rra.id=#{id}
+	</update>
+	
+	<update id="disableByIds">
+		UPDATE lar_recycle_retailer_accurl rra
+		SET rra.enable = 1
+		<where>
+			<if test="list != null &amp;&amp; list.size() > 0">
+				rra.id IN
+				<foreach collection="list" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="list == null || list.size() == 0">
+				false
+			</if>
+		</where>
+	</update>
+	
+	<update id="update">
+		UPDATE lar_recycle_retailer_accurl rra
+		<include refid="Update_Column"></include>
+		WHERE rra.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE lar_recycle_retailer_accurl rra
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" rra.name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rra.id=#{i.id} THEN #{i.name}
+               </foreach>
+            </trim>
+			<trim prefix=" rra.url = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rra.id=#{i.id} THEN #{i.url}
+               </foreach>
+            </trim>
+			<trim prefix=" rra.enable = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rra.id=#{i.id} THEN #{i.enable}
+               </foreach>
+            </trim>
+			<trim prefix=" rra.file_size = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN rra.id=#{i.id} THEN #{i.fileSize}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			rra.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="recycleRetailerAccurl">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer_accurl rra
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				rra.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(rra.id) 
+		FROM lar_recycle_retailer_accurl rra
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND rra.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND rra.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="recycleRetailerAccurl">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer_accurl rra
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND rra.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND rra.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY updateDate DESC,createDate DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="recycleRetailerAccurl">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer_accurl rra
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND rra.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="recycleRetailerAccurl">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer_accurl rra
+        <where>
+            rra.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND rra.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+	<select id="findById" parameterType="java.lang.Long" resultMap="recycleRetailerAccurl">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM lar_recycle_retailer_accurl rra
+        <where>
+       		
+	           retailer_id=#{id}
+	       
+        </where>
+    </select>
+</mapper>

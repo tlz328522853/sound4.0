@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipmentShopDao">
+	
+	<sql id="column">
+		a.id,a.name,a.org,a.type,a.area,a.city,a.longitude,a.latitude,a.address,a.remarks,a.createUser,a.createDate,a.updateUser,a.updateDate,c.regionName as "cityName",b.name as 'areaName'
+	</sql>
+	<sql id="areaJoin">
+		left join lar_shipmentArea b on a.area=b.id
+		LEFT join lar_city c on c.id=a.city
+	</sql>
+	<select id="getById" resultType="com.sdcloud.api.lar.entity.ShipmentShop">
+		select
+		<include refid="column"/>
+		from lar_shop a
+		<include refid="areaJoin"/>
+		<where>
+			a.id=#{id}
+		</where>
+	</select>
+	<select id="findAll" resultType="com.sdcloud.api.lar.entity.ShipmentShop">
+		select
+		a.id,a.name,a.org,a.type,a.area,a.city,a.longitude,a.latitude,a.address,a.remarks,a.createUser,a.createDate,a.updateUser,a.updateDate
+		from lar_shop a
+		<include refid="areaJoin"/>
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  >
+						and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by a.updateDate desc,a.createDate desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<insert id="save">
+		insert into lar_shop (id,name,org,type,area,city,longitude,latitude,address,remarks,createUser,createDate,updateUser,updateDate)
+		values(
+		#{id},#{name},#{org},#{type},#{area},#{city},#{longitude},#{latitude},#{address},#{remarks},#{createUser},#{createDate},#{updateUser},#{updateDate}
+		)
+	</insert>
+	<update id="update">
+		update lar_shop
+		<set>
+			<if test="org !=null and org !=''">
+				org=#{org},
+			</if>
+			<if test="name !=null and name !=''">
+				name=#{name},
+			</if>
+			<if test="type !=null and type !=''">
+				type=#{type},
+			</if>
+			<if test="area !=null and area !=''">
+				area=#{area},
+			</if>
+			<if test="city !=null and city !=''">
+				city=#{city},
+			</if>
+			<if test="longitude !=null and longitude !=''">
+				longitude=#{longitude},
+			</if>
+			<if test="latitude !=null and latitude !=''">
+				latitude=#{latitude},
+			</if>
+			<if test="address !=null and address !=''">
+				address=#{address},
+			</if>
+			<if test="remarks !=null">
+				remarks=#{remarks},
+			</if>
+			<if test="createUser !=null and createUser !=''">
+				createUser=#{createUser},
+			</if>
+			<if test="createDate !=null and createDate !=''">
+				createDate=#{createDate},
+			</if>
+			<if test="updateUser !=null and updateUser !=''">
+				updateUser=#{updateUser},
+			</if>
+			<if test="updateDate !=null and updateDate !=''">
+				updateDate=#{updateDate}
+			</if>
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	<delete id="delete" >
+		delete from lar_shop where id=#{id}
+	</delete>
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id) from lar_shop a
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key"  >
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select count(id) from lar_shop a
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.ShipmentShop">
+		select
+		<include refid="column"/>
+		from lar_shop a
+		<include refid="areaJoin"/>
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by a.updateDate desc,a.createDate desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<select id="exist" resultType="com.sdcloud.api.lar.entity.ShipmentShop">
+		select
+		a.id,a.name,a.org,a.type,a.area,a.city,a.longitude,a.latitude,a.address,a.remarks,a.createUser,a.createDate,a.updateUser,a.updateDate
+		from lar_shop a
+		<where>
+			1=1
+			<if test="map!=null ">
+				<foreach collection="map.keys" item="item" index="key" >
+					and a.${item}=#{map[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+</mapper> 

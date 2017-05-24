@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.GrossProfitDao">
+    
+    
+    <select id="selectGrossProfit"  resultType="com.sdcloud.api.lar.entity.GrossProfit" parameterType="com.sdcloud.framework.entity.LarPager">
+		SELECT
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<if test="larPager.params!=null and larPager.params.size>0">
+			<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+				DATE_FORMAT(now(),'%Y-%m') 'month',
+			</if>
+			<if test="larPager.params.endDate!=null and larPager.params.firstDate==null">
+				CONCAT('以前','~',DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')) 'month',
+			</if>
+			<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+				CONCAT(DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m'),'~','至今') 'month',
+			</if>
+			<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+				CONCAT(DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m'),'~',DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')) 'month',
+			</if>
+		</if>
+		orgId,
+		ROUND(SUM(buyMoney),2) 'buyMoney',
+		ROUND(SUM(stockEstimateCount),2) 'stockEstimateCount',
+		ROUND(SUM(soldEstimateCount),2) 'soldEstimateCount',
+		ROUND(SUM(receivables),2) 'receivables',
+		ROUND(SUM(soldCost),2) 'soldCost',
+		ROUND(SUM(totalMoney)-SUM(soldCost),2) 'grossProfit',
+		ROUND(IFNULL((SUM(totalMoney)-SUM(soldCost))/SUM(totalMoney),0)*100,0) 'grossRate'
+		FROM
+		(
+			SELECT
+			org_id orgId,
+			SUM(buyMoney) 'buyMoney',
+			m.oldStockCount*IF(SUM(inStockCount),SUM(buyMoney)/SUM(inStockCount),SUM(avgPrice)) 'stockEstimateCount',
+			SUM(soldEstimateCount) 'soldEstimateCount',
+			SUM(receivables) 'receivables',
+			SUM(outStockCount)*SUM(avgPrice) 'soldCost',
+			ROUND(SUM(receivables)+SUM(soldEstimateCount),2) 'totalMoney'
+			FROM
+			(
+			SELECT
+			org_id,
+			price_id,
+			SUM(num) 'inStockCount',
+			SUM(paid_money) 'buyMoney',
+			0 'outStockCount',
+			0 'soldEstimateCount',
+			0 'receivables',
+			0 'avgPrice'
+			FROM
+			lar_recycle_instock i
+			<where>
+				audit_status=2 AND `enable`=0
+				<if test="larPager.params!=null and larPager.params.size>0">
+					<if test="larPager.params.mechanismId!=null">
+						and i.org_id=#{larPager.params.mechanismId} 
+					</if>
+					<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+						and org_id in 
+						<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+		                       #{item}
+		               	</foreach>
+					</if>
+					<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+						<![CDATA[
+							and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(i.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+							and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+						]]>
+					</if>
+				</if>
+				GROUP BY i.org_id,i.price_id
+			</where>
+			
+			UNION ALL
+			
+			SELECT
+			org_id orgId,
+			price_id,
+			0 'inStockCount',
+			0 'buyMoney',
+			0 'outStockCount',
+			0 'soldEstimateCount',
+			0 'receivables',
+			avg(price) 'avgPrice'
+			FROM
+			lar_recycle_instock_price i
+			<where>
+				<if test="larPager.params!=null and larPager.params.size>0">
+					<if test="larPager.params.mechanismId!=null">
+						and i.org_id=#{larPager.params.mechanismId} 
+					</if>
+					<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+						and org_id in 
+						<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+		                       #{item}
+		               	</foreach>
+					</if>
+					<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+						<![CDATA[
+							and DATE_FORMAT(now(),'%Y%m') = i.month
+						]]>
+					</if>
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{larPager.params.firstDate},'%Y%m') <= i.month
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and i.month <= DATE_FORMAT(#{larPager.params.endDate},'%Y%m')
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{larPager.params.firstDate},'%Y%m') <= i.month
+							and i.month <= DATE_FORMAT(#{larPager.params.endDate},'%Y%m')
+						]]>
+					</if>
+				</if>
+				GROUP BY i.org_id,i.price_id
+			</where>
+			
+			UNION ALL
+			
+			SELECT
+			org_id orgId,
+			price_id,
+			0 'inStockCount',
+			0 'buyMoney',
+			SUM(num) 'outStockCount',
+			SUM(CASE WHEN check_status=1 THEN presell_money ELSE 0 END) 'soldEstimateCount',
+			SUM(CASE WHEN check_status > 1 THEN sold_money ELSE 0 END) 'receivables',
+			0 'avgPrice'
+			FROM
+			lar_recycle_outstock o
+			<where>
+				audit_status=2 AND o.`enable`=0
+				<if test="larPager.params!=null and larPager.params.size>0">
+					<if test="larPager.params.mechanismId!=null">
+						and o.org_id=#{larPager.params.mechanismId} 
+					</if>
+					<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+						and org_id in 
+						<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+		                       #{item}
+		               	</foreach>
+					</if>
+					<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+						<![CDATA[
+							and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(o.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+						]]>
+					</if>
+					<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+							and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+						]]>
+					</if>
+				</if>
+				GROUP BY o.org_id,o.price_id
+			</where>
+			) info
+			LEFT JOIN lar_recyclingprice p ON price_id = p.id
+			LEFT JOIN (
+						SELECT org_id 'orgId', price_id 'priceId',IFNULL(SUM(inStockCount)-SUM(outStockCount),0) 'oldStockCount' FROM
+						(
+							SELECT org_id, price_id, IFNULL(SUM(num),0) 'inStockCount', 0 'outStockCount' FROM lar_recycle_instock i
+							<where>
+								audit_status=2 AND `enable`=0
+								<if test="larPager.params!=null and larPager.params.size>0">
+									<if test="larPager.params.mechanismId!=null">
+										and i.org_id=#{larPager.params.mechanismId} 
+									</if>
+									<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+										and org_id in 
+										<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+						                       #{item}
+						               	</foreach>
+									</if>
+									<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+										<![CDATA[
+											and DATE_FORMAT(now(),'%Y-%m') >= DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if>
+									<!-- <if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') > DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if> -->
+									<!-- <if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+										]]>
+									</if> -->
+									<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.endDate},'%Y-%m') >= DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if>
+								</if>
+								GROUP BY i.org_id,i.price_id
+							</where>	
+							
+							UNION ALL
+							
+							SELECT org_id, price_id, 0 'inStockCount', IFNULL(SUM(num),0) 'outStockCount' FROM lar_recycle_outstock o
+							<where>
+								audit_status=2 AND `enable`=0
+								<if test="larPager.params!=null and larPager.params.size>0">
+									<if test="larPager.params.mechanismId!=null">
+										and o.org_id=#{larPager.params.mechanismId} 
+									</if>
+									<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+										and org_id in 
+										<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+						                       #{item}
+						               	</foreach>
+									</if>
+									<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+										<![CDATA[
+											and DATE_FORMAT(now(),'%Y-%m') >= DATE_FORMAT(o.audit_date,'%Y-%m')
+										]]>
+									</if>
+									<!-- <if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') > DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if> -->
+									<!-- <if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+										]]>
+									</if> -->
+									<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.endDate},'%Y-%m') >= DATE_FORMAT(o.audit_date,'%Y-%m')
+										]]>
+									</if>
+								</if>
+								GROUP BY o.org_id,o.price_id
+							</where>	
+						) a GROUP BY a.org_id, a.price_id
+					) m ON price_id = m.priceId and org_id = m.orgId
+			
+			GROUP BY org_id,price_id
+		) a
+		GROUP BY orgId
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+    <select id="countGrossProfit" parameterType="map" resultType="long">
+    	SELECT
+    	count(org_id)
+    	from (
+	    	SELECT
+			org_id
+			FROM
+			(
+			SELECT
+			org_id
+			FROM
+			lar_recycle_instock i
+			<where>
+				audit_status=2 AND `enable`=0
+				<if test="params!=null and params.size>0">
+					<if test="params.mechanismId!=null">
+						and i.org_id=#{params.mechanismId} 
+					</if>
+					<if test="params.orgIds!=null and params.orgIds.size>0">
+						and org_id in 
+						<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+		                       #{item}
+		               	</foreach>
+					</if>
+					<if test="params.endDate==null and params.firstDate==null">
+						<![CDATA[
+							and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(i.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate==null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.firstDate==null and params.endDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate!=null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+							and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+				</if>
+				GROUP BY i.org_id
+			</where>
+			
+			UNION ALL
+			
+			SELECT
+			org_id orgId
+			FROM
+			lar_recycle_outstock o
+			<where>
+				audit_status=2 AND `enable`=0
+				<if test="params!=null and params.size>0">
+					<if test="params.mechanismId!=null">
+						and o.org_id=#{params.mechanismId} 
+					</if>
+					<if test="params.orgIds!=null and params.orgIds.size>0">
+						and org_id in 
+						<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+		                       #{item}
+		               	</foreach>
+					</if>
+					<if test="params.endDate==null and params.firstDate==null">
+						<![CDATA[
+							and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(o.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate==null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.firstDate==null and params.endDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate!=null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+							and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+				</if>
+				GROUP BY o.org_id
+			</where>
+			) info
+			GROUP BY org_id
+		 ) as a
+	</select>
+	
+	<!-- 明细查询 -->
+	
+	<select id="selectGrossProfitDetail"  resultType="com.sdcloud.api.lar.entity.GrossProfitDetails" parameterType="com.sdcloud.framework.entity.LarPager">
+		SELECT
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<if test="larPager.params!=null and larPager.params.size>0">
+			<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+				DATE_FORMAT(now(),'%Y-%m') 'month',
+			</if>
+			<if test="larPager.params.endDate!=null and larPager.params.firstDate==null">
+				CONCAT('以前','~',DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')) 'month',
+			</if>
+			<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+				CONCAT(DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m'),'~','至今') 'month',
+			</if>
+			<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+				CONCAT(DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m'),'~',DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')) 'month',
+			</if>
+		</if>
+		org_id orgId,
+		t.typeName 'goodsType',
+		m.goodsName 'goodsName',
+		s.spec_name 'goodsSpec',
+		s.spec_company 'unit',
+		SUM(inStockCount) 'inStockCount',
+		ROUND(SUM(buyMoney),2) 'buyMoney',
+		ROUND(SUM(avgPrice),2)  'avgPayPrice',
+		IFNULL(m.oldStockCount,0) 'stockCount',
+		ROUND(m.oldStockCount*IF(SUM(inStockCount),SUM(buyMoney)/SUM(inStockCount),SUM(avgPrice)),2) 'stockEstimateCount',
+		SUM(outStockCount) 'outStockCount',
+		ROUND(SUM(soldEstimateCount),2) 'soldEstimateCount',
+		ROUND(SUM(receivables),2) 'receivables',
+		ROUND(SUM(outStockCount)*SUM(avgPrice),2) 'soldCost',
+		ROUND(SUM(receivables)+SUM(soldEstimateCount)-SUM(outStockCount)*SUM(avgPrice),2) 'grossProfit',
+		ROUND(IFNULL((SUM(receivables)+SUM(soldEstimateCount)-SUM(outStockCount)*SUM(avgPrice))/(SUM(receivables)+SUM(soldEstimateCount)),0)*100,0) 'grossRate'
+		FROM
+		(
+		SELECT
+		org_id,
+		price_id,
+		SUM(num) 'inStockCount',
+		SUM(paid_money) 'buyMoney',
+		0 'outStockCount',
+		0 'soldEstimateCount',
+		0 'receivables',
+		0 'avgPrice'
+		FROM
+		lar_recycle_instock i
+		<where>
+			audit_status=2 AND `enable`=0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and i.org_id=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+	                       #{item}
+	               	</foreach>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+					<![CDATA[
+						and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(i.audit_date,'%Y-%m')
+					]]>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+					]]>
+				</if>
+				<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+						and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+					]]>
+				</if>
+			</if>
+			GROUP BY i.org_id,i.price_id
+		</where>
+		
+		UNION ALL
+		
+		SELECT
+		org_id orgId,
+		price_id,
+		0 'inStockCount',
+		0 'buyMoney',
+		0'outStockCount',
+		0 'soldEstimateCount',
+		0 'receivables',
+		avg(price) 'avgPrice'
+		FROM
+		lar_recycle_instock_price i
+		<where>
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and i.org_id=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+	                       #{item}
+	               	</foreach>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+					<![CDATA[
+						and DATE_FORMAT(now(),'%Y%m') = i.month
+					]]>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(#{larPager.params.firstDate},'%Y%m') <= i.month
+					]]>
+				</if>
+				<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and i.month <= DATE_FORMAT(#{larPager.params.endDate},'%Y%m')
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(#{larPager.params.firstDate},'%Y%m') <= i.month
+						and i.month <= DATE_FORMAT(#{larPager.params.endDate},'%Y%m')
+					]]>
+				</if>
+			</if>
+			GROUP BY i.org_id,i.price_id
+		</where>
+			
+		UNION ALL
+		
+		SELECT
+		org_id orgId,
+		price_id,
+		0 'inStockCount',
+		0 'buyMoney',
+		SUM(num) 'outStockCount',
+		SUM(CASE WHEN check_status=1 THEN presell_money ELSE 0 END) 'soldEstimateCount',
+		SUM(CASE WHEN check_status > 1 THEN sold_money ELSE 0 END) 'receivables',
+		0 'avgPrice'
+		FROM
+		lar_recycle_outstock o
+		<where>
+			audit_status=2 AND `enable`=0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and o.org_id=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and org_id in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+	                       #{item}
+	               	</foreach>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+					<![CDATA[
+						and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(o.audit_date,'%Y-%m')
+					]]>
+				</if>
+				<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+					]]>
+				</if>
+				<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+						and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+					]]>
+				</if>
+			</if>
+			GROUP BY o.org_id,o.price_id
+		</where>
+		) info
+		LEFT JOIN lar_recyclingprice p ON price_id = p.id
+		LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		LEFT JOIN (
+					SELECT org_id 'orgId', price_id 'priceId',IFNULL(SUM(inStockCount)-SUM(outStockCount),0) 'oldStockCount' FROM
+						(
+							SELECT org_id, price_id, IFNULL(SUM(num),0) 'inStockCount', 0 'outStockCount' FROM lar_recycle_instock i
+							<where>
+								audit_status=2 AND `enable`=0
+								<if test="larPager.params!=null and larPager.params.size>0">
+									<if test="larPager.params.mechanismId!=null">
+										and i.org_id=#{larPager.params.mechanismId} 
+									</if>
+									<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+										and org_id in 
+										<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+						                       #{item}
+						               	</foreach>
+									</if>
+									<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+										<![CDATA[
+											and DATE_FORMAT(now(),'%Y-%m') >= DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if>
+									<!-- <if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') > DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if> -->
+									<!-- <if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+										]]>
+									</if> -->
+									<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.endDate},'%Y-%m') >= DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if>
+								</if>
+								GROUP BY i.org_id,i.price_id
+							</where>	
+							
+							UNION ALL
+							
+							SELECT org_id, price_id, 0 'inStockCount', IFNULL(SUM(num),0) 'outStockCount' FROM lar_recycle_outstock o
+							<where>
+								audit_status=2 AND `enable`=0
+								<if test="larPager.params!=null and larPager.params.size>0">
+									<if test="larPager.params.mechanismId!=null">
+										and o.org_id=#{larPager.params.mechanismId} 
+									</if>
+									<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+										and org_id in 
+										<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+						                       #{item}
+						               	</foreach>
+									</if>
+									<if test="larPager.params.endDate==null and larPager.params.firstDate==null">
+										<![CDATA[
+											and DATE_FORMAT(now(),'%Y-%m') >= DATE_FORMAT(o.audit_date,'%Y-%m')
+										]]>
+									</if>
+									<!-- <if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.firstDate},'%Y-%m') > DATE_FORMAT(i.audit_date,'%Y-%m')
+										]]>
+									</if> -->
+									<!-- <if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{larPager.params.endDate},'%Y-%m')
+										]]>
+									</if> -->
+									<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+										<![CDATA[
+											and DATE_FORMAT(#{larPager.params.endDate},'%Y-%m') >= DATE_FORMAT(o.audit_date,'%Y-%m')
+										]]>
+									</if>
+								</if>
+								GROUP BY o.org_id,o.price_id
+							</where>	
+						) a GROUP BY a.org_id, a.price_id
+				) m ON price_id = m.priceId and org_id = m.orgId
+		<where>
+			true
+			<if test="larPager.params.typeId != null">
+				and t.id = #{larPager.params.typeId}
+			</if>
+			<if test="larPager.params.goodsId != null">
+				and m.goodsId = #{larPager.params.goodsId}
+			</if>
+			<if test="larPager.params.specId != null">
+				and s.id = #{larPager.params.specId}
+			</if>
+		</where>
+		GROUP BY org_id,price_id
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+    <select id="countGrossProfitDetail" parameterType="map" resultType="long">
+    	SELECT
+    	count(price_id)
+    	from (
+	    	SELECT
+			price_id
+			FROM
+			(
+			SELECT
+			org_id,
+			price_id
+			FROM
+			lar_recycle_instock i
+			<where>
+				audit_status=2 AND `enable`=0
+				<if test="params!=null and params.size>0">
+					<if test="params.mechanismId!=null">
+						and i.org_id=#{params.mechanismId} 
+					</if>
+					<if test="params.orgIds!=null and params.orgIds.size>0">
+						and org_id in 
+						<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+		                       #{item}
+		               	</foreach>
+					</if>
+					<if test="params.endDate==null and params.firstDate==null">
+						<![CDATA[
+							and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(i.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate==null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.firstDate==null and params.endDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate!=null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(i.audit_date,'%Y-%m')
+							and DATE_FORMAT(i.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+				</if>
+				GROUP BY i.org_id,i.price_id
+			</where>
+			
+			UNION ALL
+			
+			SELECT
+			org_id orgId,
+			price_id
+			FROM
+			lar_recycle_outstock o
+			<where>
+				audit_status=2 AND `enable`=0
+				<if test="params!=null and params.size>0">
+					<if test="params.mechanismId!=null">
+						and o.org_id=#{params.mechanismId} 
+					</if>
+					<if test="params.orgIds!=null and params.orgIds.size>0">
+						and org_id in 
+						<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+		                       #{item}
+		               	</foreach>
+					</if>
+					<if test="params.endDate==null and params.firstDate==null">
+						<![CDATA[
+							and DATE_FORMAT(now(),'%Y-%m') = DATE_FORMAT(o.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate==null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+						]]>
+					</if>
+					<if test="params.firstDate==null and params.endDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+					<if test="params.endDate!=null and params.firstDate!=null">
+						<![CDATA[
+							and DATE_FORMAT(#{params.firstDate},'%Y-%m') <= DATE_FORMAT(o.audit_date,'%Y-%m')
+							and DATE_FORMAT(o.audit_date,'%Y-%m') <= DATE_FORMAT(#{params.endDate},'%Y-%m')
+						]]>
+					</if>
+				</if>
+				GROUP BY o.org_id,o.price_id
+			</where>
+			) info
+			LEFT JOIN lar_recyclingprice p ON price_id = p.id
+			LEFT JOIN lar_recyclingspec s ON p.spec_id = s.id
+			LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+			LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+			<where>
+				true
+				<if test="params.typeId != null">
+					and t.id = #{params.typeId}
+				</if>
+				<if test="params.goodsId != null">
+					and m.goodsId = #{params.goodsId}
+				</if>
+				<if test="params.specId != null">
+					and s.id = #{params.specId}
+				</if>
+			</where>
+			GROUP BY org_id,price_id
+		 ) as a
+	</select>
+    
+ </mapper>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.AdvertisementDao">
+
+	<sql id="tableColumn">
+		 orgId,advertisementName,fileUrl,
+			type,beginTime,endTime,createTime,modifiedTime,mark	
+	</sql>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+			<if test="orgId != null">
+				and orgId = #{orgId} 
+			</if>
+			<if test="orgIds != null &amp;&amp;orgIds.size() >0">
+				and orgId in
+				<foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="advertisementId != null">
+				and advertisementId = #{advertisementId} 
+			</if>
+			<if test="advertisementIds != null">
+				and advertisementId  in
+				<foreach item="item" index="index" collection="advertisementIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="filterAdvertIds != null &amp;&amp; filterAdvertIds.size() >0">
+				and advertisementId not in
+				<foreach item="item" index="index" collection="filterAdvertIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="type != null">
+				and type = #{type} 
+			</if>
+			<if test="advertisementName != null &amp;&amp; advertisementName != ''">
+			 	and advertisementName like '%${advertisementName}%' 
+			</if>
+			<if test="beginTime != null">
+				and beginTime &gt;= #{beginTime} 
+			</if>
+			<if test="endTime != null">
+				and endTime &lt;= #{endTime} 
+			</if>
+		</where>	
+		
+	</sql>
+	
+	
+	<insert id="insert" >
+		insert into so_advertisement(
+			advertisementId, <include refid="tableColumn"/>
+		)values
+			(
+			#{advertisementId},
+			#{orgId},#{advertisementName},
+			#{fileUrl},#{type},#{beginTime},#{endTime},
+			now(),#{modifiedTime},#{mark}
+			)
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_advertisement
+		<choose>
+			<when test="advertIds != null &amp;&amp; advertIds.size() != 0">
+				where advertisementId in
+		      	<foreach item="item" index="index" collection="advertIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	<update id="update" parameterType="Advertisement">
+		update so_advertisement 
+		<set>
+			<if test="orgId != null">orgId=#{orgId},</if>
+			<if test="advertisementName != null">advertisementName=#{advertisementName},</if>
+			<if test="fileUrl != ''">fileUrl=#{fileUrl},</if>
+			<if test="type != null">type=#{type},</if>
+			<if test="beginTime != null">beginTime=#{beginTime},</if>
+			<if test="endTime != null">endTime=#{endTime},</if>
+			modifiedTime=now()
+		</set>
+		where advertisementId = #{advertisementId}
+	</update>
+	
+	
+	
+	<select id="getAdvertisementById" parameterType="long" resultType="Advertisement">
+		select advertisementId,<include refid="tableColumn"/>
+		from so_advertisement
+		where advertisementId = #{advertisementId}
+	</select>
+	
+	<select id="findAllBy" resultType="Advertisement">
+		select 
+			advertisementId, <include refid="tableColumn"/>
+		from 
+			so_advertisement
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	
+	<select id="getTotalCount" resultType="long">
+		select 
+			count(advertisementId)
+		from 
+			so_advertisement
+		<include refid="queryCondition"/>
+	</select>
+	
+	
+</mapper>

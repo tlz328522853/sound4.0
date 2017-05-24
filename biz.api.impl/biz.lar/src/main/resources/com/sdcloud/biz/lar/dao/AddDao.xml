@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.AddDao">
+
+	<insert id="addStock" parameterType="java.util.Map" >
+		insert into lar_shipanal_stock
+		(
+		`code`,`name`,`type`,prov_name,city_name,area_name,street,create_time
+		) VALUES (
+		#{outstock.code},#{outstock.name},#{outstock.type},#{outstock.provName},#{outstock.cityName},#{outstock.areaName},#{outstock.street},#{outstock.createTime}
+		)
+	</insert>
+
+	<insert id="addBrand" parameterType="java.util.Map" >
+		insert into lar_shipanal_brand
+		(
+		`code`,`name`,`unit_code`,create_time,desc,remark
+		) VALUES (
+		#{brand.code},#{brand.name},#{brand.unitCode},#{brand.createTime},#{brand.desc},#{brand.remark}
+		)
+	</insert>
+
+	<insert id="addSku" parameterType="java.util.Map" >
+		insert into lar_shipanal_sku
+		(
+		`sku_code`,`sku_name`,`spec`,`desc`,price,create_time,unit_code
+		) VALUES (
+		#{sku.skuCode},#{sku.skuName},#{sku.spec},#{sku.desc},#{sku.price},#{sku.createTime},#{sku.unitCode}
+		)
+	</insert>
+
+</mapper> 

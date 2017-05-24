@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.CarAddOilRelatedDao">
+
+	<sql id="carAddOilColumn">
+	assetId,
+	oilCard,addOidTime,addOidNumber,
+	addOidMoney,payMode,mileage,price,
+	createEmp,createDate,updateEmp,
+	updateDate,remark 
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_car_add_oil(
+			addOidId, <include refid="carAddOilColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="carAddOils" separator=",">
+			(#{item.addOidId},
+			#{item.assetId},#{item.oilCard},
+			#{item.addOidTime},#{item.addOidNumber},
+			#{item.addOidMoney},#{item.payMode},#{item.mileage},#{item.price},#{item.createEmp},#{item.createDate},
+			#{item.updateEmp},#{item.updateDate},
+			#{item.remark})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_car_add_oil
+		<choose>
+			<when test="carAddOilIds != null &amp;&amp; carAddOilIds.size() != 0">
+				where addOidId in
+		      	<foreach item="item" index="index" collection="carAddOilIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="CarAddOil">
+		update so_car_add_oil
+		<set>
+			<if test="assetId != null &amp;&amp; assetId != ''">assetId = #{assetId},</if>
+			<if test="addOidTime != null">addOidTime = #{addOidTime},</if>
+			<if test="addOidNumber != null &amp;&amp; addOidNumber != ''">addOidNumber = #{addOidNumber},</if>
+			<if test="addOidMoney != null &amp;&amp; addOidMoney != ''">addOidMoney = #{addOidMoney},</if>
+			<if test="payMode != null &amp;&amp; payMode != ''">payMode = #{payMode},</if>
+			<if test="oilCard != null &amp;&amp; oilCard != ''">oilCard = #{oilCard},</if>
+			<if test="price != null &amp;&amp; price != ''">price = #{price},</if>
+			<if test="mileage != null &amp;&amp; mileage != ''">mileage = #{mileage},</if>
+			<if test="createEmp != null &amp;&amp; createEmp != ''">createEmp = #{createEmp},</if>
+			<if test="createDate != null &amp;&amp; createDate != ''">createDate = #{createDate},</if>
+			<if test="updateEmp != null &amp;&amp; updateEmp != ''">updateEmp = #{updateEmp},</if>
+			<if test="updateDate != null &amp;&amp; updateDate != ''">updateDate = #{updateDate},</if>
+			<if test="remark != null &amp;&amp; remark != ''">remark = #{remark},</if>
+		</set>
+		where addOidId = #{addOidId}
+	</update>
+	
+	<sql id="carAddOilCondition">
+		<where>
+            <if test="newOrgId != null &amp;&amp;newOrgId !=0">
+				o.newOrgId = #{newOrgId}
+			</if>
+			<if test="orgIds != null &amp;&amp;orgIds.size() >0">
+				and o.newOrgId in
+				<foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="createEmp != null &amp;&amp; createEmp !=0">
+				and c.createEmp = #{createEmp}
+			</if>
+			<if test="updateEmp != null &amp;&amp; updateEmp !=0">
+				and c.updateEmp = #{updateEmp}
+			</if>
+			<if test="cEmpName != null &amp;&amp; cEmpName !=''">
+				and cem.name like '%${cEmpName}%'
+			</if>
+			<if test="uEmpName != null &amp;&amp; uEmpName !=''">
+				and uem.name like '%${uEmpName}%'
+			</if>
+			<if test="addOidNumber != null &amp;&amp;addOidNumber >0">
+				and c.addOidNumber = #{addOidNumber}
+			</if>
+			<if test="price != null &amp;&amp; price >0">
+				and c.price = #{price}
+			</if>
+			<if test="mileage != null &amp;&amp; mileage >0">
+				and c.mileage = #{price}
+			</if>
+			<if test="addOidMoney != null &amp;&amp;addOidMoney >0">
+				and c.addOidMoney = #{addOidMoney}
+			</if>
+			<if test="assetId != null &amp;&amp;assetId !=0">
+				and c.assetId = #{assetId}
+			</if>
+			<if test="payMode != null">
+				and c.payMode = #{payMode}
+			</if>
+			<if test="oilCard != null &amp;&amp; oilCard !=''">
+				and c.oilCard like '%${oilCard}%'
+			</if>
+			<if test="carName != null &amp;&amp;carName !=''">
+				and ca.carName like '%${carName}%'
+			</if>
+			<if test="carNumber != null &amp;&amp;carNumber !=''">
+				and ca.carNumber like '%${carNumber}%'
+			</if>
+			<if test="firstDate != null">
+				and c.addOidTime >= #{firstDate}
+			</if>
+			<if test="endDate !=null">
+				<![CDATA[
+					and c.addOidTime <= #{endDate}
+				]]>
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.assetId)
+		from so_car_add_oil c
+	    left outer join so_asset_object o
+	    on c.assetId = o.assetId
+	    left outer join so_asset_car ca
+	    on ca.assetId = c.assetId
+	    left outer join pf_employee cem
+	    on c.createEmp = cem.employeeId
+	    left outer join pf_employee uem
+	    on c.updateEmp = uem.employeeId
+        <include refid="carAddOilCondition"></include>
+	</select>
+	
+	<select id="findAllBy" resultType="CarAddOil">
+	    select 	addOidId, c.assetId,
+	    ca.carNumber,ca.carName,ca.carCode,
+	    oilCard,addOidTime,
+		addOidNumber,mileage,price,
+		createEmp,createDate,updateEmp,
+		updateDate,
+		addOidMoney,payMode,c.remark ,
+		cem.name as "cEmpName" ,
+		uem.name as "uEmpName" 
+	    from so_car_add_oil c
+	    left outer join so_asset_object o
+	    on c.assetId = o.assetId
+	    left outer join so_asset_car ca
+	    on ca.assetId = c.assetId
+	    left outer join pf_employee cem
+	    on c.createEmp = cem.employeeId
+	    left outer join pf_employee uem
+	    on c.updateEmp = uem.employeeId
+        <include refid="carAddOilCondition"></include>
+		<if test="pager != null">
+			<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				<if test="for_method_exportData != 'true'">
+				limit #{pager.first}, #{pager.pageSize} 
+				</if>
+			</if>
+		</if>
+	</select> 
+	
+</mapper>

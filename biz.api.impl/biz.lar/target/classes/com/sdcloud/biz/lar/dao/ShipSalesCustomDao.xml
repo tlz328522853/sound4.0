@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipSalesCustomDao">
+
+	<sql id="field">
+		ST.id, ST.user_name, ST.contact, ST.sex, ST.age,
+		ST.address, ST.detail, ST.org, ST.longitude, ST.latitude,
+		ST.enable, ST.create_date, ST.update_date, ST.create_user, ST.update_user
+	</sql>
+	
+	<!-- 查询操作的动态where条件 -->
+	<sql id="dynamicWhereQuery">
+		<!-- ognl访问静态方法的表达式 为@class@method(args),以下为调用rapid中的Ognl.isNotEmpty()方法,还有其它方法如isNotBlank()可以使用，具体请查看Ognl类 -->
+		<where>
+           <if test="id!=null">
+				AND ST.id=#{id}
+		   </if>
+           <if test="userName!=null and userName!=''">
+				AND ST.user_name=#{userName}
+		   </if>
+           <if test="contact!=null">
+				AND ST.contact=#{contact}
+		   </if>
+           <if test="sex!=null">
+				AND ST.sex=#{sex}
+		   </if>
+           <if test="age!=null">
+				AND ST.age=#{age}
+		   </if>
+           <if test="address!=null and address!=''">
+				AND ST.address=#{address}
+		   </if>
+           <if test="detail!=null and detail!=''">
+				AND ST.detail=#{detail}
+		   </if>
+           <if test="org!=null">
+				AND ST.org=#{org}
+		   </if>
+           <if test="longitude!=null and longitude!=''">
+				AND ST.longitude=#{longitude}
+		   </if>
+           <if test="latitude!=null and latitude!=''">
+				AND ST.latitude=#{latitude}
+		   </if>
+		   <if test="enable!=null">
+				AND ST.enable=#{enable}
+		   </if>
+		   <if test="createDate!=null and createDate!=''">
+				AND ST.create_date=#{createDate}
+		   </if>
+           <if test="updateDate!=null and updateDate!=''">
+				AND ST.update_date=#{updateDate}
+		   </if>
+			<if test="createUser!=null and createUser!=''">
+				AND ST.create_user=#{createUser}
+		   </if>
+           <if test="updateUser!=null and updateUser!=''">
+				AND ST.update_user=#{updateUser}
+		   </if>
+			
+		</where>
+	</sql>
+	
+	<sql id="dynamicSet">
+		<set>
+           <if test="userName!=null and userName!=''">
+				 ST.user_name=#{userName},
+		   </if>
+           <if test="contact!=null">
+				 ST.contact=#{contact},
+		   </if>
+           <if test="sex!=null">
+				 ST.sex=#{sex},
+		   </if>
+           <if test="age!=null">
+				 ST.age=#{age},
+		   </if>
+           <if test="address!=null and address!=''">
+				 ST.address=#{address},
+		   </if>
+           <if test="detail!=null and detail!=''">
+				 ST.detail=#{detail},
+		   </if>
+           <if test="org!=null">
+				 ST.org=#{org},
+		   </if>
+           <if test="longitude!=null and longitude!=''">
+				 ST.longitude=#{longitude},
+		   </if>
+           <if test="latitude!=null and latitude!=''">
+				 ST.latitude=#{latitude},
+		   </if>
+		   <if test="enable!=null">
+				 ST.enable=#{enable},
+		   </if>
+           <if test="updateDate!=null and updateDate!=''">
+				 ST.update_date=#{updateDate},
+		   </if>
+           <if test="updateUser!=null and updateUser!=''">
+				 ST.update_user=#{updateUser},
+		   </if>
+		</set>
+	</sql>
+	
+	<resultMap id="shipSalesCustom" type="com.sdcloud.api.lar.entity.ShipSalesCustom">
+		<result property="id" column="id"></result>
+		<result property="userName" column="user_name"></result>
+		<result property="contact" column="contact"></result>
+		<result property="sex" column="sex"></result>
+		<result property="age" column="age"></result>
+		<result property="address" column="address"></result>
+		<result property="detail" column="detail"></result>
+		<result property="org" column="org"></result>
+		<result property="longitude" column="longitude"></result>
+		<result property="latitude" column="latitude"></result>
+		<result property="enable" column="enable"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateDate" column="update_date"></result>
+		<result property="createUser" column="create_user"></result>
+		<result property="updateUser" column="update_user"></result>
+	</resultMap>
+	
+	<insert id="save">
+		insert into lar_ship_sales_custom(
+			id, user_name, contact, sex, age,
+		    address, detail, org, longitude, latitude,
+		    enable, create_date, update_date, create_user, update_user
+		)values(
+			#{id,jdbcType=NUMERIC}, #{userName,jdbcType=VARCHAR},
+			#{contact,jdbcType=NUMERIC}, #{sex,jdbcType=NUMERIC},
+			#{age,jdbcType=NUMERIC}, #{address,jdbcType=VARCHAR},
+			#{detail,jdbcType=VARCHAR},#{org,jdbcType=NUMERIC},
+			#{longitude,jdbcType=VARCHAR},#{latitude,jdbcType=VARCHAR},
+			#{enable,jdbcType=NUMERIC},
+			#{createDate,jdbcType=TIMESTAMP}, #{updateDate,jdbcType=TIMESTAMP},
+			#{createUser,jdbcType=VARCHAR}, #{updateUser,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+
+	<update id="update">
+		UPDATE lar_ship_sales_custom ST
+		<include refid="dynamicSet" /> 
+	    WHERE ST.id = #{id}
+	</update>
+
+	<select id="totalCount" resultType="java.lang.Integer">
+		SELECT count(*) FROM lar_ship_sales_custom ST
+		<include refid="dynamicWhereQuery" />
+	</select>
+
+	<select id="findAll" resultMap="shipSalesCustom">
+		SELECT <include refid="field"/>
+		FROM lar_ship_sales_custom ST
+		<include refid="dynamicWhereQuery" />
+		ORDER BY ST.id DESC
+	</select>
+
+	
+</mapper> 

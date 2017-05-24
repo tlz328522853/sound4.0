@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.SalesmanDao">
+	<sql id="Base_Column_List">
+		s.id`id`,s.`areaSettingId` AS "areaSetting.id",mechanism AS "areaSetting.mechanism",a.mechanismId AS "areaSetting.mechanismId",a.areaName AS "areaSetting.areaName",
+		`manId`,`manName`,`deviceId`,`ownedSupplierId` AS "ownedSupplier.id",osName AS "ownedSupplier.osName",
+		`manDescribe`,`personnelId`,s.`createDate`,s.`enable`,integral,`rechargeIntegral`,`giveIntegral`,`expenditureIntegral`,
+		SUM(so.account) as accountSum, count(so.`sales_man`) as count, SUM(so.recharge_score) AS rechargeSum, SUM(so.give_score) AS giveSum
+	</sql>
+	
+	<select id="countByConditron" resultType="long" parameterType="map">
+		select count(s.id) FROM `lar_salesman` s LEFT OUTER JOIN `lar_areasettings` a ON(s.areaSettingId=a.id)
+			LEFT OUTER JOIN lar_ownedsupplier o ON(s.ownedSupplierId=o.id) 
+		<where>
+			s.enable=0 
+			<if test="params!=null and params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="params.mechanismId!=null">
+					and a.mechanismId=#{params.mechanismId} 
+				</if>
+				<if test="params.orgIds!=null and params.orgIds.size>0">
+					and a.mechanismId in 
+					<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="params.id!=null">
+					and s.id=#{params.id}
+				</if>
+				<if test="params.manId!=null">
+					and manId=#{params.manId} 
+				</if>
+				<if test="params.areaId!=null">
+					and s.areaSettingId=#{params.areaId} 
+				</if>
+				<if test="params.osId!=null">
+					and o.osId=#{params.osId} 
+				</if>
+				<if test="params.salesmanId!=null">
+					and manId=#{params.salesmanId} 
+				</if>
+			</if>
+		</where>
+			
+	</select>
+	
+	<select id="countByEmploy" resultType="java.lang.Long">
+    	select count(id) from
+        (select s.id from lar_salesman s
+        left join lar_areasettings a on s.areaSettingId=a.id
+        <where>
+            s.enable = 0
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    and ${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                and a.mechanismId in
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+            group by s.personnelId
+        </where>
+        ) as employ
+        
+    </select>
+    
+    <sql id="column">
+		a.id,a.manName,a.personnelId,a.areaSettingId,a.createDate,b.areaName as "areaName",a.enable,
+		b.mechanismId as "mechanismId",mechanism as 'areaSetting.mechanism',deviceId
+	</sql>
+    
+    <sql id="areaJoin">
+		left join lar_areasettings b on a.areaSettingId=b.id
+		LEFT OUTER JOIN lar_ownedsupplier o ON(a.ownedSupplierId=o.id)
+		LEFT OUTER JOIN lar_score so ON(so.`sales_man`=a.`id`)
+	</sql>
+    
+    <!-- <sql id="column">
+    	s.id`id`,s.`areaSettingId` AS "areaSetting.id",mechanism AS "areaSetting.mechanism",a.mechanismId AS "areaSetting.mechanismId",a.name AS "areaName",
+		`manId`,name as`manName`,`deviceId`,`ownedSupplierId` AS "ownedSupplier.id",osName AS "ownedSupplier.osName",
+		`manDescribe`,`personnelId`,s.`createDate`,s.`enable`,integral,`rechargeIntegral`,`giveIntegral`,`expenditureIntegral`,
+		SUM(so.account) as accountSum, count(so.`sales_man`) as count, SUM(so.recharge_score) AS rechargeSum, SUM(so.give_score) AS giveSum
+    </sql>
+    <sql id="areaJoin">
+    LEFT OUTER JOIN `lar_areasettings` a ON(s.areaSettingId=a.id)
+	LEFT OUTER JOIN lar_ownedsupplier o ON(s.ownedSupplierId=o.id) LEFT OUTER JOIN lar_score so ON(so.`sales_man`=s.`id`)
+    </sql> -->
+    
+    <select id="findEmploy" resultType="com.sdcloud.api.lar.entity.Salesman">
+        select
+        <include refid="column"/>
+        from lar_salesman a
+        <include refid="areaJoin"/>
+        <where>
+            a.enable = 0 and b.enable=0 
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    and ${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                and b.mechanismId in
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+            group by a.personnelId
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                order by ${larPager.orderSql}
+            </when>
+            <otherwise>
+                order by a.createDate desc
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            limit #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+	
+	<select id="selectByExample" resultType="com.sdcloud.api.lar.entity.Salesman" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		 FROM `lar_salesman` s LEFT OUTER JOIN `lar_areasettings` a ON(s.areaSettingId=a.id)
+			LEFT OUTER JOIN lar_ownedsupplier o ON(s.ownedSupplierId=o.id) LEFT OUTER JOIN lar_score so ON(so.`sales_man`=s.`id`)
+		<where>
+			s.enable=0 and a.enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.mechanismId!=null">
+					and a.mechanismId=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and a.mechanismId in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="larPager.params.id!=null">
+					and s.id=#{larPager.params.id}
+				</if>
+				<if test="larPager.params.manId!=null">
+					and manId=#{larPager.params.manId} 
+				</if>
+				<if test="larPager.params.areaId!=null">
+					and s.areaSettingId=#{larPager.params.areaId} 
+				</if>
+				<if test="larPager.params.osId!=null">
+					and o.osId=#{larPager.params.osId} 
+				</if>
+				<if test="larPager.params.salesmanId!=null">
+					and manId=#{larPager.params.salesmanId} 
+				</if>
+				<if test="larPager.params.name!=null">
+					and manName like '%${larPager.params.name}%'
+				</if>
+			</if>
+		</where>
+			GROUP BY s.id
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="countByIds" resultType="java.lang.Long" >
+		select 
+		 count(s.id )
+		 FROM `lar_salesman` s LEFT OUTER JOIN `lar_areasettings` a ON(s.areaSettingId=a.id)
+			LEFT OUTER JOIN lar_ownedsupplier o ON(s.ownedSupplierId=o.id) 
+		<where>
+			s.enable=0 and a.enable=0 
+			<if test="params!=null and params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="params.mechanismId!=null">
+					and a.mechanismId=#{params.mechanismId} 
+				</if>
+				<if test="params.orgIds!=null and params.orgIds.size>0">
+					and a.mechanismId in 
+					<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				<if test="params.manId!=null">
+					and manId=#{params.manId} 
+				</if>
+				<if test="params.areaId!=null">
+					and s.areaSettingId=#{params.areaId} 
+				</if>
+				<if test="params.osId!=null">
+					and o.osId=#{params.osId} 
+				</if>
+				<if test="params.salesmanId!=null">
+					and manId=#{params.salesmanId} 
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="salesManPointStatistics" resultType="com.sdcloud.api.lar.entity.Salesman" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		 FROM `lar_salesman` s LEFT OUTER JOIN `lar_areasettings` a ON(s.areaSettingId=a.id) LEFT OUTER JOIN lar_score so ON(so.`sales_man`=s.`id`)
+		<where>
+			s.enable=0 and a.enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.mechanismId!=null">
+					and a.mechanismId=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.manId!=null">
+					and manId=#{larPager.params.manId} 
+				</if>
+				<if test="larPager.params.areaId!=null">
+					and s.areaSettingId=#{larPager.params.areaId} 
+				</if>
+				<if test="larPager.params.osId!=null">
+					and o.osId=#{larPager.params.osId} 
+				</if>
+				<if test="larPager.params.salesmanId!=null">
+					and manId=#{larPager.params.salesmanId} 
+				</if>
+			</if>
+		</where>
+			GROUP BY s.id
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<sql id="ItemPointStatistics_list">
+		mechanismId,SUM(mallPointInput) AS mallPointInputSum,SUM(sanitationPointOut) AS sanitationPointOutSum,SUM(recyclePointOut) AS recyclePointOutSum
+	</sql>
+	
+	<select id="itemPointStatistics" resultType="com.sdcloud.api.lar.entity.ItemPointStatistics" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="ItemPointStatistics_list" /> 
+		 FROM(
+			select le.mechanismId, sum(integral) AS mallPointInput,NULL AS sanitationPointOut,NULL AS recyclePointOut
+						from lar_exchangeinfo le 
+						<where>
+							enable = 0 AND le.OrderStatus !=0 
+							<if test="larPager.params!=null and larPager.params.size>0">
+								<if test="larPager.params.firstDate !=null">
+									<![CDATA[
+										and le.createDate >= #{larPager.params.firstDate}
+									]]>
+					            </if>
+								<if test="larPager.params.endDate != null">
+									<![CDATA[
+										and le.createDate <= #{larPager.params.endDate}
+									]]>
+								</if>
+							</if>
+						</where>
+						GROUP BY le.mechanismId
+			
+			UNION ALL
+			select k.org as mechanismId, NULL AS mallPointInput, SUM(k.integral) AS sanitationPointOut,NULL AS recyclePointOut
+						from lar_event k where k.updateDate IS NOT NULL
+						<if test="larPager.params!=null and larPager.params.size>0">
+							<if test="larPager.params.firstDate !=null">
+								<![CDATA[
+									AND k.updateDate >= #{larPager.params.firstDate}
+								]]>
+				            </if>
+							<if test="larPager.params.endDate != null">
+								<![CDATA[
+									and k.updateDate <= #{larPager.params.endDate}
+								]]>
+							</if>
+						</if>
+						GROUP BY k.org
+			UNION ALL
+			select d.mechanismId, NULL AS malllPointInput, NULL AS sanitationPointOut, SUM(d.integralSum) AS recyclePointOut  
+						from 
+							(
+								select la.mechanismId,sum(om.integral) as integralSum
+								from lar_ordermanager om,lar_areasettings la where orderStatusId=4 and CONCAT(om.areaSettingId,"")=la.id 
+									<if test="larPager.params!=null and larPager.params.size>0">
+										<if test="larPager.params.firstDate !=null">
+											<![CDATA[
+												and om.createDate >= #{larPager.params.firstDate}
+											]]>
+							            </if>
+										<if test="larPager.params.endDate != null">
+											<![CDATA[
+												and om.createDate <= #{larPager.params.endDate}
+											]]>
+										</if>
+									</if>
+								GROUP BY la.mechanismId 
+							UNION ALL
+								SELECT ro.org as mechanismId,sum(ro.integral) as integralSum 
+								from lar_recycle_order ro
+									<where> 
+										<if test="larPager.params!=null and larPager.params.size>0">
+											<if test="larPager.params.firstDate !=null">
+												<![CDATA[
+													ro.create_date >= #{larPager.params.firstDate}
+												]]>
+								            </if>
+											<if test="larPager.params.endDate != null">
+												<![CDATA[
+													and ro.create_date <= #{larPager.params.endDate}
+												]]>
+											</if>
+										</if>
+									</where>
+								GROUP BY ro.org
+							) d
+						
+						GROUP BY d.mechanismId
+			) f
+		<where>
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.mechanismId!=null">
+					and f.mechanismId=#{larPager.params.mechanismId} 
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and f.mechanismId in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+			</if>
+		</where>
+			GROUP BY f.mechanismId ORDER BY f.mechanismId
+	</select>
+	
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.Salesman">
+		insert into lar_salesman 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="areaSetting != null and areaSetting.id!=null">
+				areaSettingId,
+			</if>
+			<if test="manId != null">
+				manId,
+			</if>
+			<if test="manName != null">
+				manName,
+			</if>
+			<if test="deviceId!=null">
+				deviceId,
+			</if>
+			<if test="ownedSupplier != null and ownedSupplier.id!=null">
+				ownedSupplierId,
+			</if>
+			<if test="manDescribe != null">
+				manDescribe,
+			</if>
+			<if test="personnelId">
+				personnelId,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="integral != null">
+				integral,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="areaSetting != null and areaSetting.id!=null">
+				#{areaSetting.id},
+			</if>
+			<if test="manId != null">
+				#{manId},
+			</if>
+			<if test="manName != null">
+				#{manName},
+			</if>
+			<if test="deviceId!=null">
+				#{deviceId},
+			</if>
+			<if test="ownedSupplier != null and ownedSupplier.id!=null">
+				#{ownedSupplier.id},
+			</if>
+			<if test="manDescribe != null">
+				#{manDescribe},
+			</if>
+			<if test="personnelId != null">
+				#{personnelId},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="integral != null">
+				#{integral},
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="updateByExampleSelective" parameterType="map">
+		update lar_salesman
+		<set>
+			<if test="params.salesman.areaSetting != null and params.salesman.areaSetting.id != null">
+				areaSettingId = #{params.salesman.areaSetting.id},
+			</if>
+			<if test="params.salesman.manId != null">
+				manId = #{params.salesman.manId},
+			</if>
+			<if test="params.salesman.manName != null">
+				manName = #{params.salesman.manName},
+			</if>
+			<if test="params.salesman.deviceId != null">
+				deviceId = #{params.salesman.deviceId},
+			</if>
+			<if test="params.salesman.ownedSupplier != null and params.salesman.ownedSupplier.id != null">
+				ownedSupplierId = #{params.salesman.ownedSupplier.id},
+			</if>
+			<if test="params.salesman.manDescribe != null">
+				manDescribe = #{params.salesman.manDescribe},
+			</if>
+			<if test="params.salesman.personnelId != null">
+				personnelId = #{params.salesman.personnelId},
+			</if>
+			<if test="params.salesman.createDate != null">
+				createDate = #{params.salesman.createDate},
+			</if>
+			<if test="params.salesman.enable != null">
+				enable = #{params.salesman.enable},
+			</if>
+			<if test="params.salesman.integral != null">
+				integral=#{params.salesman.integral},
+			</if>
+			<if test="params.salesman.rechargeIntegral != null">
+				rechargeIntegral=#{params.salesman.rechargeIntegral},
+			</if>
+			<if test="params.salesman.giveIntegral != null">
+				giveIntegral=#{params.salesman.giveIntegral},
+			</if>
+		</set>
+		<where>
+			<if test="params.salesman.id !=null">
+				id=#{params.salesman.id}
+			</if>
+		</where>
+	</update>
+	<update id="updateByEmployeeId" parameterType="map">
+		update lar_salesman
+		<set>
+			<if test="params.salesman.areaSetting != null and params.salesman.areaSetting.id != null">
+				areaSettingId = #{params.salesman.areaSetting.id},
+			</if>
+			<if test="params.salesman.manId != null">
+				manId = #{params.salesman.manId},
+			</if>
+			<if test="params.salesman.manName != null">
+				manName = #{params.salesman.manName},
+			</if>
+			<if test="params.salesman.deviceId != null">
+				deviceId = #{params.salesman.deviceId},
+			</if>
+			<if test="params.salesman.ownedSupplier != null and params.salesman.ownedSupplier.id != null">
+				ownedSupplierId = #{params.salesman.ownedSupplier.id},
+			</if>
+			<if test="params.salesman.manDescribe != null">
+				manDescribe = #{params.salesman.manDescribe},
+			</if>
+			<if test="params.salesman.createDate != null">
+				createDate = #{params.salesman.createDate},
+			</if>
+			<if test="params.salesman.enable != null">
+				enable = #{params.salesman.enable},
+			</if>
+			<if test="params.salesman.integral != null">
+				integral=#{params.salesman.integral},
+			</if>
+		</set>
+		<where>
+			<if test="params.salesman.personnelId !=null">
+				personnelId=#{params.salesman.personnelId}
+			</if>
+		</where>
+	</update>
+	
+	<select id="getByPersonnelId" resultType="com.sdcloud.api.lar.entity.Salesman">
+		select 
+		s.id`id`,s.`areaSettingId` AS "areaSetting.id",mechanism AS "areaSetting.mechanism",
+		a.mechanismId AS "areaSetting.mechanismId",a.areaName AS "areaSetting.areaName",
+		`manId`,`manName`,`manDescribe`,`personnelId`,integral,`rechargeIntegral`,`giveIntegral`
+		 FROM `lar_salesman` s LEFT OUTER JOIN `lar_areasettings` a ON(s.areaSettingId=a.id)
+		<where>
+			s.`personnelId` = #{personnelId}
+			and s.enable = 0
+		</where>
+	</select>
+	
+	<select id="getSalesmansByAreaIds" resultType="com.sdcloud.api.lar.entity.Salesman">
+		SELECT `id`,`areaSettingId` as "areaSetting.id",`manId`,`manName`,`deviceId`,`ownedSupplierId` as "ownedSupplier.id",`manDescribe`,`personnelId`,`createDate`,`enable`
+		FROM `lar_salesman` 
+		<where>
+			enable = 0
+			<choose>
+				 <when test="null !=areaSettings  and areaSettings.size>0">
+		        	 and areaSettingId in  
+		        	<foreach collection="areaSettings" item="areaSetting" close=")" open="(" separator=",">
+		                    ${areaSetting.id}
+		        	</foreach>
+				</when>
+				<otherwise>
+					and 1=0
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<select id="selectPersonnelIdList" resultType="java.lang.String">
+	
+		select personnelId from lar_salesman
+		<if test="null !=params">
+			<where>
+				1=1
+				<foreach collection="params.keys" item="item" index="key">
+	            	and ${item}=#{params[${item}]}
+	        	</foreach>
+			</where>
+		</if>
+	</select>
+	
+</mapper>

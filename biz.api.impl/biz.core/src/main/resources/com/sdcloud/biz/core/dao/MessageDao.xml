@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.MessageDao">
+
+	<sql id="messageColumn">
+	    messageTitle,
+		messageBody,
+		topic,
+		releaseUser,
+		releaseTime,
+		createTime,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into pf_message(
+			messageId, <include refid="messageColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="messages" separator=",">
+			(#{item.messageId},#{item.messageTitle},
+			#{item.messageBody},#{item.topic},
+			#{item.releaseUser},#{item.releaseTime},
+			#{item.createTime},#{item.tenantId})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from pf_message
+		<choose>
+			<when test="messageIds != null &amp;&amp; messageIds.size() != 0">
+				where messageId in
+		      	<foreach item="item" index="index" collection="messageIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="com.sdcloud.framework.mqtt.Message">
+		update pf_message
+		<set>
+		    <if test="messageTitle != null &amp;&amp; messageTitle != ''">messageTitle = #{messageTitle},</if>
+			<if test="messgeBody != null &amp;&amp; messgeBody != ''">messgeBody = #{messgeBody},</if>
+			<if test="topic != null">topic = #{topic},</if>
+			<if test="releaseUser != null &amp;&amp; releaseUser != ''">releaseUser = #{releaseUser},</if>
+			<if test="releaseTime != null &amp;&amp; releaseTime != ''">releaseTime = #{releaseTime},</if>
+			<if test="createTime != null &amp;&amp; createTime != ''">createTime = #{createTime},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where messageId = #{messageId}
+	</update>
+	<select id="getTotalCount" resultType="long">
+		select count(c.messageId)
+		from pf_message c
+		<choose>
+			<when test="userId != null">
+				INNER JOIN pf_message_unread_user po 
+				on po.messageId= c.messageId
+		    </when>
+		</choose> 
+	   <where>
+			<if test="releaseUser != null &amp;&amp; releaseUser !=0">
+				c.releaseUser = #{releaseUser}
+			</if>
+			
+			<if test="messageTitle != null &amp;&amp; messageTitle !=''">
+				and c.messageTitle like '%${messageTitle}%'
+			</if>
+			<if test="messgeBody != null &amp;&amp; messgeBody !=''">
+				and c.messgeBody like '%${messgeBody}%'
+			</if>
+			<if test="topic != null &amp;&amp; topic !=''">
+				and c.topic like '%${topic}%'
+			</if>
+			<if test="userId != null &amp;&amp; userId !=0">
+				and po.userId = #{userId}
+			</if>
+			<!-- <if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if> -->
+			<if test="firstDate != null &amp;&amp; endDate !=null">
+				and c.releaseTime between #{firstDate} and #{endDate}
+			</if>
+			<if test="firstCreateDate != null &amp;&amp; endCreateDate !=null">
+				and c.createTime between #{firstCreateDate} and #{endCreateDate}
+			</if>
+		</where>
+	</select>
+	<select id="findAllBy" resultType="com.sdcloud.framework.mqtt.Message">
+	    select 	c.messageId,c.messageTitle,
+		c.messageBody,
+		c.topic,
+		c.releaseUser,
+		c.releaseTime,
+		c.createTime,
+		pu.`name` as releaseUserName,
+		c.tenantId
+	    <choose>
+			<when test="userId != null">
+				,po.redState as redState
+		    </when>
+		</choose>
+	    from pf_message c
+	    INNER JOIN pf_user pu 
+		on pu.userId=c.releaseUser
+	     <choose>
+			<when test="userId != null">
+				INNER JOIN pf_message_unread_user po 
+				on po.messageId= c.messageId
+		    </when>
+		</choose>
+	   <where>
+			<if test="releaseUser != null &amp;&amp; releaseUser !=0">
+				c.releaseUser = #{releaseUser}
+			</if>
+			<if test="messageTitle != null &amp;&amp; messageTitle !=''">
+				and c.messageTitle like '%${messageTitle}%'
+			</if>
+			<if test="messgeBody != null &amp;&amp; messgeBody !=''">
+				and c.messgeBody like '%${messgeBody}%'
+			</if>
+			<if test="topic != null &amp;&amp; topic !=''">
+				and c.topic like '%${topic}%'
+			</if>
+			<if test="userId != null &amp;&amp; userId !=0">
+				and po.userId = #{userId}
+			</if>
+			<!-- <if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if> -->
+			<if test="firstDate != null &amp;&amp; endDate !=null">
+				and c.releaseTime between #{firstDate} and #{endDate}
+			</if>
+			<if test="firstCreateDate != null &amp;&amp; endCreateDate !=null">
+				and c.createTime between #{firstCreateDate} and #{endCreateDate}
+			</if>
+		</where>
+		<if test="pager != null">
+			<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

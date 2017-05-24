@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.AnalysisReportDao">
+
+	<select id="getEmployeeGenderReport" resultType="ReportEntity">
+		SELECT
+		count(employeeId) AS
+		VALUE,
+		gender AS NAME
+		FROM
+		pf_employee
+		<choose>
+			<when test="orgIds != null">
+				where orgId in
+				<foreach item="orgid" index="index" collection="orgIds"
+					open="(" separator="," close=")">
+					#{orgid}
+				</foreach>
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+		GROUP BY
+		gender
+	</select>
+
+	<!-- <select id="getEmployeeAgeReport" resultType="ReportEntity">
+		SELECT
+			count(a.employeeId) AS value,
+			a. name as name
+		FROM
+		(
+			SELECT
+				CEILING(TIMESTAMPDIFF(DAY, birthday, NOW()) / 365) AS name,
+				employeeId
+			FROM
+				pf_employee
+			<choose>
+				<when test="orgIds!=null">
+					where orgId in
+					<foreach item="orgid" index="index" collection="orgIds"
+						open="(" separator="," close=")">
+						#{orgid}
+					</foreach>
+				</when>
+				<otherwise>
+					where 1 = 2
+				</otherwise>
+			</choose>
+		) a
+		GROUP BY a.name
+		ORDER BY a.name DESC
+	</select> -->
+
+	<select id="getEmployeeAgeReport" resultType="ReportEntity">
+		SELECT
+			a.name AS name,
+			count(a.employeeId) AS value
+		FROM
+		(
+			SELECT
+				FLOOR(DATEDIFF(NOW(), birthday) / 3650) AS name,
+				employeeId
+			FROM
+				pf_employee
+			where birthday is not null
+			<choose>
+				<when test="orgIds!=null">
+					and orgId in
+					<foreach item="orgid" index="index" collection="orgIds"
+						open="(" separator="," close=")">
+						#{orgid}
+					</foreach>
+				</when>
+				<otherwise>
+					and 1 = 2
+				</otherwise>
+			</choose>
+		) a
+		GROUP BY a.name
+		ORDER BY a.name DESC
+	</select>
+	
+	<select id="getFacilityCountReport" resultType="ReportEntity">
+		SELECT
+		a.count as value, t.assetTypeName as name
+		FROM
+			(
+				SELECT
+					count(o.assetId) AS count,
+					o.assetTypeId
+				FROM
+					so_asset_object o
+				<choose>
+					<when test="orgIds!=null">
+						where o.newOrgId in
+						<foreach item="orgid" index="index" collection="orgIds"
+							open="(" separator="," close=")">
+							#{orgid}
+						</foreach>
+						and o.assetTypeId != 22
+					</when>
+					<otherwise>
+						where 1 = 2
+					</otherwise>
+				</choose>
+				GROUP BY
+					o.assetTypeId
+			) a
+		LEFT JOIN so_asset_type t 
+		ON a.assetTypeId = t.assetTypeId
+	</select>
+	
+	<select id="getCarCountReport" resultType="ReportEntity">
+		SELECT
+		b.name AS name,
+		a.count AS value
+		FROM
+			(
+				SELECT
+					count(c.assetId) AS count,
+					c.carType
+				FROM so_asset_car c
+				INNER JOIN so_asset_object o
+				ON c.assetId = o.assetId
+				<choose>
+					<when test="orgIds!=null">
+						where o.newOrgId in
+						<foreach item="orgId" index="index" collection="orgIds"
+							open="(" separator="," close=")">
+							#{orgId}
+						</foreach>
+					</when>
+					<otherwise>
+						where 1 = 2
+					</otherwise>
+				</choose>
+				GROUP BY c.carType
+			) a
+		LEFT JOIN pf_dic b 
+		ON a.carType = b.dicId
+	</select>
+	
+	<!-- <select id="getCarCountReport" resultType="ReportEntity">
+		SELECT
+		a.count as value, t.assetTypeName as name
+		FROM
+			(
+				SELECT
+					count(o.assetId) AS count,
+					o.assetTypeId
+				FROM
+					so_asset_object o
+				<choose>
+					<when test="orgIds!=null">
+						where o.newOrgId in
+						<foreach item="orgid" index="index" collection="orgIds"
+							open="(" separator="," close=")">
+							#{orgid}
+						</foreach>
+					</when>
+					<otherwise>
+						where 1 = 2
+					</otherwise>
+				</choose>
+				GROUP BY
+					o.assetTypeId
+			) a
+		LEFT JOIN so_asset_type t 
+		ON a.assetTypeId = t.assetTypeId and (t.assetTypeId=22 or t.assetTypePid=22)
+	</select> -->
+	
+	<select id="getCarCostReport" resultType="ReportEntity">
+		SELECT
+			a.count as value, t.assetTypeName as name
+		FROM
+			(
+				SELECT
+					sum(o.priceUnit) AS count,
+					o.assetTypeId
+				FROM
+					so_asset_car o
+				
+				GROUP BY
+					o.assetTypeId
+			) a
+		LEFT JOIN so_asset_type t 
+		ON a.assetTypeId = t.assetTypeId
+	</select>
+	
+
+</mapper>

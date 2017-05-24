@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.EventDao">
+	<resultMap id="event" type="com.sdcloud.api.envsanitation.entity.Event">
+	  <result property="eventId" column="eventId" />
+	  <result property="orgId" column="orgId"/>
+	  <result property="eventType" column="eventType"/>
+	  <result property="level" column="level"/>
+	  <result property="integral" column="integral"/>
+	  <result property="eventDes" column="eventDes"/>
+	  <result property="discoveryAddress" column="discoveryAddress"/>
+	  <result property="reportPerson" column="reportPerson"/>
+	  <result property="reportTime" column="reportTime"/>
+	  <result property="dealPerson" column="dealPerson"/>
+	  <result property="dealTime" column="dealTime"/>
+	  <result property="dealState" column="dealState"/>
+	  <result property="eventSource" column="eventSource"/>
+	  <result property="ownerCode" column="ownerCode"/>
+	  <result property="tenantId" column="tenantId"/>
+	  <result property="latitude" column="latitude" />
+	  <result property="longitude" column="longitude" />
+	  <result property="reportPersonName" column="reportPersonName" />
+	  <result property="reportPhone" column="reportPhone" />
+	  <result property="dealPersonName" column="dealPersonName" />
+	  <result property="dealPersonPhone" column="dealPersonPhone" />
+	  <result property="extStr1" column="extStr1"/>
+	  <result property="extStr2" column="extStr2"/>
+	  <result property="extStr3" column="extStr3"/>
+	  <result property="extStr4" column="extStr4"/>
+	  <result property="extStr5" column="extStr5"/>
+	  <result property="extStr6" column="extStr6"/>
+	  <result property="extStr7" column="extStr7"/>
+	  <result property="extDate1" column="extDate1"/>
+	  <result property="extDate2" column="extDate2"/>
+	  <result property="extDate3" column="extDate3"/>
+	  <result property="orgName" column="orgName" />
+	  <collection property="eventPics" javaType="ArrayList" column="eventId" ofType="com.sdcloud.api.envsanitation.entity.EventPics" select="findPicsByEventId"/>
+	</resultMap>
+
+   <sql id="EventColumn">
+   orgId,eventType,level,integral,eventDes,discoveryAddress,reportPerson,
+   reportTime,reportPhone,dealPerson,dealTime,dealState,eventSource,assignStatus,dealStatus,latitude,longitude
+   </sql>
+   
+   <sql id="EventPicsColumn">
+   picName,picPath,picSequence,eventId,picType,extStr1,
+   extStr2,extStr3,extStr4,extStr5,extStr6,extStr7,extDate1,extDate2,extDate3
+   </sql>
+   
+   <sql id="EventCondition">
+		<where>
+			<if test="newOrgId != null and newOrgId.size() > 0">
+				and s.orgId in
+				<foreach item="item" index="index" collection="newOrgId" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<!-- <if test="newOrgId == null or newOrgId.size() == 0">
+				1 = 2
+			</if> -->
+			<if test="clientUserList != null and clientUserList.size() > 0">
+				and s.reportPerson in
+				<foreach item="item" index="index" collection="clientUserList" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="reportPerson != null ">
+				and s.reportPerson = #{reportPerson}
+			</if>
+			<if test="dealPerson != null ">
+				and s.dealPerson = #{dealPerson}
+			</if>
+			<if test="assignStatus != null ">
+				and s.assignStatus = #{assignStatus}
+			</if>
+			<if test="dealStatus != null ">
+				and s.dealStatus = #{dealStatus}
+			</if>
+			<if test="eventSource != null &amp;&amp; eventSource != ''">
+				and s.eventSource = #{eventSource}
+			</if>
+			<if test="reportPhone != null &amp;&amp; reportPhone  != ''">
+				and s.reportPhone  = #{reportPhone}
+			</if>
+			<if test="eventType != null ">
+				and s.eventType = #{eventType}
+			</if>
+			<if test="discoveryAddress != null &amp;&amp; discoveryAddress != ''">
+				and s.discoveryAddress like '%${discoveryAddress}%'
+			</if>
+			<if test="reportTimeFrom != null">
+				and s.reportTime >=#{reportTimeFrom}
+			</if>
+			<if test="reportTimeTo != null">
+				<![CDATA[
+					and s.reportTime <=#{reportTimeTo}
+				]]>
+			</if>
+			<if test="dealTimeFrom != null">
+				and s.reportTime >=#{dealTimeFrom}
+			</if>
+			<if test="dealTimeTo != null">
+				<![CDATA[
+					and s.reportTime <=#{dealTimeTo}
+				]]>
+			</if>
+			
+		</where>
+	</sql>
+
+
+	<insert id="insert" parameterType="com.sdcloud.api.envsanitation.entity.Event">
+		insert into
+		so_event(eventId,<include refid="EventColumn"></include>)
+		values(#{eventId},#{orgId},#{eventType},#{level},#{integral},#{eventDes},#{discoveryAddress},#{reportPerson},#{reportTime},#{reportPhone},
+		#{dealPerson},#{dealTime},#{dealState},#{eventSource},#{assignStatus},#{dealStatus},#{latitude},#{longitude})
+	</insert>
+
+	<select id="findAllBy" resultMap="event">
+		SELECT
+			s.eventId,
+			s.orgId,
+			s.eventType,
+			s.level,
+			s.integral,
+			s.eventDes,
+			s.discoveryAddress,
+			s.reportPerson,
+			s.reportTime,
+			s.dealPerson,
+			s.dealTime,
+			s.dealState,
+			s.eventSource,
+			s.assignStatus,
+			s.dealStatus,
+			s.latitude,
+			s.longitude,
+			<!-- 导出所需字段 start-->
+			CASE WHEN s.assignStatus = '0' THEN '未派发'
+				 ELSE '已派发'
+		         END
+		         As extStr1,
+		    CASE WHEN s.dealStatus = '0' THEN '未处理'
+				 ELSE '已处理'
+		         END
+		         As extStr2,
+		    pd.name as extStr3,
+		    <!-- 导出所需字段 end-->
+			r.name AS reportPersonName,
+			<!-- r.mobile AS reportPhone, -->
+			CASE WHEN s.eventSource = 'WEB' THEN r.mobile
+		     	 WHEN s.eventSource = 'APP' THEN r.mobile
+		     	 WHEN s.eventSource = 'CLIENT' THEN s.reportPhone
+		     	 ELSE r.mobile
+		         END
+		         AS reportPhone,
+			d.name AS dealPersonName,
+			d.mobile AS dealPersonPhone,
+			o.name as orgName
+		FROM
+			so_event s 
+		LEFT JOIN pf_employee r ON s.reportPerson = r.employeeId
+		LEFT JOIN pf_employee d ON s.dealPerson = d.employeeId 
+		LEFT JOIN pf_org o ON s.orgId = o.orgId
+		LEFT JOIN pf_dic pd ON s.eventType = pd.dicId
+		
+		<include refid="EventCondition" />
+		
+		<if test="pager != null">
+		    <if test="pager.orderSql != null &amp;&amp; pager.orderSql != ''">
+				order by ${pager.orderSql} 
+		    </if>
+		    <if test="for_method_exportData != 'true'">
+				limit #{pager.first}, #{pager.pageSize}
+		    </if>
+		</if>
+	</select>
+
+	<select id="getTotalCount" resultType="java.lang.Long">
+		select count(eventId)
+		from so_event s
+		<include refid="EventCondition" />
+	</select>
+	
+	<select id="findById" resultMap="event">
+		SELECT
+			s.eventId,
+			s.orgId,
+			s.eventType,
+			s.level,
+			s.integral,
+			s.eventDes,
+			s.discoveryAddress,
+			s.reportPerson,
+			s.reportTime,
+			s.dealPerson,
+			s.dealTime,
+			s.dealState,
+			s.eventSource,
+			s.assignStatus,
+			s.dealStatus,
+			s.latitude,
+			s.longitude,
+			r.name AS reportPersonName,
+			<!-- r.mobile AS reportPhone, -->
+			CASE WHEN s.eventSource = 'WEB' THEN r.mobile
+		     	 WHEN s.eventSource = 'APP' THEN r.mobile
+		     	 WHEN s.eventSource = 'CLIENT' THEN s.reportPhone
+		     	 ELSE r.mobile
+		         END
+		         AS reportPhone,
+			d.name AS dealPersonName,
+			d.mobile AS dealPersonPhone,
+			o.name AS orgName
+		FROM
+			so_event s 
+		LEFT JOIN pf_employee r ON s.reportPerson = r.employeeId
+		LEFT JOIN pf_employee d ON s.dealPerson = d.employeeId 
+		LEFT JOIN pf_org o ON s.orgId = o.orgId
+		WHERE  s.eventId=#{id}
+	</select>
+
+	<update id="update">
+		update so_event
+		<set>
+			eventType = #{eventType},
+			level = #{level},
+			integral = #{integral},
+			eventDes = #{eventDes},
+			discoveryAddress = #{discoveryAddress},
+			reportPerson = #{reportPerson},
+			reportTime = #{reportTime},
+			reportPhone = #{reportPhone},
+			assignStatus = #{assignStatus},
+			dealPerson = #{dealPerson},
+			dealTime = #{dealTime},
+			dealState = #{dealState},
+			dealStatus = #{dealStatus},
+			eventSource = #{eventSource},
+			latitude = #{latitude},
+			longitude = #{longitude}
+		</set>
+		where eventId = #{eventId}
+	</update>
+
+	<delete id="delete">
+		delete from so_event
+		<choose>
+			<when test="eventIds != null &amp;&amp; eventIds.size() != 0">
+				where eventId in
+		      	<foreach item="item" index="index" collection="eventIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<insert id="insertEventPics" parameterType="com.sdcloud.api.envsanitation.entity.EventPics">
+		insert into
+		so_event_pics (eventPicId,<include refid="EventPicsColumn"></include>)
+		values (#{eventPicId},#{picName},#{picPath},#{picSequence},#{eventId},#{picType},#{extStr1},
+		#{extStr2},#{extStr3},#{extStr4},#{extStr5},#{extStr6},#{extStr7},#{extDate1},#{extDate2},#{extDate3})
+	</insert>
+	
+	<insert id="batchInsertEventPics" parameterType="list">
+		insert into
+		so_event_pics (eventPicId,<include refid="EventPicsColumn"></include>)
+		values 
+		<foreach collection="eventPicsList" item="item" separator=",">
+			(#{item.eventPicId},#{item.picName},#{item.picPath},#{item.picSequence},#{item.eventId},#{item.picType},#{item.extStr1},
+			#{item.extStr2},#{item.extStr3},#{item.extStr4},#{item.extStr5},#{item.extStr6},#{item.extStr7},#{item.extDate1},#{item.extDate2},#{item.extDate3})
+		</foreach>
+	</insert>
+	
+	<select id="findPicsByEventId" resultType="com.sdcloud.api.envsanitation.entity.EventPics">
+		select eventPicId,<include refid="EventPicsColumn"/> 
+		from so_event_pics
+		where eventId = #{eventId}
+	</select>
+</mapper>

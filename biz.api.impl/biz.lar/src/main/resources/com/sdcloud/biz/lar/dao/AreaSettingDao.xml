@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.AreaSettingDao">
+	
+	<sql id="Region_Sql">
+		regionId,regionCode,regionName,parentId,regionLevel,regionOrder,regionNameEn,regionShortNameEn 
+	</sql>
+	<sql id="Base_Column_List">
+		 id,mechanism, taskTime, areaName, acreage, areaPosition, startDate, endDate, remarks, createDate,enable,mechanismId  
+	</sql>
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.AreaSetting">
+		insert into lar_areasettings
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="mechanism != null">
+				mechanism,
+			</if>
+			<if test="taskTime != null">
+				taskTime,
+			</if>
+			<if test="areaName != null">
+				areaName,
+			</if>
+			<if test="acreage != null">
+				acreage,
+			</if>
+			<if test="areaPosition != null">
+				areaPosition,
+			</if>
+			<if test="startDate != null">
+				startDate,
+			</if>
+			<if test="endDate != null">
+				endDate,
+			</if>
+			<if test="remarks != null">
+				remarks,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="mechanismId != null">
+				mechanismId
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="mechanism != null">
+				#{mechanism,jdbcType=VARCHAR},
+			</if>
+			<if test="taskTime != null">
+				#{taskTime,jdbcType=VARCHAR},
+			</if>
+			<if test="areaName != null">
+				#{areaName,jdbcType=VARCHAR},
+			</if>
+			<if test="acreage != null">
+				#{acreage,jdbcType=VARCHAR},
+			</if>
+			<if test="areaPosition != null">
+				#{areaPosition,jdbcType=VARCHAR},
+			</if>
+			<if test="startDate != null">
+				#{startDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="endDate != null">
+				#{endDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remarks != null">
+				#{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="enable != null">
+				#{enable,jdbcType=INTEGER},
+			</if>
+			<if test="mechanismId != null">
+				#{mechanismId,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="insertUserGetId" parameterType="com.sdcloud.api.lar.entity.LarClientUser"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into lar_areasettings
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="mechanism != null">
+				mechanism,
+			</if>
+			<if test="taskTime != null">
+				taskTime,
+			</if>
+			<if test="areaName != null">
+				areaName,
+			</if>
+			<if test="acreage != null">
+				acreage,
+			</if>
+			<if test="areaPosition != null">
+				areaPosition,
+			</if>
+			<if test="startDate != null">
+				startDate,
+			</if>
+			<if test="endDate != null">
+				endDate,
+			</if>
+			<if test="remarks != null">
+				remarks,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="enable != null">
+				enable
+			</if>
+			<if test="mechanismId != null">
+				mechanismId
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="mechanism != null">
+				#{mechanism,jdbcType=VARCHAR},
+			</if>
+			<if test="taskTime != null">
+				#{taskTime,jdbcType=VARCHAR},
+			</if>
+			<if test="areaName != null">
+				#{areaName,jdbcType=VARCHAR},
+			</if>
+			<if test="acreage != null">
+				#{acreage,jdbcType=VARCHAR},
+			</if>
+			<if test="areaPosition != null">
+				#{areaPosition,jdbcType=VARCHAR},
+			</if>
+			<if test="startDate != null">
+				#{startDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="endDate != null">
+				#{endDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remarks != null">
+				#{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="enable != null">
+				#{enable,jdbcType=INTEGER},
+			</if>
+			<if test="mechanismId != null">
+				#{mechanismId,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	
+	<select id="selectByExample" resultType="com.sdcloud.api.lar.entity.AreaSetting" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		from lar_areasettings 
+		<where>
+			enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.id!=null">
+					and id=#{larPager.params.id}
+				</if>
+				<if test="larPager.params.mechanismId!=null">
+					 and mechanismId=#{larPager.params.mechanismId}
+				</if>
+				<if test="larPager.params.orgIds!=null and larPager.params.orgIds.size>0">
+					and mechanismId in 
+					<foreach item="item" index="index" collection="larPager.params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+				
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="countByIds" resultType="java.lang.Long">
+		select 
+		count(id)
+		from lar_areasettings 
+		<where>
+			enable=0 
+			<if test="params!=null and params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="params.id!=null">
+					and id=#{params.id}
+				</if>
+				<if test="params.mechanismId!=null">
+					 and mechanismId=#{params.mechanismId}
+				</if>
+				<if test="params.orgIds!=null and params.orgIds.size>0">
+					and mechanismId in 
+					<foreach item="item" index="index" collection="params.orgIds" open="(" separator="," close=")">
+                        #{item}
+                	</foreach>
+				</if>
+			</if>
+		</where>
+	</select>
+
+	<update id="updateByExampleSelective" parameterType="map">
+		update lar_areasettings
+		<set>
+			<if test="params.areaSetting.mechanism != null">
+				mechanism = #{params.areaSetting.mechanism,jdbcType=VARCHAR},
+			</if>
+			<if test="params.areaSetting.taskTime != null">
+				taskTime = #{params.areaSetting.taskTime,jdbcType=VARCHAR},
+			</if>
+			<if test="params.areaSetting.areaName != null">
+				areaName = #{params.areaSetting.areaName,jdbcType=VARCHAR},
+			</if>
+			<if test="params.areaSetting.acreage != null">
+				acreage = #{params.areaSetting.acreage,jdbcType=VARCHAR},
+			</if>
+			<if test="params.areaSetting.areaPosition != null">
+				areaPosition = #{params.areaSetting.areaPosition,jdbcType=VARCHAR},
+			</if>
+			<if test="params.areaSetting.startDate != null">
+				startDate = #{params.areaSetting.startDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="params.areaSetting.endDate != null">
+				endDate = #{params.areaSetting.endDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="params.areaSetting.remarks != null">
+				remarks = #{params.areaSetting.remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="params.areaSetting.createDate != null">
+				createDate = #{params.areaSetting.createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="params.areaSetting.enable != null">
+				enable = #{params.areaSetting.enable,jdbcType=INTEGER},
+			</if>
+			<if test="params.areaSetting.mechanismId != null">
+				mechanismId = #{params.areaSetting.mechanismId,jdbcType=VARCHAR},
+			</if>
+		</set>
+		<where>
+			<if test="params.areaSetting.id !=null">
+				id=#{params.areaSetting.id}
+			</if>
+		</where>
+	</update>
+</mapper>

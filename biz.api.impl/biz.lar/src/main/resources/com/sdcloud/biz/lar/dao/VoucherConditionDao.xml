@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.VoucherConditionDao">
+
+    <sql id="voucherConditionColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.total_start AS "totalStart",
+		a.total_end AS "totalEnd",
+		a.service_count_start AS "serviceCountStart",
+		a.service_count_end AS "serviceCountEnd",
+		a.remark AS "remark",
+		a.create_date AS "createDate",
+		a.type as "type",
+		a.condition as "condition",
+		a.create_user AS "createUser"
+	</sql>
+
+    <sql id="voucherConditionJoins">
+    </sql>
+
+    <insert id="save">
+		INSERT INTO lar_voucher_condition(
+			id,
+			name,
+			total_start,
+			total_end,
+			service_count_start,
+			service_count_end,
+			remark,
+			type,
+			`condition`,
+			create_date,
+			create_user
+		) VALUES (
+			#{id},
+			#{name},
+			#{totalStart},
+			#{totalEnd},
+			#{serviceCountStart},
+			#{serviceCountEnd},
+			#{remark},
+			#{type},
+			#{condition},
+			#{createDate},
+			#{createUser}
+		)
+	</insert>
+
+    <update id="update">
+        UPDATE lar_voucher_condition
+        <set>
+        <if test="name!=null and name!=''">
+            name = #{name},
+        </if>
+        <if test="totalStart!=''">
+            total_start = #{totalStart},
+        </if>
+        <if test="totalEnd!=''">
+            total_end = #{totalEnd},
+        </if>
+        <if test="serviceCountStart!=''">
+            service_count_start = #{serviceCountStart},
+        </if>
+        <if test="serviceCountEnd!=''">
+            service_count_end = #{serviceCountEnd},
+        </if> 
+        <if test="remark!=''">
+            remark = #{remark},
+        </if>
+        <if test="type!=null and type!=''">
+            type = #{type},
+        </if>
+        <if test="condition!=null and condition!=''">
+            `condition`= #{condition}
+        </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		DELETE FROM lar_voucher_condition
+		WHERE id = #{id}
+	</update>
+    <select id="getById" resultType="com.sdcloud.api.lar.entity.VoucherCondition">
+        select
+        <include refid="voucherConditionColumns"/>
+        from lar_voucher_condition a
+        <where>
+            a.id=#{id}
+        </where>
+    </select>
+    <select id="findAll" resultType="com.sdcloud.api.lar.entity.VoucherCondition">
+        select
+        <include refid="voucherConditionColumns"/>
+        from lar_voucher_condition a
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                order by ${larPager.orderSql}
+            </when>
+            <otherwise>
+                order by a.create_Date desc
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            limit #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+    <select id="totalCount" resultType="java.lang.Long">
+        select count(id) from lar_voucher_condition
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key">
+                    and ${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>

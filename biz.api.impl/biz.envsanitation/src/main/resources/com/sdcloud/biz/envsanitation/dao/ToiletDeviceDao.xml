@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.ToiletDeviceDao">
+
+	<sql id="toiletDeviceColumn">
+		deviceMac,
+		aseetId,
+		createTime
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_toilet_device(
+			toiletDeviceId, <include refid="toiletDeviceColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="toiletDevices" separator=",">
+			(#{item.toiletDeviceId},#{item.deviceMac},
+			#{item.aseetId},#{item.createTime})
+		</foreach>
+	</insert>
+	
+	<delete id="deletes">
+		delete from so_toilet_device
+		<where>
+			<if test="aseetId != null &amp;&amp;aseetId !=''">
+				 aseetId = #{aseetId}
+			</if>
+			<if test="deviceMacs != null &amp;&amp; deviceMacs.size()>0">
+				and  deviceMac in
+		      	<foreach item="item" index="index" collection="deviceMacs" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+		</where>
+	</delete>
+	
+	<delete id="deleteByMacs">
+		delete from so_toilet_device
+		<choose>
+			<when test="deviceMacs != null &amp;&amp; deviceMacs.size() != 0">
+				where deviceMac in
+		      	<foreach item="item" index="index" collection="deviceMacs" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<delete id="deleteAll">
+		delete from so_toilet_device
+		<where>
+			<if test="aseetId != null &amp;&amp;aseetId !=''">
+				 aseetId = #{aseetId}
+			</if>
+			<if test="aseetId == null &amp;&amp;aseetId ==''">
+				and  1=3
+			</if>
+		</where>
+	</delete>
+	 <delete id="delete" parameterType="list" >
+		delete from so_toilet_device
+		<choose>
+			<when test="toiletDeviceIds != null &amp;&amp; toiletDeviceIds.size() != 0">
+				where toiletDeviceId in
+		      	<foreach item="item" index="index" collection="toiletDeviceIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="ToiletDevice">
+		update so_toilet_device
+		<set>
+			<if test="deviceMac != null &amp;&amp; deviceMac != ''">deviceMac = #{deviceMac},</if>
+			<if test="aseetId != null">aseetId = #{aseetId},</if>
+			<if test="createTime != null &amp;&amp; createTime != ''">createTime = #{createTime},</if>
+		</set>
+		where toiletDeviceId = #{toiletDeviceId}
+	</update>
+	
+	
+	
+	<select id="getTotalCount" resultType="long">
+		select count(si.deviceMac)
+		from so_toilet_device c
+		INNER JOIN so_device si 
+		on si.deviceMac =c.deviceMac
+	   <where>
+			<if test="deviceMac != null &amp;&amp; deviceMac !=0">
+				c.deviceMac = #{deviceMac}
+			</if>
+			<if test="filterDeviceMacs!= null">
+				c.deviceMac not in
+				<foreach item="item" index="index" collection="filterDeviceMacs" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="toiletDeviceId != null &amp;&amp; toiletDeviceId !=0">
+				and c.toiletDeviceId = #{toiletDeviceId}
+			</if>
+			<if test="aseetId != null &amp;&amp;aseetId !=''">
+				and c.aseetId = #{aseetId}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=''">
+				and si.orgId = #{orgId}
+			</if>
+			<if test="createTime != null &amp;&amp;createTime !=null">
+				and c.createTime between #{createTime} and #{createTime}
+			</if>
+			
+		</where>
+	</select>
+	 
+	 <select id="findDevice" resultType="Device">
+	    select 	si.*
+	    from so_toilet_device c
+	    INNER JOIN so_device si 
+		on si.deviceMac =c.deviceMac
+	   <where>
+			<if test="aseetId != null &amp;&amp;aseetId !=''">
+				 c.aseetId = #{aseetId}
+			</if>
+		</where>       
+			order by c.createTime
+	</select> 
+	<select id="findAllBy" resultType="Device">
+	    select 	si.*
+	    from so_toilet_device c
+	    INNER JOIN so_device si 
+		on si.deviceMac =c.deviceMac
+	   <where>
+			<if test="deviceMac != null &amp;&amp;deviceMac !=0">
+				c.deviceMac = #{deviceMac}
+			</if>
+			
+			<if test="filterDeviceMacs!= null">
+				c.deviceMac not in
+				<foreach item="item" index="index" collection="filterDeviceMacs" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="toiletDeviceId != null &amp;&amp; toiletDeviceId !=0">
+				and c.toiletDeviceId = #{toiletDeviceId}
+			</if>
+			<if test="aseetId != null &amp;&amp;aseetId !=''">
+				and c.aseetId = #{aseetId}
+			</if>
+			<if test="orgId != null &amp;&amp; orgId !=''">
+				and si.orgId = #{orgId}
+			</if>
+			<if test="createTime != null &amp;&amp;createTime !=null">
+				and c.createTime between #{createTime} and #{createTime}
+			</if>
+		</where>
+		<if test="pager != null">
+			order by c.createTime
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+</mapper>

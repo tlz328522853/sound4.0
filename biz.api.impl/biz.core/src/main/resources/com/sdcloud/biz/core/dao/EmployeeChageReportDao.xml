@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.EmployeeChageReportDao">
+
+	<sql id="employeeChageReportColumn">
+		employeeId,
+		outOrgId,
+		outDepartmentOrgId,
+		outDate,
+		outAgentEmpId,
+		outDescription,
+		inOrgId,
+		inDepartmentOrgId,
+		inDate,
+		inAgentEmpId,
+		inDescription,
+		status,
+		employeeJobName,
+		tenantId 
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into pf_employee_chagereport(
+			employeeChageId, <include refid="employeeChageReportColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="employeeChageReports" separator=",">
+			(
+			#{item.employeeChageId},
+			#{item.employeeId},
+			#{item.outOrgId},
+			#{item.outDepartmentOrgId},
+			#{item.outDate},
+			#{item.outAgentEmpId},
+			#{item.outDescription},
+			#{item.inOrgId},
+			#{item.inDepartmentOrgId},
+			#{item.inDate},
+			#{item.inAgentEmpId},
+			#{item.inDescription},
+			#{item.status},
+			#{item.employeeJobName},
+			#{item.tenantId}
+			)
+		</foreach>
+	</insert>
+	<!-- 新增内部调动记录 -->
+	<insert id="insertInner" parameterType="list">
+		insert into pf_employee_chagereport(employeeChageId,employeeId,outDate,outDepartmentOrgId
+		,employeeJobName,inDepartmentOrgId,employeeNewJobName,operate,operateTime,transferType,transferReason)
+		values
+		<foreach collection="employeeChageReports" index="index" item="item" separator=",">
+			(
+			#{item.employeeChageId},
+			#{item.employeeId},
+			#{item.outDate},
+			#{item.outDepartmentOrgId},
+			#{item.employeeJobName},
+			#{item.inDepartmentOrgId},
+			#{item.employeeNewJobName},
+			#{item.operate},
+			#{item.operateTime},
+			#{item.transferType},
+			#{item.transferReason}
+			)
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from pf_employee_chagereport
+		<choose>
+			<when test="employeeChageReportIds != null &amp;&amp; employeeChageReportIds.size() != 0">
+				where employeeChageId in
+		      	<foreach item="item" index="index" collection="employeeChageReportIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="employeeChageReport">
+		update pf_employee_chagereport
+		<set>
+			<if test="employeeId != null &amp;&amp; employeeId != ''">employeeId = #{employeeId},</if>
+			<if test="outOrgId != null">outOrgId = #{outOrgId},</if>
+			<if test="outDepartmentOrgId != null &amp;&amp; outDepartmentOrgId != ''">outDepartmentOrgId = #{outDepartmentOrgId},</if>
+			<if test="outDate != null &amp;&amp; outDate != ''">outDate = #{outDate},</if>
+			<if test="outAgentEmpId != null &amp;&amp; outAgentEmpId != ''">outAgentEmpId = #{outAgentEmpId},</if>
+			<if test="outDescription != null">outDescription = #{outDescription},</if>
+			<if test="inOrgId != null &amp;&amp; inOrgId != ''">inOrgId = #{inOrgId},</if>
+			<if test="inDepartmentOrgId != null &amp;&amp; inDepartmentOrgId != ''">inDepartmentOrgId = #{inDepartmentOrgId},</if>
+			<if test="inDate != null &amp;&amp; inDate != ''">inDate = #{inDate},</if>
+			<if test="inAgentEmpId != null">inAgentEmpId = #{inAgentEmpId},</if>
+			<if test="inDescription != null">inDescription = #{inDescription},</if>
+			<if test="status != null">status = #{status},</if>
+			<if test="employeeJobName != null">employeeJobName = #{employeeJobName},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where employeeChageId = #{employeeChageId}
+	</update>
+	
+	<update id="updateReason" parameterType="employeeChageReport">
+		update pf_employee_chagereport
+		<set>
+			<if test="transferReason != null">transferReason = #{transferReason}</if>
+		</set>
+		where employeeChageId = #{employeeChageId}
+	</update>
+	
+	<update id="updateParam" parameterType="Map">
+		update pf_employee_chagereport
+		<set>
+			<if test="employeeId != null &amp;&amp; employeeId != ''">employeeId = #{employeeId},</if>
+			<if test="outOrgId != null">outOrgId = #{outOrgId},</if>
+			<if test="outDepartmentOrgId != null &amp;&amp; outDepartmentOrgId != ''">outDepartmentOrgId = #{outDepartmentOrgId},</if>
+			<if test="outDate != null &amp;&amp; outDate != ''">outDate = #{outDate},</if>
+			<if test="outAgentEmpId != null &amp;&amp; outAgentEmpId != ''">outAgentEmpId = #{outAgentEmpId},</if>
+			<if test="outDescription != null &amp;&amp; outDescription != ''">outDescription = #{outDescription},</if>
+			<if test="inOrgId != null &amp;&amp; inOrgId != ''">inOrgId = #{inOrgId},</if>
+			<if test="inDepartmentOrgId != null &amp;&amp; inDepartmentOrgId != ''">inDepartmentOrgId = #{inDepartmentOrgId},</if>
+			<if test="inDate != null &amp;&amp; inDate != ''">inDate = #{inDate},</if>
+			<if test="inAgentEmpId != null ">inAgentEmpId = #{inAgentEmpId},</if>
+			<if test="inDescription != null">inDescription = #{inDescription},</if>
+			<if test="status != null">status = #{status},</if>
+			<if test="employeeJobName != null">employeeJobName = #{employeeJobName},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		<if test="empChageIds != null &amp;&amp; empChageIds.size()>0">
+			where employeeChageId in
+			<foreach item="item" index="index" collection="empChageIds"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="empChageIds == null &amp;&amp; empChageIds.size() == 0">
+			where employeeChageId =1
+		</if>
+		
+	</update>
+	<sql id="employeeChageReportCondition">
+		<where>
+			<if test="employeeChageId != null ">
+				o.employeeChageId = #{employeeChageId}
+			</if>
+		</where>	
+	</sql>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.employeeChageId)
+		from pf_employee_chagereport c
+		LEFT JOIN pf_employee pem
+		on pem.employeeId=c.employeeId
+		LEFT JOIN pf_employee pemo
+		on pemo.employeeId=c.outAgentEmpId
+		LEFT JOIN pf_employee pemi
+		on pemi.employeeId=c.inAgentEmpId
+		LEFT JOIN pf_org orgo
+		ON orgo.orgId = c.outOrgId
+		LEFT JOIN pf_org orgod
+		ON orgod.orgId = c.outDepartmentOrgId
+		LEFT JOIN pf_org orgi
+		ON orgi.orgId = c.inOrgId
+		LEFT JOIN pf_org orgid
+		ON orgid.orgId = c.inDepartmentOrgId
+	   <where>
+	   		
+			<if test="employeeChageId != null &amp;&amp; employeeChageId !=0">
+				c.employeeChageId = #{employeeChageId}
+			</if>
+			
+			<if test="employeeJobName != null &amp;&amp; employeeJobName !=''">
+				and c.employeeJobName like '%${employeeJobName}%'
+			</if>
+			<if test="peName != null &amp;&amp; peName !=''">
+				and pem.name like '%${peName}%'
+			</if>
+			<if test="peoName != null &amp;&amp; peoName !=''">
+				and pemo.name like '%${peoName}%'
+			</if>
+			<if test="peiName != null &amp;&amp; peiName !=''">
+				and pemi.name like '%${peiName}%'
+			</if>
+			<if test="orgoName != null &amp;&amp; orgoName !=''">
+				and orgo.name like '%${orgoName}%'
+			</if>
+			<if test="orgodName != null &amp;&amp; orgodName !=''">
+				and orgod.name like '%${orgodName}%'
+			</if>
+			<if test="orgiName != null &amp;&amp; orgiName !=''">
+				and orgi.name like '%${orgiName}%'
+			</if>
+			<if test="orgidName != null &amp;&amp; orgidName !=''">
+				and orgid.name like '%${orgidName}%'
+			</if>
+			<if test="outFirstDate !=null &amp;&amp; outFirstDate !=''">
+	      		and c.outDate &gt;= #{outFirstDate}
+	      	</if>
+	      	<if test="outEndDate !=null &amp;&amp; outEndDate !=''">
+	      		and c.outDate &lt;= #{outEndDate}
+	      	</if>
+	      	<if test="inFirstDate !=null &amp;&amp; inFirstDate !=''">
+	      		and c.inDate &gt;= #{inFirstDate}
+	      	</if>
+	      	<if test="inEndDate !=null &amp;&amp; inEndDate !=''">
+	      		and c.inDate &lt;= #{inEndDate}
+	      	</if>
+			<if test="status != null">
+				and c.status = #{status}
+			</if>
+			 <if test="outOrgIds != null &amp;&amp; outOrgIds.size() != 0">
+	        	and c.outOrgId in 
+		    	<foreach item="item" index="index" collection="outOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="outDtOrgIds != null &amp;&amp; outDtOrgIds.size() != 0">
+	        	and c.outDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="outDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inOrgIds != null &amp;&amp; inOrgIds.size() != 0">
+	        	and c.inOrgId in 
+		    	<foreach item="item" index="index" collection="inOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inDtOrgIds != null &amp;&amp; inDtOrgIds.size() != 0">
+	        	and c.inDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="inDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	and c.transferType = 0
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="EmployeeChageReport">
+	    select 	c.employeeChageId,
+	    c.employeeId,
+		c.outOrgId,
+		c.outDepartmentOrgId,
+		c.outDate,
+		c.outAgentEmpId,
+		c.outDescription,
+		c.inOrgId,
+		c.inDepartmentOrgId,
+		c.inDate,
+		c.inAgentEmpId,
+		c.inDescription,
+		c.status,
+		c.employeeJobName,
+		pem.name as employeeName,
+		pemo.name as outAgentEmpName,
+		pemi.name as inAgentEmpName,
+		orgo.name as outOrgName,
+		orgod.name as outOrgDName,
+		orgi.name as inOrgName,
+		orgid.name as inOrgDName,
+		c.tenantId 
+	    from pf_employee_chagereport c
+	 	LEFT JOIN pf_employee pem
+		on pem.employeeId=c.employeeId
+		LEFT JOIN pf_employee pemo
+		on pemo.employeeId=c.outAgentEmpId
+		LEFT JOIN pf_employee pemi
+		on pemi.employeeId=c.inAgentEmpId
+		LEFT JOIN pf_org orgo
+		ON orgo.orgId = c.outOrgId
+		LEFT JOIN pf_org orgod
+		ON orgod.orgId = c.outDepartmentOrgId
+		LEFT JOIN pf_org orgi
+		ON orgi.orgId = c.inOrgId
+		LEFT JOIN pf_org orgid
+		ON orgid.orgId = c.inDepartmentOrgId
+	   <where>
+			<if test="employeeChageId != null &amp;&amp; employeeChageId !=0">
+				c.employeeChageId = #{employeeChageId}
+			</if>
+			<if test="status != null &amp;&amp; employeeChageId !=0">
+				and c.status = #{status}
+			</if>
+			<if test="employeeJobName != null &amp;&amp; employeeJobName !=''">
+				and c.employeeJobName like '%${employeeJobName}%'
+			</if>
+			<if test="peName != null &amp;&amp; peName !=''">
+				and pem.name like '%${peName}%'
+			</if>
+			<if test="peoName != null &amp;&amp; peoName !=''">
+				and pemo.name like '%${peoName}%'
+			</if>
+			<if test="peiName != null &amp;&amp; peiName !=''">
+				and pemi.name like '%${peiName}%'
+			</if>
+			<if test="orgoName != null &amp;&amp; orgoName !=''">
+				and orgo.name like '%${orgoName}%'
+			</if>
+			<if test="orgodName != null &amp;&amp; orgodName !=''">
+				and orgod.name like '%${orgodName}%'
+			</if>
+			<if test="orgiName != null &amp;&amp; orgiName !=''">
+				and orgi.name like '%${orgiName}%'
+			</if>
+			<if test="orgidName != null &amp;&amp; orgidName !=''">
+				and orgid.name like '%${orgidName}%'
+			</if>
+			<if test="outFirstDate !=null &amp;&amp; outFirstDate !=''">
+	      		and c.outDate &gt;= #{outFirstDate}
+	      	</if>
+	      	<if test="outEndDate !=null &amp;&amp; outEndDate !=''">
+	      		and c.outDate &lt;= #{outEndDate}
+	      	</if>
+	      	<if test="inFirstDate !=null &amp;&amp; inFirstDate !=''">
+	      		and c.inDate &gt;= #{inFirstDate}
+	      	</if>
+	      	<if test="inEndDate !=null &amp;&amp; inEndDate !=''">
+	      		and c.inDate &lt;= #{inEndDate}
+	      	</if>
+			<if test="status != null">
+				and c.status = #{status}
+			</if>
+			 <if test="outOrgIds != null &amp;&amp; outOrgIds.size() != 0">
+	        	and c.outOrgId in 
+		    	<foreach item="item" index="index" collection="outOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="outDtOrgIds != null &amp;&amp; outDtOrgIds.size() != 0">
+	        	and c.outDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="outDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inOrgIds != null &amp;&amp; inOrgIds.size() != 0">
+	        	and c.inOrgId in 
+		    	<foreach item="item" index="index" collection="inOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inDtOrgIds != null &amp;&amp; inDtOrgIds.size() != 0">
+	        	and c.inDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="inDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	 <if test="employeeChageIds != null &amp;&amp; employeeChageIds.size() != 0">
+	        	and c.employeeChageId  in 
+		    	<foreach item="item" index="index" collection="employeeChageIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	and c.transferType = 0
+		</where>
+		 <if test="pager != null">
+			 group  by c.employeeChageId
+				<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+			</if>
+	</select> 
+	
+	<select id="getInnerTotalCount" resultType="long">
+		select count(c.employeeChageId)
+		from pf_employee_chagereport c
+		LEFT JOIN pf_employee pem
+		on pem.employeeId=c.employeeId
+		LEFT JOIN pf_employee pemo
+		on pemo.employeeId=c.outAgentEmpId
+		LEFT JOIN pf_employee pemi
+		on pemi.employeeId=c.inAgentEmpId
+		LEFT JOIN pf_org orgo
+		ON orgo.orgId = c.outOrgId
+		LEFT JOIN pf_org orgod
+		ON orgod.orgId = c.outDepartmentOrgId
+		LEFT JOIN pf_org orgi
+		ON orgi.orgId = c.inOrgId
+		LEFT JOIN pf_org orgid
+		ON orgid.orgId = c.inDepartmentOrgId
+	   <where>
+	   		
+			<if test="employeeChageId != null &amp;&amp; employeeChageId !=0">
+				c.employeeChageId = #{employeeChageId}
+			</if>
+			
+			<if test="employeeJobName != null &amp;&amp; employeeJobName !=''">
+				and c.employeeJobName like '%${employeeJobName}%'
+			</if>
+			<if test="peName != null &amp;&amp; peName !=''">
+				and pem.name like '%${peName}%'
+			</if>
+			<if test="peoName != null &amp;&amp; peoName !=''">
+				and pemo.name like '%${peoName}%'
+			</if>
+			<if test="peiName != null &amp;&amp; peiName !=''">
+				and pemi.name like '%${peiName}%'
+			</if>
+			<if test="orgoName != null &amp;&amp; orgoName !=''">
+				and orgo.name like '%${orgoName}%'
+			</if>
+			<if test="orgodName != null &amp;&amp; orgodName !=''">
+				and orgod.name like '%${orgodName}%'
+			</if>
+			<if test="orgiName != null &amp;&amp; orgiName !=''">
+				and orgi.name like '%${orgiName}%'
+			</if>
+			<if test="orgidName != null &amp;&amp; orgidName !=''">
+				and orgid.name like '%${orgidName}%'
+			</if>
+			<if test="outFirstDate !=null &amp;&amp; outFirstDate !=''">
+	      		and c.outDate &gt;= #{outFirstDate}
+	      	</if>
+	      	<if test="outEndDate !=null &amp;&amp; outEndDate !=''">
+	      		and c.outDate &lt;= #{outEndDate}
+	      	</if>
+	      	<if test="operate !=null &amp;&amp; operate !=''">
+	      		and c.operate like '%${operate}%'
+	      	</if>
+	      	<if test="employeeNewJobName !=null &amp;&amp; employeeNewJobName !=''">
+	      		and c.employeeNewJobName like '%${employeeNewJobName}%'
+	      	</if>
+			<if test="status != null">
+				and c.status = #{status}
+			</if>
+			 <if test="outOrgIds != null &amp;&amp; outOrgIds.size() != 0">
+	        	and c.outDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="outOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="outDtOrgIds != null &amp;&amp; outDtOrgIds.size() != 0">
+	        	and c.outDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="outDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inOrgIds != null &amp;&amp; inOrgIds.size() != 0">
+	        	and c.inOrgId in 
+		    	<foreach item="item" index="index" collection="inOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inDtOrgIds != null &amp;&amp; inDtOrgIds.size() != 0">
+	        	and c.inDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="inDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	and c.transferType = 1
+		</where>
+	</select>
+	
+	<select id="findAllInnerBy" resultType="EmployeeInnerReport">
+	    select 	c.employeeChageId,
+	    c.employeeId,
+		c.outOrgId,
+		c.outDepartmentOrgId,
+		c.outDate,
+		c.inOrgId,
+		c.inDepartmentOrgId,
+		c.inDate,
+		c.employeeJobName,
+		c.employeeNewJobName,
+		c.operate,
+		c.operateTime,
+		c.transferReason,
+		pem.name as employeeName,
+		orgo.name as outOrgName,
+		orgod.name as outOrgDName,
+		orgi.name as inOrgName,
+		orgid.name as inOrgDName
+	    from pf_employee_chagereport c
+	 	LEFT JOIN pf_employee pem
+		on pem.employeeId=c.employeeId
+		LEFT JOIN pf_employee pemo
+		on pemo.employeeId=c.outAgentEmpId
+		LEFT JOIN pf_employee pemi
+		on pemi.employeeId=c.inAgentEmpId
+		LEFT JOIN pf_org orgo
+		ON orgo.orgId = c.outOrgId
+		LEFT JOIN pf_org orgod
+		ON orgod.orgId = c.outDepartmentOrgId
+		LEFT JOIN pf_org orgi
+		ON orgi.orgId = c.inOrgId
+		LEFT JOIN pf_org orgid
+		ON orgid.orgId = c.inDepartmentOrgId
+	   <where>
+			<if test="employeeChageId != null &amp;&amp; employeeChageId !=0">
+				c.employeeChageId = #{employeeChageId}
+			</if>
+			<if test="status != null &amp;&amp; employeeChageId !=0">
+				and c.status = #{status}
+			</if>
+			<if test="employeeJobName != null &amp;&amp; employeeJobName !=''">
+				and c.employeeJobName like '%${employeeJobName}%'
+			</if>
+			<if test="peName != null &amp;&amp; peName !=''">
+				and pem.name like '%${peName}%'
+			</if>
+			<if test="peoName != null &amp;&amp; peoName !=''">
+				and pemo.name like '%${peoName}%'
+			</if>
+			<if test="peiName != null &amp;&amp; peiName !=''">
+				and pemi.name like '%${peiName}%'
+			</if>
+			<if test="orgoName != null &amp;&amp; orgoName !=''">
+				and orgo.name like '%${orgoName}%'
+			</if>
+			<if test="orgodName != null &amp;&amp; orgodName !=''">
+				and orgod.name like '%${orgodName}%'
+			</if>
+			<if test="orgiName != null &amp;&amp; orgiName !=''">
+				and orgi.name like '%${orgiName}%'
+			</if>
+			<if test="orgidName != null &amp;&amp; orgidName !=''">
+				and orgid.name like '%${orgidName}%'
+			</if>
+			<if test="outFirstDate !=null &amp;&amp; outFirstDate !=''">
+	      		and c.outDate &gt;= #{outFirstDate}
+	      	</if>
+	      	<if test="outEndDate !=null &amp;&amp; outEndDate !=''">
+	      		and c.outDate &lt;= #{outEndDate}
+	      	</if>
+	      	<if test="operate !=null &amp;&amp; operate !=''">
+	      		and c.operate like '%${operate}%'
+	      	</if>
+	      	<if test="employeeNewJobName !=null &amp;&amp; employeeNewJobName !=''">
+	      		and c.employeeNewJobName like '%${employeeNewJobName}%'
+	      	</if>
+			<if test="status != null">
+				and c.status = #{status}
+			</if>
+			 <if test="outOrgIds != null &amp;&amp; outOrgIds.size() != 0">
+	        	and c.outDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="outOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="outDtOrgIds != null &amp;&amp; outDtOrgIds.size() != 0">
+	        	and c.outDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="outDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inOrgIds != null &amp;&amp; inOrgIds.size() != 0">
+	        	and c.inOrgId in 
+		    	<foreach item="item" index="index" collection="inOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	<if test="inDtOrgIds != null &amp;&amp; inDtOrgIds.size() != 0">
+	        	and c.inDepartmentOrgId in 
+		    	<foreach item="item" index="index" collection="inDtOrgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	 <if test="employeeChageIds != null &amp;&amp; employeeChageIds.size() != 0">
+	        	and c.employeeChageId  in 
+		    	<foreach item="item" index="index" collection="employeeChageIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				</foreach>
+	    	</if>
+	    	and c.transferType = 1
+		</where>
+		 <if test="pager != null">
+			 group  by c.employeeChageId
+				<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+			</if>
+	</select> 
+	
+</mapper>

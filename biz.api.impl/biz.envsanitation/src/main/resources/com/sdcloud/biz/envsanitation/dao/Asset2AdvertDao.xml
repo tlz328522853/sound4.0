@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.Asset2AdvertDao">
+
+	<select id="count" resultType="long">
+		select count(o.assetId)
+		from so_asset_object o
+		<include refid="pagerCondition" />
+	</select>
+	
+	<sql id="pagerCondition">
+		<where>
+			<if test="assetTypeId != null">
+				and o.assetTypeId = #{assetTypeId}
+			</if>
+			<if test="assetTypeId == null">
+				and o.assetTypeId in (22,2099,5287)
+			</if>
+			<if test="assetCode != null &amp;&amp; assetCode != ''">
+				and LOCATE(#{assetCode}, o.assetCode) > 0
+			</if>
+			<if test="orgIds != null">
+				and o.newOrgId in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orgId != null">
+				and o.newOrgId = #{orgId}
+			</if>
+			<if test="non_eq != null &amp;&amp; non_eq == 'true' &amp;&amp; assetIds != null &amp;&amp; assetIds.size() > 0">
+				and o.assetId not in
+				<foreach item="item" index="index" collection="assetIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+	<select id="findAllCar" resultType="com.sdcloud.api.envsanitation.entity.Asset2Advert">
+		select 
+			o.assetId,
+			o.assetTypeId,
+			o.assetName,
+			o.assetCode,
+			o.longitude,
+			o.latitude,
+			o.newOrgId,
+			c.carNumber,
+			c.cardNumber
+				
+		from so_asset_object o
+		LEFT JOIN so_asset_car c 
+			ON o.assetId = c.assetId
+		<include refid="pagerCondition" />
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	<select id="findAllStation" resultType="com.sdcloud.api.envsanitation.entity.Asset2Advert">
+		select 
+			o.assetId,
+			o.assetTypeId,
+			o.assetName,
+			o.assetCode,
+			o.longitude,
+			o.latitude,
+			o.newOrgId
+				
+		from so_asset_object o
+		<!-- <if test="o.assetTypeId == 22">
+			LEFT JOIN so_asset_car c ON o.assetId = c.assetId
+		</if>
+		<if test="o.assetTypeId == 5287">
+			LEFT JOIN so_asset_station s ON o.assetId = s.assetId
+		</if>
+		<if test="o.assetTypeId == 2099">
+			LEFT JOIN so_asset_wc w ON o.assetId = w.assetId
+		</if> -->
+		<include refid="pagerCondition" />
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+	<select id="findAllWc" resultType="com.sdcloud.api.envsanitation.entity.Asset2Advert">
+		select 
+			o.assetId,
+			o.assetTypeId,
+			o.assetName,
+			o.assetCode,
+			o.longitude,
+			o.latitude,
+			o.newOrgId
+				
+		from so_asset_object o
+		<!-- <if test="o.assetTypeId == 22">
+			LEFT JOIN so_asset_car c ON o.assetId = c.assetId
+		</if>
+		<if test="o.assetTypeId == 5287">
+			LEFT JOIN so_asset_station s ON o.assetId = s.assetId
+		</if>
+		<if test="o.assetTypeId == 2099">
+			LEFT JOIN so_asset_wc w ON o.assetId = w.assetId
+		</if> -->
+		<include refid="pagerCondition" />
+		<if test="pager != null">
+			order by ${pager.orderSql}
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select>
+</mapper>

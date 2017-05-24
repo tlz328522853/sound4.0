@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.MessageUnreadUserDao">
+
+	<sql id="messageUnreadUserColumn">
+		userId,
+		messageId,
+		redState ,
+		redTime,
+		tenantId
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into pf_message_unread_user(
+			muuserId, <include refid="messageUnreadUserColumn"/>		
+		)values
+		<foreach item="item" index="index" collection="messageUnreadUsers" separator=",">
+			(#{item.muuserId},
+			#{item.userId}, #{item.messageId},
+			#{item.redState}, #{item.redTime},
+			#{item.tenantId})
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from pf_message_unread_user
+		<choose>
+			<when test="muuserIds != null &amp;&amp; muuserIds.size() != 0">
+				where muuserId in
+		      	<foreach item="item" index="index" collection="muuserIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="com.sdcloud.framework.mqtt.MessageUnreadUser">
+		update pf_message_unread_user
+		<set>
+			<if test="userId != null &amp;&amp; userId != ''">userId = #{userId},</if>
+			<if test="messageId != null">messageId = #{messageId},</if>
+			<if test="redState != null &amp;&amp; redState != ''">redState = #{redState},</if>
+			<if test="redTime != null &amp;&amp; redTime != ''">redTime = #{redTime},</if>
+			<if test="tenantId != null">tenantId = #{tenantId},</if>
+		</set>
+		where muuserId = #{muuserId}
+	</update>
+	<update id="redMessage">
+		update pf_message_unread_user
+		<set>
+			redState = 0
+		</set>
+		 <where>
+		 	<if test="userId != null &amp;&amp; userId != ''">
+		 		 userId = #{userId}
+		 	</if>
+			<if test="messageIds != null &amp;&amp; messageIds.size() != 0">
+				and  messageId in
+		      	<foreach item="item" index="index" collection="messageIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </if>
+		 </where>
+	</update>
+	 <delete id="delMessage">
+		delete from pf_message_unread_user
+		<where>
+		 	<if test="userId != null &amp;&amp; userId != ''">
+		 		 userId = #{userId}
+		 	</if>
+			<if test="messageIds != null &amp;&amp; messageIds.size() != 0">
+				and  messageId in
+		      	<foreach item="item" index="index" collection="messageIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </if>
+		 </where>
+	</delete>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(c.muuserId)
+		from pf_message_unread_user c
+	   <where>
+			<if test="userId != null &amp;&amp; userId !=0">
+				c.userId = #{userId}
+			</if>
+			<if test="messageId != null &amp;&amp; messageId !=''">
+				and c.messageId = #{messageId}
+			</if>
+			<if test="redState != null &amp;&amp; redState !=''">
+				and c.redState = #{redState}
+			</if>
+			
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="firstDate != null &amp;&amp; endDate !=null">
+				and c.redTime between #{firstDate} and #{endDate}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllBy" resultType="com.sdcloud.framework.mqtt.MessageUnreadUser">
+	    select 	muuserId,<include refid="messageUnreadUserColumn"/>
+	    from pf_message_unread_user c
+	   <where>
+			<if test="userId != null &amp;&amp; userId !=0">
+				c.userId = #{userId}
+			</if>
+			<if test="messageId != null &amp;&amp; messageId !=''">
+				and c.messageId = #{messageId}
+			</if>
+			<if test="redState != null &amp;&amp; redState !=''">
+				and c.redState = #{redState}
+			</if>
+			<if test="tenantId != null">
+				and c.tenantId = #{tenantId}
+			</if>
+			<if test="firstDate != null &amp;&amp; endDate !=null">
+				and c.redTime between #{firstDate} and #{endDate}
+			</if>
+		</where>
+		<if test="pager != null">
+			<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+					order by  ${pager.orderBy}
+					<if test="pager.order!=null &amp;&amp; pager.order!=''">
+					  ${pager.order}
+					</if>
+				</if>
+			limit #{pager.first}, #{pager.pageSize}
+		</if>
+	</select> 
+	
+	<select id="findUnreadMessageCount" resultType="int">
+		select count(distinct c.muuserId)
+		from pf_message_unread_user c
+	   <where>
+			<if test="userId != null &amp;&amp; userId !=0">
+				c.userId = #{userId}
+				and c.redState =1;
+			</if>
+		</where>
+	</select>
+</mapper>

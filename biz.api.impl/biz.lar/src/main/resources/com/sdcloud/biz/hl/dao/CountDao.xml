@@ -1,0 +1,501 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2017-05-12
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.hl.dao.CountDao">
+
+    <!-- 统计4个总数实体 数据对象映射结果集 -->
+	<resultMap id="countNumEntry" type="com.sdcloud.api.hl.entity.CountNumEntry">
+		<result property="userRegNum" column="userreg_num"></result>
+		<result property="expressNum" column="express_num"></result>
+		<result property="recyleNum" column="recyle_num"></result>
+		<result property="lifeNum" column="life_num"></result>
+		<result property="conveNum" column="conve_num"></result>
+	</resultMap>
+	
+    <!-- 统计4类图表数据实体  数据对象映射结果集 -->
+	<resultMap id="countChartEntry" type="com.sdcloud.api.hl.entity.CountChartEntry">
+		<result property="dateStr" column="date_str"></result>
+		<result property="numInt1" column="num_int1"></result>
+		<result property="numInt2" column="num_int2"></result>
+		<result property="numInt3" column="num_int3"></result>
+		<result property="numInt4" column="num_int4"></result>
+		<result property="numDou1" column="num_dou1"></result>
+		<result property="numDou2" column="num_dou2"></result>
+		<result property="numDou3" column="num_dou3"></result>
+		<result property="numDou4" column="num_dou4"></result>
+		<result property="nickname" column="nickname"></result>
+	</resultMap>
+	
+	<!-- 统计四个类型总数 -->
+	<select id="countNum" parameterType="com.sdcloud.api.hl.entity.CountNumEntry" resultMap="countNumEntry">
+	   SELECT(
+			SELECT SUM(i.lytotal)
+			FROM(
+			SELECT SUM(ly.weight1+ly.weight2+ly.weight3+ly.weight4+ly.weight5+
+					ly.weight6+ly.weight7+ly.weight8+ly.weight9) AS lytotal
+			FROM hl_ly_recycler_child ly
+			UNION ALL
+			SELECT SUM(e.weight1+e.weight2+e.weight3+e.weight4+e.weight5+
+					e.weight6+e.weight7+e.weight8+e.weight9) as lytotal
+			FROM hl_elescale_child e
+			UNION ALL
+			SELECT SUM(lj.clothes_weight) AS lytotal
+			FROM hl_lj_recycler_child lj
+			) i )as recyle_num,
+		   (SELECT COUNT(a.id)
+		   FROM hl_express_find a) as express_num,
+		   (SELECT COUNT(u.id)
+		   FROM hl_user u) as userreg_num,
+		   (SELECT SUM(h.real_amount)
+		   FROM hl_hypay h) as life_num,
+		   (SELECT COUNT(sc.id)
+		   FROM hl_service_cust sc) as conve_num
+	</select>
+	
+	
+	<!-- 统计用户图表日 -->
+	<select id="countUserChartDate" resultMap="countChartEntry">
+		SELECT COUNT(id) as num_int1,DATE_FORMAT(ctime,'%Y-%m-%d') as date_str
+		FROM hl_user u
+		<where>
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+		</where>
+		group by DATE_FORMAT(ctime,'%Y-%m-%d')
+		order by DATE_FORMAT(ctime,'%Y-%m-%d') asc
+	</select>
+	
+	
+	<!-- 统计用户图表月 -->
+	<select id="countUserChartMonth" resultMap="countChartEntry">
+		SELECT COUNT(id) as num_int1, DATE_FORMAT(ctime,'%Y-%m') as date_str
+		FROM hl_user u
+		<where>
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+		</where>
+		group by DATE_FORMAT(ctime,'%Y-%m')
+		order by DATE_FORMAT(ctime,'%Y-%m') asc
+	</select>
+	
+	
+	<!-- 统计快递收发图表日 -->
+	<select id="countExpressChartDate" resultMap="countChartEntry">
+		SELECT i.date_str,
+		SUM(i.num_int1) as num_int1,
+		SUM(i.num_int2) as num_int2,
+		SUM(i.num_int3) as num_int3
+			FROM(
+			SELECT DATE_FORMAT(ctime,'%Y-%m-%d') as date_str,COUNT(id) as num_int1,0 as num_int2,0 as num_int3
+			FROM hl_express_find
+			<where>
+					AND state=1
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+			</where>
+			group by DATE_FORMAT(ctime,'%Y-%m-%d')
+			union all
+			SELECT DATE_FORMAT(ctime,'%Y-%m-%d') as date_str,0 as num_int1,COUNT(id) AS num_int2,0 as num_int3
+			FROM hl_express_find
+			<where>
+					AND state=0
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+			</where>
+			group by DATE_FORMAT(ctime,'%Y-%m-%d')
+			UNION ALL
+			SELECT DATE_FORMAT(ctime,'%Y-%m-%d') as date_str,0 as num_int1,0 as num_int2,COUNT(*) as num_int3
+			FROM hl_express_find
+			<where>
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+			</where>
+			group by DATE_FORMAT(ctime,'%Y-%m-%d')
+			)i
+			group by i.date_str
+			order by i.date_str asc
+	</select>
+	
+	
+	<!-- 统计快递收发图表月 -->
+	<select id="countExpressChartMonth" resultMap="countChartEntry">
+		SELECT i.date_str,
+			SUM(i.num_int1) as num_int1,
+			SUM(i.num_int2) as num_int2,
+			SUM(i.num_int3) as num_int3
+			FROM(
+			SELECT DATE_FORMAT(ctime,'%Y-%m') as date_str,COUNT(id) as num_int1,0 as num_int2,0 as num_int3
+			FROM hl_express_find
+			<where>
+					and state =1
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+			</where>
+			GROUP BY DATE_FORMAT(ctime,'%Y-%m')
+			UNION ALL
+			SELECT DATE_FORMAT(ctime,'%Y-%m') as date_str,0 as num_int1,COUNT(id) AS num_int2,0 as num_int3
+			FROM hl_express_find
+			<where>
+					AND state =0
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+			</where>
+			GROUP BY DATE_FORMAT(ctime,'%Y-%m')
+			UNION ALL
+			SELECT DATE_FORMAT(ctime,'%Y-%m') as date_str,0 as num_int1,0 as num_int2,COUNT(*) as num_int3
+			FROM hl_express_find
+			<where>
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+			</where>
+			GROUP BY DATE_FORMAT(ctime,'%Y-%m')
+			)i
+			group by i.date_str
+			order by i.date_str asc
+	</select>
+	
+	
+	<!-- 统计回收量图表日 -->
+	<select id="countRecyleChartDate" resultMap="countChartEntry">
+		SELECT SUM(i.lytotal) as num_int1,i.date_str
+				FROM(
+				SELECT SUM(ly.weight1+ly.weight2+ly.weight3+ly.weight4+ly.weight5+
+						ly.weight6+ly.weight7+ly.weight8+ly.weight9) AS lytotal,
+						DATE_FORMAT(ly.flush_time,'%Y-%m-%d') as date_str
+				FROM hl_ly_recycler_child ly
+				WHERE ly.flush_time &gt;= #{startTime}
+					  and ly.flush_time &lt; #{endTime}
+				GROUP BY DATE_FORMAT(ly.flush_time,'%Y-%m-%d')
+				UNION ALL
+				SELECT SUM(e.weight1+e.weight2+e.weight3+e.weight4+e.weight5+
+						e.weight6+e.weight7+e.weight8+e.weight9) as lytotal,
+						DATE_FORMAT(e.flush_time,'%Y-%m-%d') as date_str
+				FROM hl_elescale_child e
+				WHERE e.flush_time &gt;= #{startTime}
+					  and e.flush_time &lt; #{endTime}
+				GROUP BY DATE_FORMAT(e.flush_time,'%Y-%m-%d')
+				UNION ALL
+				SELECT SUM(lj.clothes_weight) AS lytotal,
+				DATE_FORMAT(lj.flush_time,'%Y-%m-%d') as date_str
+				FROM hl_lj_recycler_child lj
+				WHERE lj.flush_time &gt;= #{startTime}
+					  and lj.flush_time &lt; #{endTime}
+				GROUP BY DATE_FORMAT(lj.flush_time,'%Y-%m-%d')
+				) i
+		GROUP BY i.date_str
+		ORDER BY i.date_str asc
+	</select>
+	
+	
+	<!-- 统计回收量图表月  -->
+	<select id="countRecyleChartMonth" resultMap="countChartEntry">
+	SELECT SUM(i.lytotal) as num_int1,i.date_str
+				FROM(
+				SELECT SUM(ly.weight1+ly.weight2+ly.weight3+ly.weight4+ly.weight5+
+						ly.weight6+ly.weight7+ly.weight8+ly.weight9) AS lytotal,
+						DATE_FORMAT(flush_time,'%Y-%m') as date_str
+				FROM hl_ly_recycler_child ly
+				WHERE ly.flush_time &gt;= #{startTime}
+					  and ly.flush_time &lt; #{endTime}
+				GROUP BY DATE_FORMAT(ly.flush_time,'%Y-%m')
+				UNION ALL
+				SELECT SUM(e.weight1+e.weight2+e.weight3+e.weight4+e.weight5+
+						e.weight6+e.weight7+e.weight8+e.weight9) as lytotal,
+						DATE_FORMAT(e.flush_time,'%Y-%m') as date_str
+				FROM hl_elescale_child e
+				WHERE e.flush_time &gt;= #{startTime}
+					  and e.flush_time &lt; #{endTime}
+				GROUP BY DATE_FORMAT(e.flush_time,'%Y-%m')
+				UNION ALL
+				SELECT SUM(lj.clothes_weight) AS lytotal,
+				DATE_FORMAT(lj.flush_time,'%Y-%m') as date_str
+				FROM hl_lj_recycler_child lj
+				WHERE lj.flush_time &gt;= #{startTime}
+					  and lj.flush_time &lt; #{endTime}
+				GROUP BY DATE_FORMAT(lj.flush_time,'%Y-%m')
+				) i
+		GROUP BY i.date_str
+		ORDER BY i.date_str asc
+	</select>
+	
+	
+	<!-- 统计生活缴费图表月 -->
+	<select id="countLifeChartMonth" resultMap="countChartEntry">
+		select a.date_str,
+		SUM(a.shuifei) as num_dou1,
+		SUM(a.dianfei)as num_dou2,
+		SUM(a.qifei) as num_dou3
+		FROM
+		(
+			select DATE_FORMAT(pay_time,'%Y-%m') as date_str,
+			sum(real_amount) as 'shuifei',0 as 'dianfei',0 as 'qifei'
+			from hl_hypay
+			where project_id='c2670'
+			and pay_time &gt;= #{startTime}
+			and pay_time &lt; #{endTime}
+			group by DATE_FORMAT(pay_time,'%Y-%m')
+			UNION ALL
+			select DATE_FORMAT(pay_time,'%Y-%m') as date_str,
+			0 as 'shuifei',sum(real_amount) as 'dianfei',0 as 'qifei'
+			from hl_hypay
+			where project_id='c2680'
+			and pay_time &gt;= #{startTime}
+			and pay_time &lt; #{endTime}
+			group by DATE_FORMAT(pay_time,'%Y-%m')
+			UNION ALL
+			select DATE_FORMAT(pay_time,'%Y-%m') as date_str,
+			0 as 'shuifei',0 as 'dianfei',sum(real_amount) as 'qifei'
+			from hl_hypay
+			where project_id='c2681'
+			and pay_time &gt;= #{startTime}
+			and pay_time &lt; #{endTime}
+			group by DATE_FORMAT(pay_time,'%Y-%m')
+		) a
+		group by a.date_str
+		order by a.date_str asc
+	</select>
+	
+	
+	<!-- 统计生活缴费图表日 -->
+	<select id="countLifeChartDate" resultMap="countChartEntry">
+		select a.date_str,
+		SUM(a.shuifei) as num_dou1,
+		SUM(a.dianfei)as num_dou2,
+		SUM(a.qifei) as num_dou3
+		FROM
+		(
+			select DATE_FORMAT(pay_time,'%Y-%m-%d') as date_str,
+			sum(real_amount) as 'shuifei',0 as 'dianfei',0 as 'qifei'
+			from hl_hypay
+			where project_id='c2670'
+			and pay_time &gt;= #{startTime}
+			and pay_time &lt; #{endTime}
+			group by DATE_FORMAT(pay_time,'%Y-%m-%d')
+			UNION ALL
+			select DATE_FORMAT(pay_time,'%Y-%m-%d') as date_str,
+			0 as 'shuifei',sum(real_amount) as 'dianfei',0 as 'qifei'
+			from hl_hypay
+			where project_id='c2680'
+			and pay_time &gt;= #{startTime}
+			and pay_time &lt; #{endTime}
+			group by DATE_FORMAT(pay_time,'%Y-%m-%d')
+			UNION ALL
+			select DATE_FORMAT(pay_time,'%Y-%m-%d') as date_str,
+			0 as 'shuifei',0 as 'dianfei',sum(real_amount) as 'qifei'
+			from hl_hypay
+			where project_id='c2681'
+			and pay_time &gt;= #{startTime}
+			and pay_time &lt; #{endTime}
+			group by DATE_FORMAT(pay_time,'%Y-%m-%d')
+		) a
+		group by a.date_str
+		order by a.date_str asc
+	</select>
+	
+	<!-- 便民厅回收量图表日 -->
+	<select id="countConveRecyleDate" resultMap="countChartEntry">
+		SELECT SUM(sc.weight1+sc.weight2+sc.weight3+sc.weight4+sc.weight5
+		+sc.weight6+sc.weight7+sc.weight8+sc.weight9) AS num_int1,DATE_FORMAT(flush_time,'%Y-%m-%d') AS date_str
+		FROM hl_service_cust_child sc
+		<where>
+				<if test="startTime!=null">
+					<![CDATA[
+					and flush_time >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and flush_time < #{endTime}
+					]]>
+				</if>
+		</where>
+		group by DATE_FORMAT(flush_time,'%Y-%m-%d')
+	</select>
+	
+	
+	<!-- 便民厅回收量图表月 -->
+	<select id="countConveRecyleMonth" resultMap="countChartEntry">
+		SELECT SUM(sc.weight1+sc.weight2+sc.weight3+sc.weight4+sc.weight5
+		+sc.weight6+sc.weight7+sc.weight8+sc.weight9) AS num_int1,DATE_FORMAT(flush_time,'%Y-%m') AS date_str
+		FROM hl_service_cust_child sc
+		<where>
+				<if test="startTime!=null">
+					<![CDATA[
+					and flush_time >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and flush_time < #{endTime}
+					]]>
+				</if>
+		</where>
+		group by DATE_FORMAT(flush_time,'%Y-%m')
+	</select>
+	
+	<!-- 便民厅快递量图表日 -->
+	<select id="countExpressDate" resultMap="countChartEntry">
+		SELECT COUNT(e.house_id) AS num_int1
+		,DATE_FORMAT(ctime,'%Y-%m-%d') AS date_str
+		FROM hl_express_find e
+		<where>
+				e.state !=0
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+		</where>
+		group by DATE_FORMAT(ctime,'%Y-%m-%d')
+	</select>
+	
+	
+	<!-- 便民厅快递量图表月 -->
+	<select id="countExpressMonth" resultMap="countChartEntry">
+		SELECT COUNT(e.house_id) AS num_int1
+		,DATE_FORMAT(ctime,'%Y-%m') AS date_str
+		FROM hl_express_find e
+		<where>
+				e.state !=0
+				<if test="startTime!=null">
+					<![CDATA[
+					and ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ctime < #{endTime}
+					]]>
+				</if>
+		</where>
+		group by DATE_FORMAT(ctime,'%Y-%m')
+	</select>
+	<!-- 
+	
+	WHERE sc.flush_time>("1970-01")
+	GROUP BY sc.sc_id
+	 -->
+	 
+	 <!--根据服务厅 回收量图表 -->
+	<select id="countRecyle" resultMap="countChartEntry">
+		SELECT SUM(sc.weight1+sc.weight2+sc.weight3+sc.weight4
+		+sc.weight5+sc.weight6+sc.weight7+sc.weight8+sc.weight9) AS num_int1,sc.nickname
+		FROM hl_service_cust_child sc
+		<where>
+				<if test="startTime!=null">
+					<![CDATA[
+					and flush_time >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and flush_time < #{endTime}
+					]]>
+				</if>
+		</where>
+		group by sc.sc_id
+	</select>
+	
+	
+	<!--根据回收厅统计 快递量图 -->
+	<select id="countExpress" resultMap="countChartEntry">
+		SELECT COUNT(e.house_id) AS num_int1,sc.nickname
+		FROM
+		(
+		SELECT ee.house_id
+		FROM hl_express_find ee
+		<where> 
+		        ee.house_id is not null
+		        and ee.state !=0
+				<if test="startTime!=null">
+					<![CDATA[
+					and ee.ctime >= #{startTime}
+					]]>
+				</if>
+				<if test="endTime!=null">
+					<![CDATA[
+					and ee.ctime < #{endTime}
+					]]>
+				</if>
+		</where>
+		) e
+		LEFT JOIN hl_service_cust sc
+		ON e.house_id=sc.sc_id
+		GROUP BY sc.sc_id
+	</select>
+</mapper>

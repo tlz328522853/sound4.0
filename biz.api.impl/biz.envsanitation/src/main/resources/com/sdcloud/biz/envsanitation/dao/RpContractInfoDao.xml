@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.RpContractInfoDao">
+
+	<sql id="rpContractInfoColumn">
+		id,companyId,contractType,contractName,counterSignNumber,contractNumber,signDate,
+		signPeople,firstParty,secondParty,contractAmount,realAmount,startDate,endDate,
+		contractCopy,contractManager,isFile,attachName,attachPath,tenantId,
+		createUser,createTime,updateUser,updateTime
+	</sql>
+	
+	<insert id="insert" parameterType="RpContractInfo">
+		insert into rp_contract_info (
+			<include refid="rpContractInfoColumn"/>		
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			#{item.id},#{item.companyId},#{item.contractType},#{item.contractName},#{item.counterSignNumber},
+			#{item.contractNumber},#{item.signDate},#{item.signPeople},#{item.firstParty},#{item.secondParty},
+			#{item.contractAmount},#{item.realAmount},#{item.startDate},#{item.endDate},#{item.contractCopy},
+			#{item.contractManager},#{item.isFile},#{item.attachName},#{item.attachPath},#{item.tenantId},
+			#{item.createUser},now(),#{item.updateUser},now()
+		)
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="RpContractInfo">
+		update rp_contract_info
+		<set>
+		    contractType = #{contractType},contractName = #{contractName},
+		    counterSignNumber = #{counterSignNumber},contractNumber = #{contractNumber},
+		    signDate = #{signDate},signPeople = #{signPeople},firstParty = #{firstParty},
+		    secondParty = #{secondParty},contractAmount = #{contractAmount},realAmount = #{realAmount},
+		    startDate = #{startDate},endDate = #{endDate},contractCopy = #{contractCopy},
+		    contractManager = #{contractManager},attachName = #{attachName},attachPath = #{attachPath},
+		    updateUser = #{updateUser}, updateTime = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(r.id) from rp_contract_info r
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findAllBy" parameterType="map" resultType="RpContractInfo">
+		select r.*, fe.name filePeopleName, ce.name createUserName, ue.name updateUserName, p.name companyName
+		from rp_contract_info r
+		left join pf_employee fe on r.filePeople = fe.employeeId
+		left join pf_employee ce on r.createUser = ce.employeeId
+		left join pf_employee ue on r.updateUser = ue.employeeId
+		left join pf_org p on p.orgId = r.companyId
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+		 	<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+				order by ${pager.orderBy}
+				<if test="pager.order!=null &amp;&amp; pager.order!=''">
+				  ${pager.order}
+				</if>
+			</if>
+			<if test="for_method_exportData == null">
+				limit #{pager.first}, #{pager.pageSize}
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+		 	<if test="companyIds != null &amp;&amp; companyIds.size() != 0">
+				and r.companyId in
+		      	<foreach item="item" index="index" collection="companyIds" open="(" separator="," close=")">
+		      		${item}
+		      	</foreach>
+	      	</if>
+	      	<if test="dicIds != null &amp;&amp; dicIds.size() != 0">
+				and r.contractType in
+		      	<foreach item="item" index="index" collection="dicIds" open="(" separator="," close=")">
+		      		${item}
+		      	</foreach>
+	      	</if>
+	      	<if test="contractType != null &amp;&amp; contractType != ''">
+	      		and r.contractType = #{contractType}
+	      	</if>
+	      	<if test="contractName != null &amp;&amp; contractName != ''">
+	      		and r.contractName like concat('%', #{contractName}, '%')
+	      	</if>
+	      	<if test="contractNumber != null &amp;&amp; contractNumber != ''">
+	      		and r.contractNumber like concat('%', #{contractNumber}, '%')
+	      	</if>
+	      	<if test="isFile !=null &amp;&amp; isFile !=''">
+	      		and r.isFile = #{isFile}
+	      	</if>
+	      	<if test="startStartDate !=null &amp;&amp; startStartDate !=''">
+	      		and r.startDate &gt;= #{startStartDate}
+	      	</if>
+	      	<if test="endStartDate !=null &amp;&amp; endStartDate !=''">
+	      		and r.startDate &lt;= #{endStartDate}
+	      	</if>
+	      	<if test="startEndDate !=null &amp;&amp; startEndDate !=''">
+	      		and r.endDate &gt;= #{startEndDate}
+	      	</if>
+	      	<if test="endEndDate !=null &amp;&amp; endEndDate !=''">
+	      		and r.endDate &lt;= #{endEndDate}
+	      	</if>
+	      	<if test="startSignDate !=null &amp;&amp; startSignDate !=''">
+	      		and r.signDate &gt;= #{startSignDate}
+	      	</if>
+	      	<if test="endSignDate !=null &amp;&amp; endSignDate !=''">
+	      		and r.signDate &lt;= #{endSignDate}
+	      	</if>
+		</where>	
+	</sql>
+	
+	<delete id="delete">
+		delete from rp_contract_info
+		<choose>
+			<when test="ids != null &amp;&amp; ids.size() != 0">
+				where id in
+		      	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="file" parameterType="RpContractInfo">
+		update rp_contract_info
+		<set>
+		    isFile = #{isFile}, filePeople = #{filePeople}, fileTime = #{fileTime},
+		    updateUser = #{updateUser}, updateTime = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+</mapper>

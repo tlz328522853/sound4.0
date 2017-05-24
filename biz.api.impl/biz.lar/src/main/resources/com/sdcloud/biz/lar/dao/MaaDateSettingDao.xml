@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.MaaDateSettingDao">
+	<sql id="Base_Column_List">
+		 `id`,`startDate`,`endDate`,`enable`,`createDate`,CONCAT(DATE_FORMAT(startDate,'%H:%i'),'-',DATE_FORMAT(endDate,'%H:%i')) AS TIME 
+	</sql>
+	<select id="selectByExample" resultType="com.sdcloud.api.lar.entity.MaaDateSetting" parameterType="com.sdcloud.framework.entity.LarPager">
+		select 
+		<if test="larPager.distinct==true">
+			distinct 
+		</if>
+		<include refid="Base_Column_List" /> 
+		  FROM lar_maadatesetting 
+		<where>
+			enable=0 
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<!-- index 作为map 的key。item为map的值，这里使用了嵌套循环，嵌套循环使用ent。 -->
+				<if test="larPager.params.mechanismId!=null">
+					and a.mechanismId=#{larPager.params.mechanismId} 
+				</if>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by startDate
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	
+	<!-- <insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.OwnedSupplier">
+		insert into lar_ownedsupplier 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="areaSetting != null and areaSetting.id!=null">
+				areaSettingId,
+			</if>
+			<if test="typeId != null">
+				typeId,
+			</if>
+			<if test="osId != null">
+				osId,
+			</if>
+			<if test="osName!=null">
+				osName,
+			</if>
+			<if test="abbreviation != null">
+				abbreviation,
+			</if>
+			<if test="contactsName != null">
+				contactsName,
+			</if>
+			<if test="contactsTel != null">
+				contactsTel,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="areaSetting != null and areaSetting.id!=null">
+				#{areaSetting.id},
+			</if>
+			<if test="typeId != null">
+				#{typeId},
+			</if>
+			<if test="osId != null">
+				#{osId},
+			</if>
+			<if test="osName !=null">
+				#{osName},
+			</if>
+			<if test="abbreviation != null">
+				#{abbreviation},
+			</if>
+			<if test="contactsName != null">
+				#{contactsName},
+			</if>
+			<if test="contactsTel != null">
+				#{contactsTel},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+		</trim>
+	</insert> -->
+	
+	<!-- <update id="updateByExampleSelective" parameterType="map">
+		update lar_ownedsupplier
+		<set>
+			<if test="params.ownedSupplier.areaSetting != null and params.ownedSupplier.areaSetting.id != null">
+				areaSettingId = #{params.ownedSupplier.areaSetting.id},
+			</if>
+			<if test="params.ownedSupplier.typeId != null">
+				typeId = #{params.ownedSupplier.typeId},
+			</if>
+			<if test="params.ownedSupplier.osId != null">
+				osId = #{params.ownedSupplier.osId},
+			</if>
+			<if test="params.ownedSupplier.osName != null">
+				osName = #{params.ownedSupplier.osName},
+			</if>
+			<if test="params.ownedSupplier.abbreviation != null">
+				abbreviation = #{params.ownedSupplier.abbreviation},
+			</if>
+			<if test="params.ownedSupplier.contactsName != null">
+				contactsName = #{params.ownedSupplier.contactsName},
+			</if>
+			<if test="params.ownedSupplier.contactsTel != null">
+				contactsTel = #{params.ownedSupplier.contactsTel},
+			</if>
+			<if test="params.ownedSupplier.createDate != null">
+				createDate = #{params.ownedSupplier.createDate},
+			</if>
+			<if test="params.ownedSupplier.enable != null">
+				enable = #{params.ownedSupplier.enable},
+			</if>
+		</set>
+		<where>
+			<if test="params.ownedSupplier.id !=null">
+				id=#{params.ownedSupplier.id}
+			</if>
+		</where>
+	</update> -->
+</mapper>

@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.RecycleOrderDao">
+
+	<!-- 更新子单 -->
+	<update id="updateChildByExampleSelective" parameterType="map">
+		update lar_recycle_child_order
+		<set>
+			<if test="params.childOrders.material.id != null">
+				material_id = #{params.childOrders.material.id},
+			</if>
+			<if test="params.childOrders.number != null">
+				number = #{params.childOrders.number},
+			</if>
+		</set>
+		<where>
+			<if test="params.childOrders.id !=null">
+				id=#{params.childOrders.id}
+			</if>
+		</where>
+	</update>
+	
+
+	<insert id="save">
+		insert into `lar_recycle_order`(
+		`id`,
+		`order_id`,
+		`business_type_id`,
+		`business_type_name`,
+		`org`,
+		`area`,
+		`salesman`,
+		`salesman_id`,
+		`pay_type_id`,
+		`pay_type_name`,
+		`money`,
+		`integral`,
+		`remark`,
+		`client_user`,
+		`check_status`,
+		`check_status_name`,
+		`check_man`,
+		`check_date`,
+		`overproof`,
+		`overproof_name`,
+		`trouble_type`,
+		`trouble_name`,
+		`check_remark`,
+		`create_user`,
+		`create_date`,
+		`update_user`,
+		`update_date`,
+		`total_price`
+		) values(
+		#{id},
+		#{orderId},
+		#{businessTypeId},
+		#{businessTypeName},
+		#{orgId},
+		#{area},
+		#{salesman.personnelId},
+		#{salesman.id},
+		#{payTypeId},
+		#{payTypeName},
+		#{money},
+		#{integral},
+		#{remark},
+		#{clientUser.id},
+		#{checkStatus},
+		#{checkStatusName},
+		#{checkMan},
+		#{checkDate},
+		#{overproof},
+		#{overproofName},
+		#{troubleType},
+		#{troubleName},
+		#{checkRemark},
+		#{createUser},
+		#{createDate},
+		#{updateUser},
+		#{updateDate},
+		#{totalPrice}
+		)
+	</insert>
+
+	<select id="findByOrgIds" resultMap="queryOrders">
+		select
+		a.`id`,
+		a.`order_id`,
+		`business_type_id`,
+		`business_type_name`,
+		a.`org`,
+		a.`area`,
+		s.`areaName`,
+		a.`salesman`,
+		a.`salesman_id`,
+		a.`pay_type_id`,
+		`pay_type_name`,
+		`money`,
+		`integral`,
+		`remark`,
+		a.`client_user`,
+		c.phone,
+		c.name,
+		CONCAT(c.address,c.addressDetail) AS "address",
+		a.`check_status`,
+		`check_status_name`,
+		a.`check_man`,
+		`check_date`,
+		a.`overproof`,
+		`overproof_name`,
+		`trouble_type`,
+		`trouble_name`,
+		`check_remark`,
+		a.`create_user`,
+		a.`create_date`,
+		a.`update_user`,
+		a.`update_date`
+
+		from
+		`lar_recycle_order` a
+		LEFT OUTER JOIN `lar_clientuser` c ON (a.`client_user`=c.id)
+		LEFT OUTER JOIN `lar_areasettings` s ON (a.`area`=s.id)
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key">
+					<if test="null != item" >
+					and a.${item}=#{larPager.params[${item}]}
+					</if>
+				</foreach>
+			</if>
+			
+			<if test="larPager.extendMap !=null and larPager.extendMap.startTime !=null and larPager.extendMap.endTime !=null">
+				and a.create_date between #{larPager.extendMap.startTime} and #{larPager.extendMap.endTime}
+			</if>
+			
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="("
+					separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		 <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                order by ${larPager.orderSql}
+            </when>
+            <otherwise>
+                order by a.create_date desc ,a.update_date desc
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            limit #{larPager.first}, #{larPager.pageSize}
+        </if>
+		
+		
+	</select>
+
+	<resultMap type="com.sdcloud.api.lar.entity.RecycleOrder" id="queryOrders">
+		<id property="id" column="id" />
+		<result property="orderId" column="order_id" />
+		<result property="businessTypeId" column="business_type_id" />
+		<result property="businessTypeName" column="business_type_name" />
+		<result property="area" column="area" />
+		<result property="areaName" column="areaName" />
+		<result property="orgId" column="org" />
+		<result property="salesman.personnelId" column="salesman" />
+		<result property="salesman.id" column="salesman_id" />
+		<result property="payTypeId" column="pay_type_id" />
+		<result property="payTypeName" column="pay_type_name" />
+		<result property="money" column="money" />
+		<result property="remark" column="remark" />
+		<result property="clientUser.id" column="client_user" />
+		<result property="clientUser.phone" column="phone" />
+		<result property="clientUser.name" column="name" />
+		<result property="clientUser.address" column="address" />
+		<result property="checkStatus" column="check_status" />
+		<result property="checkStatusName" column="check_status_name" />
+		<result property="checkMan" column="check_man" />
+		<result property="checkDate" column="check_date" />
+		<result property="overproof" column="overproof" />
+		<result property="overproofName" column="overproof_name" />
+		<result property="troubleType" column="trouble_type" />
+		<result property="troubleName" column="trouble_name" />
+		<result property="checkRemark" column="check_remark" />
+		<result property="createUser" column="create_user" />
+		<result property="createDate" column="create_date" />
+		<result property="updateUser" column="update_user" />
+		<result property="updateDate" column="update_date" />
+		<collection property="child" column="order_id" javaType="java.util.ArrayList"
+			ofType="com.sdcloud.api.lar.entity.RecycleChildOrder" select="childOrders">
+		</collection>
+	</resultMap>
+
+	<select id="childOrders" resultType="com.sdcloud.api.lar.entity.RecycleChildOrder">
+		SELECT
+			c.`id`,
+			`order_id` AS "orderId",
+			`number`,
+			r.`id` AS "material.id",
+			r.`goodsId` AS "material.goodsId",
+			r.`goodsName` AS "material.goodsName",
+			`goodsDescribe` AS "material.goodsDescribe",
+			`meteringCompany` AS "material.meteringCompany",
+			`imgUrl` AS "material.imgUrl",
+			t.`id` AS "material.recyclingTypeId.id",
+			`typeName` AS "material.recyclingTypeId.typeName",
+			c.`create_user`,
+			c.`create_date`,
+			c.`update_user`,
+			c.`update_date`,
+			c.`price` AS "recyclingSpec.price",
+			e.`id` AS "recyclingSpec.id",
+			`paidTotalPrice`,
+			e.`spec_company` AS "recyclingSpec.specCompany",
+			p.`id` AS "recyclingSpec.priceId",
+			e.`spec_name` AS "recyclingSpec.specName"
+		FROM
+			lar_recycle_child_order c
+		LEFT OUTER JOIN `lar_recyclingmaterial` r ON (c.`material_id` = r.id)
+		LEFT OUTER JOIN `lar_recyclingtype` t ON (r.recyclingTypeId = t.id)
+		LEFT OUTER JOIN `lar_recyclingprice` p ON (p.id = c.price_id)
+		LEFT OUTER JOIN `lar_recyclingspec` e ON (p.spec_id = e.id)
+		where order_id =#{order_id}
+	</select>
+
+	<select id="countByOrgIds" resultType="long">
+	select count(id) from `lar_recycle_order` a
+	<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key">
+					and a.${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="larPager.extendMap !=null and larPager.extendMap.startTime !=null and larPager.extendMap.endTime !=null">
+				and a.create_date between #{larPager.extendMap.startTime} and #{larPager.extendMap.endTime}
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and a.org in
+				<foreach collection="ids" item="id" close=")" open="("
+					separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<update id="checkOrder">
+		update lar_recycle_order
+			<set>
+				<if test="recycleOrder.checkStatus != null">
+					check_status = #{recycleOrder.checkStatus},
+				</if>
+				<if test="recycleOrder.checkStatusName != null">
+					check_status_name = #{recycleOrder.checkStatusName},
+				</if>
+				<if test="recycleOrder.checkMan != null">
+					check_man = #{recycleOrder.checkMan},
+				</if>
+				<if test="recycleOrder.checkDate != null">
+					check_date = #{recycleOrder.checkDate},
+				</if>
+				<if test="recycleOrder.overproof !=null">
+					overproof = #{recycleOrder.overproof},
+				</if>
+				<if test="recycleOrder.overproofName !=null">
+					overproof_name = #{recycleOrder.overproofName},
+				</if>
+				<if test="recycleOrder.troubleType !=null">
+					trouble_type = #{recycleOrder.troubleType},
+				</if>
+				<if test="recycleOrder.troubleName !=null">
+					trouble_name = #{recycleOrder.troubleName},
+				</if>
+				<if test="recycleOrder.checkRemark != null">
+					check_remark = #{recycleOrder.checkRemark},
+				</if>
+				<!-- <if test="recycleOrder.money != null">
+					money = #{recycleOrder.money},
+				</if> -->
+			</set>
+			<where>
+				<if test="recycleOrder.id !=null">
+					id=#{recycleOrder.id}
+				</if>
+			</where>
+	</update>
+	
+	<select id="getOrderByUserId" resultMap="getChildOrderByUserId" parameterType="map">
+		SELECT o.id,order_id,create_date AS "finishDate",integral,pay_type_id AS "paymentTypeId"
+		FROM `lar_recycle_order` o 
+		
+		where o.client_user=#{params.userId} order by finishDate desc,o.id 
+	</select>
+	<resultMap id="getChildOrderByUserId" type="com.sdcloud.api.lar.entity.MyPoints">
+		<id column="id" property="id" />
+		<result column="finishDate" property="finishDate" />
+		<result column="integral" property="integral"/>
+		<result column="paymentTypeId" property="paymentTypeId"/>
+		<collection column="order_id" property="childOrders" javaType="java.util.ArrayList" ofType="com.sdcloud.api.lar.entity.ChildOrders" select="selectChildOrders" ></collection>
+	</resultMap>
+	
+	<select id="selectChildOrders" resultType="com.sdcloud.api.lar.entity.ChildOrders">
+		select
+		c.`id`,
+		`number`,
+		r.`id` AS "recyclingMaterial.id",
+		`goodsName` AS "recyclingMaterial.goodsName",
+		`goodsDescribe` AS "recyclingMaterial.goodsDescribe",
+		`meteringCompany` AS "recyclingMaterial.meteringCompany",
+		t.`id` AS "recyclingMaterial.recyclingTypeId.id",
+		`typeName` AS "recyclingMaterial.recyclingTypeId.typeName"
+		from lar_recycle_child_order c
+		LEFT OUTER JOIN `lar_recyclingmaterial` r ON(c.`material_id`=r.id) 
+		LEFT OUTER JOIN `lar_recyclingtype` t ON(r.recyclingTypeId=t.id)
+		where order_id =#{order_id}
+	</select>
+	
+	<select id="getCheckMens" resultType="long">
+		select distinct `check_man`
+		FROM `lar_recycle_order`
+		<where>
+			`check_man` is not null
+			<if test="larPager.params!=null and larPager.params.org!=null">
+				and org=#{larPager.params.org}
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="("
+					separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+
+</mapper>

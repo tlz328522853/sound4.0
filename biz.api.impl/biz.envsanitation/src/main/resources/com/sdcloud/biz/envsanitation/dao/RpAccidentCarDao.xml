@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.RpAccidentCarDao">
+
+	<sql id="rpAccidentCarColumn">
+		id,companyId,reportDate,reportPerson,assetId,accidentDate,accidentAddress,
+		driver,accidentGrade,maimNumber,dieNumber,accidentCause,preventionPlan,
+		disposeOpinion,isCarInsurance,carInsuranceFee,insuranceStartDate,insuranceEndDate,
+		claimsSchedule,notSettleCause,damageDate,damageMoney,responsiblePerson,remark,
+		attachName,attachPath,tenantId,createUser,createTime,updateUser,updateTime
+	</sql>
+	
+	<insert id="insert" parameterType="RpAccidentCar">
+		insert into rp_accident_car (
+			<include refid="rpAccidentCarColumn"/>		
+		) values
+		<foreach item="item" index="index" collection="list" separator=",">
+		(
+			#{item.id},#{item.companyId},#{item.reportDate},#{item.reportPerson},#{item.assetId},
+			#{item.accidentDate},#{item.accidentAddress},#{item.driver},#{item.accidentGrade},
+			#{item.maimNumber},#{item.dieNumber},#{item.accidentCause},#{item.preventionPlan},
+			#{item.disposeOpinion},#{item.isCarInsurance},#{item.carInsuranceFee},#{item.insuranceStartDate},
+			#{item.insuranceEndDate},#{item.claimsSchedule},#{item.notSettleCause},#{item.damageDate},
+			#{item.damageMoney},#{item.responsiblePerson},#{item.remark},#{item.attachName},
+			#{item.attachPath},#{item.tenantId},#{item.createUser},now(),#{item.updateUser},now()
+		)
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="RpAccidentCar">
+		update rp_accident_car
+		<set>
+		    reportDate = #{reportDate},reportPerson = #{reportPerson},assetId = #{assetId},
+		    accidentDate = #{accidentDate},accidentAddress = #{accidentAddress},driver = #{driver},
+		    accidentGrade = #{accidentGrade},maimNumber = #{maimNumber},dieNumber = #{dieNumber},
+		    accidentCause = #{accidentCause},preventionPlan = #{preventionPlan},
+		    disposeOpinion = #{disposeOpinion},isCarInsurance = #{isCarInsurance},
+		    carInsuranceFee = #{carInsuranceFee},insuranceStartDate = #{insuranceStartDate},
+		    insuranceEndDate = #{insuranceEndDate},claimsSchedule = #{claimsSchedule},
+		    notSettleCause = #{notSettleCause},damageDate = #{damageDate},damageMoney = #{damageMoney},
+		    responsiblePerson = #{responsiblePerson},remark = #{remark},attachName = #{attachName},
+		    attachPath = #{attachPath},updateUser = #{updateUser},updateTime = now()
+		</set>
+		where id = #{id}
+	</update>
+	
+	<select id="getTotalCount" resultType="long">
+		select count(r.id) from rp_accident_car r
+		left join so_asset_car ac on r.assetId = ac.assetId
+		<include refid="queryCondition"/>
+	</select>
+	
+	<select id="findAllBy" parameterType="map" resultType="RpAccidentCar">
+		select r.*, ac.carNumber, ce.name createUserName, ue.name updateUserName, p.name companyName
+		from rp_accident_car r
+		left join so_asset_car ac on r.assetId = ac.assetId
+		left join pf_employee ce on r.createUser = ce.employeeId
+		left join pf_employee ue on r.updateUser = ue.employeeId
+		left join so_asset_object o on ac.assetId = o.assetId
+		left join pf_org p on o.newOrgId = p.orgId
+		<include refid="queryCondition"/>
+		<if test="pager != null">
+		 	<if test="pager.orderBy!=null &amp;&amp; pager.orderBy!=''">
+				order by ${pager.orderBy}
+				<if test="pager.order!=null &amp;&amp; pager.order!=''">
+				  ${pager.order}
+				</if>
+			</if>
+			<if test="for_method_exportData == null">
+				limit #{pager.first}, #{pager.pageSize}
+			</if>
+		</if>
+	</select>
+	
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<where>
+		 	<if test="companyIds != null &amp;&amp; companyIds.size() != 0">
+				and r.companyId in
+		      	<foreach item="item" index="index" collection="companyIds" open="(" separator="," close=")">
+		      		${item}
+		      	</foreach>
+	      	</if>
+	      	<if test="startReportDate != null &amp;&amp; startReportDate != ''">
+	      		and r.reportDate &gt;= #{startReportDate}
+	      	</if>
+	      	<if test="endReportDate != null &amp;&amp; endReportDate != ''">
+	      		and r.reportDate &lt;= #{endReportDate}
+	      	</if>
+	      	<if test="reportPerson != null &amp;&amp; reportPerson != ''">
+	      		and r.reportPerson like concat('%', #{reportPerson}, '%')
+	      	</if>
+	      	<if test="carNumber != null &amp;&amp; carNumber != ''">
+	      		and ac.carNumber like concat('%', #{carNumber}, '%')
+	      	</if>
+	      	<if test="accidentGrade != null &amp;&amp; accidentGrade != ''">
+	      		and r.accidentGrade = #{accidentGrade}
+	      	</if>
+		</where>	
+	</sql>
+	
+	<delete id="delete">
+		delete from rp_accident_car
+		<choose>
+			<when test="ids != null &amp;&amp; ids.size() != 0">
+				where id in
+		      	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+</mapper>

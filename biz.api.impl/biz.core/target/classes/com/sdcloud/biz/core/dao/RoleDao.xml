@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.core.dao.RoleDao">
+
+	<!-- pf_role表的字段 -->
+	<sql id="roleColumn">
+		roleName, roleType, portalTypeId, description, beginTime,
+		endTime, creator, createTime,
+		editor, editTime, ownerCode, tenantId,pId
+	</sql>
+
+	<insert id="insert">
+		insert into pf_role
+		(roleId,roleName,roleType,portalTypeId,description,beginTime,
+		endTime,creator,createTime,ownerCode,tenantId,pId)
+		values
+		(#{roleId},#{roleName},#{roleType},#{portalTypeId},#{description},#{beginTime},
+		#{endTime},#{creator},now(),#{ownerCode},#{tenantId},#{pId})
+	</insert>
+
+	<select id="findByUser" resultType="com.sdcloud.api.core.entity.Role">
+		select r.roleId,
+		roleName,
+		roleType,
+		portalTypeId,
+		description,
+		beginTime,
+		endTime,
+		creator,
+		createTime,
+		r.ownerCode,
+		r.tenantId,
+		r.pId
+		from pf_role r join pf_user_role ur
+		on r.roleId = ur.roleId
+		where ur.userId = #{userId}
+
+	</select>
+
+	<select id="deleteById">
+		delete
+		from pf_role
+		where roleId = #{roleId}
+	</select>
+
+	<update id="update">
+		update pf_role
+		set editTime=now()
+		<if test="roleName != null">
+			,roleName=#{roleName}
+		</if>
+
+		<if test="roleType != null">
+			,roleType=#{roleType}
+		</if>
+
+		<if test="portalTypeId != null">
+			,portalTypeId=#{portalTypeId}
+		</if>
+
+		<if test="description != null">
+			,description=#{description}
+		</if>
+
+		<if test="beginTime != null">
+			,beginTime=#{beginTime}
+		</if>
+
+		<if test="endTime != null">
+			,endTime=#{endTime}
+		</if>
+
+		<if test="editor != null">
+			,editor=#{editor}
+		</if>
+
+		<if test="ownerCode != null">
+			,ownerCode=#{ownerCode}
+		</if>
+
+		<if test="tenantId != null">
+			,tenantId=#{tenantId}
+		</if>
+		where roleId = #{roleId}
+	</update>
+
+	<delete id="clearUser">
+		delete from pf_user_role
+		where roleId = #{roleId}
+	</delete>
+
+	<insert id="setUsers">
+		insert into pf_user_role
+		(userId, roleId, tenantId)
+
+		select userId, #{roleId}, tenantId
+		from pf_user where userId in
+		<foreach collection="userIds" item="item" index="index"
+			separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</insert>
+
+	<select id="findAll" resultType="Role">
+		select
+		roleId,
+		<include refid="roleColumn" />
+		from
+		pf_role
+	</select>
+	<select id="findRoleById" resultType="Role">
+		select
+		roleId,
+		<include refid="roleColumn" />
+		from
+		pf_role
+		<where>
+			<if test="roleId!= null">
+				roleId=#{roleId}
+			</if>
+		</where>
+	</select>
+	<select id="findRoleByUserGroup" resultType="Role">
+		select
+		pr.roleId,
+		pr.roleName, pr.roleType, pr.portalTypeId, pr.description, pr.beginTime,
+		pr.endTime, pr.creator, pr.createTime,
+		pr.editor, pr.editTime, pr.ownerCode, pr.tenantId,pr.pId
+		from
+		pf_role pr
+		LEFT JOIN pf_group_role gr
+		ON pr.roleId =gr.roleId
+		<where>
+			<if test="userGroupId!= null">
+				gr.groupId =#{userGroupId}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findRoleByUserGroupPid" resultType="Role">
+		select
+		pr.roleId,
+		pr.roleName, pr.roleType, pr.portalTypeId, pr.description, pr.beginTime,
+		pr.endTime, pr.creator, pr.createTime,
+		pr.editor, pr.editTime, pr.ownerCode, pr.tenantId,pr.pId
+		from
+		pf_group_role gr
+		LEFT JOIN pf_role pr
+		ON pr.roleId =gr.roleId
+		LEFT JOIN pf_user_group ug
+		ON gr.groupId = ug.groupId
+		<where>
+			<if test="userGroupPid!= null">
+				ug.pId =#{userGroupPid}
+			</if>
+		</where>
+	</select>
+	<select id="findByParam" parameterType="map" resultType="Role">
+		select
+		roleId,
+		<include refid="roleColumn" />
+		from
+		pf_role
+		
+		<where>
+
+			<if test="types!= null">
+				and roleType in
+				<foreach item="item" index="index" collection="types" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="ownerCode!= null">
+				and ownerCode =#{ownerCode}
+			</if>
+			<if test="tenantId!= null">
+				and tenantId =#{tenantId}
+			</if>
+			<if test="roleIds!= null">
+				and roleId in
+				<foreach item="item" index="index" collection="roleIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<select id="findRoleParent " resultType="Role">
+		select
+		roleId,
+		<include refid="roleColumn" />
+		from
+		pf_role
+		<where>
+			<if test="roleId!= null">
+				roleId =(select
+				pr.pId
+				from
+				pf_role as pr
+				where pr.roleId=#{roleId}
+			</if>
+		</where>
+	</select>
+	<select id="findRootRoleByGroup" resultType="Long">
+		select
+		pr.roleId
+		from
+		pf_role pr
+		INNER JOIN pf_group_role pgr
+		on pgr.roleId=pr.roleId
+		<where>
+		  	<if test="1==1">
+				pr.roleType=0
+			 </if>
+			<if test="groupIds!= null">
+				and pgr.groupId in
+				<foreach item="item" index="index" collection="groupIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<select id="hasRoleByName" resultType="Long">
+		select
+		pr.roleId
+		from
+		pf_role pr
+		INNER JOIN pf_group_role pgr
+		on pgr.roleId=pr.roleId
+		<where>
+		  	<if test="roleName!=null">
+				pr.roleName=#{roleName}
+			 </if>
+			<if test="groupId!= null">
+				and pgr.groupId =#{groupId}
+			</if>
+		</where>
+	</select>
+	<select id="findRoleChild" resultType="Role">
+		select
+		roleId,
+		<include refid="roleColumn" />
+		from
+		pf_role
+		<where>
+		   <if test="roleIds!= null">
+				pId  in
+				<foreach item="item" index="index" collection="roleIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="findNotFunctionRootRoleId" resultType="Long">
+		SELECT por.roleId ,por.roleName
+		from pf_role por
+		INNER JOIN pf_group_role pgr
+		on pgr.roleId=por.roleId
+		INNER JOIN pf_user_group pug 
+		on pug.groupId=pgr.groupId
+		INNER JOIN pf_tenant pt 
+		on pug.tenantId=pt.tenantId 
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.salesPackageId=pt.salesPackageId 
+		INNER JOIN pf_module pm 
+		on pm.moduleId=pspm.moduleId 
+		INNER JOIN pf_function pf 
+		on pf.moduleId=pm.moduleId 
+		<where>
+			<if test="functionId != null">
+			pf.funcId =#{functionId} and pug.pId=1 and por.roleType=0 and por.roleId not In 
+			(SELECT pfr.ownerId from pf_func_right pfr
+			INNER JOIN pf_role pfro 
+			on pfro.roleId=pfr.ownerId 
+			INNER JOIN pf_group_role pfgr
+			on pfgr.roleId= pfro.roleId
+			INNER JOIN pf_user_group pug 
+			on pug.groupId=pfgr.groupId
+			INNER JOIN pf_tenant pt 
+			on pug.tenantId=pt.tenantId 
+			INNER JOIN pf_sales_package_module pspm 
+			on pspm.salesPackageId=pt.salesPackageId 
+			INNER JOIN pf_module pm 
+			on pm.moduleId=pspm.moduleId 
+			INNER JOIN pf_function pf 
+			on pf.moduleId=pm.moduleId 
+			where pfr.funcId =#{functionId} and pf.funcId=#{functionId} and pug.pId=1 and pfro.roleType=0 and pfr.ownerType=1 GROUP BY pfr.ownerId)
+		    </if>
+		 </where>
+	</select>
+	<select id="findNotTopicRootRoleId" resultType="Long">
+		SELECT por.roleId ,por.roleName
+		from pf_role por
+		INNER JOIN pf_group_role pgr
+		on pgr.roleId=por.roleId
+		INNER JOIN pf_user_group pug 
+		on pug.groupId=pgr.groupId
+		INNER JOIN pf_tenant pt 
+		on pug.tenantId=pt.tenantId 
+		INNER JOIN pf_sales_package_module pspm 
+		on pspm.salesPackageId=pt.salesPackageId 
+		INNER JOIN pf_module pm 
+		on pm.moduleId=pspm.moduleId 
+		INNER JOIN pf_topic pf 
+		on pf.moduleId=pm.moduleId 
+		<where>
+			<if test="topicId != null">
+			pf.topicId =#{topicId} and pug.pId=1 and por.roleType=0 and por.roleId not In 
+			(SELECT pfr.ownerId from pf_topic_right pfr
+			INNER JOIN pf_role pfro 
+			on pfro.roleId=pfr.ownerId 
+			INNER JOIN pf_group_role pfgr
+			on pfgr.roleId= pfro.roleId
+			INNER JOIN pf_user_group pug 
+			on pug.groupId=pfgr.groupId
+			INNER JOIN pf_tenant pt 
+			on pug.tenantId=pt.tenantId 
+			INNER JOIN pf_sales_package_module pspm 
+			on pspm.salesPackageId=pt.salesPackageId 
+			INNER JOIN pf_module pm 
+			on pm.moduleId=pspm.moduleId 
+			INNER JOIN pf_topic pf 
+			on pf.moduleId=pm.moduleId 
+			where pfr.topicId =#{topicId} and pf.topicId=#{topicId} and pug.pId=1 and pfro.roleType=0 and pfr.ownerType=1 GROUP BY pfr.ownerId)
+		    </if>
+		 </where>
+	</select>
+</mapper> 

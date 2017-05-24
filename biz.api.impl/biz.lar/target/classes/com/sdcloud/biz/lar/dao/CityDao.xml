@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.CityDao">
+	<sql id="Base_Column_List">
+		id, org,regionId, regionName, cityOrder,cityStatus,updateCityStatusUser
+	</sql>
+	<select id="findAll" resultType="City">
+		select
+		<include refid="Base_Column_List" />
+		from lar_city
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key" separator="and">
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id) from lar_city
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key" separator="and">
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	<select id="serviceCity" resultType="City">
+		SELECT
+		c.id, c.org,c.regionId, c.regionName, c.cityOrder,c.cityStatus,c.updateCityStatusUser
+		from lar_city c
+		LEFT JOIN lar_region r ON c.regionId = r.regionId
+		where c.cityStatus != 1
+		ORDER BY r.regionShortNameEn ASC
+	</select>
+	<insert id="save" parameterType="City">
+		insert into lar_city(
+		id, org,regionId, regionName,cityOrder,createUser,createDate,cityStatus,updateCityStatusUser
+		)values(
+		#{id},#{org},#{regionId},#{regionName},#{cityOrder},#{createUser},#{createDate},#{cityStatus},#{updateCityStatusUser}
+		)
+	</insert>
+	<update id="update" parameterType="City">
+		update lar_city
+		<set>
+			<if test="org != null">
+				org = #{org},
+			</if>
+			<if test="regionId != null">
+				regionId = #{regionId},
+			</if>
+			<if test="regionName != null">
+				regionName = #{regionName},
+			</if>
+			<if test="cityOrder != null">
+				cityOrder = #{cityOrder},
+			</if>
+			<if test="createUser!= null">
+				createUser = #{createUser},
+			</if>
+			<if test="createDate != null">
+				createDate = #{createDate},
+			</if>
+			<if test="updateUser != null">
+				updateUser = #{updateUser},
+			</if>
+			<if test="updateDate != null">
+				updateDate = #{updateDate},
+			</if>
+			<if test="cityStatus != null">
+				cityStatus = #{cityStatus},
+			</if>
+			<if test="updateCityStatusUser != null">
+				updateCityStatusUser = #{updateCityStatusUser}
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	<delete id="delete">
+		delete from lar_city where id=#{id}
+	</delete>
+	<select id="selectByCityId" resultType="City">
+		select 
+		<include refid="Base_Column_List" />
+		from lar_city where regionId=#{id}
+	</select>
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.City">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_city
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select count(id) from lar_city
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" separator="and">
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+</mapper>

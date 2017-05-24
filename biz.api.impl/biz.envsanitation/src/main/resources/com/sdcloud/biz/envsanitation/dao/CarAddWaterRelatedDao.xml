@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.CarAddWaterRelatedDao">
+
+	<sql id="carAddWaterColumn">
+	assetId,
+	empId,addWaterTime,
+	addWaterNumber,addWaterPosition,
+	addWaterMoney,payMode,remark 
+	</sql>
+	<insert id="insert" parameterType="list">
+		insert into so_car_add_water(
+			addWaterId, <include refid="carAddWaterColumn"/>		
+		) values
+		<foreach item="item" index="index" collection="carAddWaters" separator=",">
+			(
+			#{item.addWaterId},
+			#{item.assetId}, #{item.empId},
+			#{item.addWaterTime}, #{item.addWaterNumber},
+			#{item.addWaterPosition}, #{item.addWaterMoney},
+			#{item.payMode},#{item.remark}
+			)
+		</foreach>
+	</insert>
+	 <delete id="delete" parameterType="list" >
+		delete from so_car_add_water
+		<choose>
+			<when test="carAddWaterIds != null &amp;&amp; carAddWaterIds.size() != 0">
+				where addWaterId in
+		      	<foreach item="item" index="index" collection="carAddWaterIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+		    </when>
+		    <otherwise>
+		      	where 1 = 2
+		    </otherwise>
+		</choose>
+	</delete>
+	
+	<update id="update" parameterType="CarAddWater">
+		update so_car_add_water
+		<set>
+			<if test="assetId != null &amp;&amp; assetId != ''">assetId = #{assetId},</if>
+			<if test="addWaterTime != null">addWaterTime = #{addWaterTime},</if>
+			<if test="addWaterPosition != null &amp;&amp; addWaterPosition != ''">addWaterPosition = #{addWaterPosition},</if>
+			<if test="addWaterNumber != null &amp;&amp; addWaterNumber != ''">addWaterNumber = #{addWaterNumber},</if>
+			<if test="addWaterMoney != null &amp;&amp; addWaterMoney != ''">addWaterMoney = #{addWaterMoney},</if>
+			<if test="payMode != null &amp;&amp; payMode != ''">payMode = #{payMode},</if>
+			<if test="remark != null &amp;&amp; remark != ''">remark = #{remark},</if>
+		</set>
+		where addWaterId = #{addWaterId}
+	</update>
+	<sql id="carAddWaterCondition">
+	<where>
+	<if test="newOrgId != null &amp;&amp;newOrgId !=0">
+				o.newOrgId = #{newOrgId}
+			</if>
+			<if test="orgIds != null &amp;&amp;orgIds.size() >0">
+				and o.newOrgId in
+				<foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		      		#{item}
+		      	</foreach>
+			</if>
+			<if test="empId != null &amp;&amp;empId !=0">
+				and c.empId = #{empId}
+			</if>
+			<if test="empName != null &amp;&amp;empName !=''">
+				and em.name like '%${empName}%'
+			</if>
+			<if test="addWaterNumber != null &amp;&amp;addWaterNumber >0">
+				and c.addWaterNumber = #{addWaterNumber}
+			</if>
+			<if test="addWaterMoney != null &amp;&amp;addWaterMoney >0">
+				and c.addWaterMoney = #{addWaterMoney}
+			</if>
+			<if test="assetId != null &amp;&amp;assetId !=0">
+				and c.assetId = #{assetId}
+			</if>
+			<if test="payMode != null">
+				and c.payMode = #{payMode}
+			</if>
+			<if test="addWaterPosition != null &amp;&amp;addWaterPosition !=''">
+				and c.addWaterPosition like '%${addWaterPosition}%'
+			</if>
+			<if test="carName != null &amp;&amp;carName !=''">
+				and ca.carName like '%${carName}%'
+			</if>
+			<if test="carNumber != null &amp;&amp;carNumber !=''">
+				and ca.carNumber like '%${carNumber}%'
+			</if>
+			<if test="firstDate != null">
+				and c.addWaterTime >= #{firstDate}
+			</if>
+			<if test="endDate !=null">
+				<![CDATA[
+					and c.addWaterTime <= #{endDate}
+				]]>
+			</if>
+	</where>
+	</sql>
+	<select id="getTotalCount" resultType="long">
+		select count(c.assetId)
+		from so_car_add_water c
+	    left outer join so_asset_object o
+	    on c.assetId = o.assetId
+	    left outer join so_asset_car ca
+	    on ca.assetId = c.assetId
+		left outer join pf_employee em
+	    on c.empId = em.employeeId
+	   <include refid="carAddWaterCondition"></include>
+	</select>
+	
+	<select id="findAllBy" resultType="CarAddWater">
+	    select 	addWaterId, c.assetId,
+	    ca.carNumber,ca.carName,
+		empId,addWaterTime,
+		addWaterNumber,addWaterPosition,
+		addWaterMoney,payMode,c.remark ,em.name as "empName"
+	    from so_car_add_water c
+	    left outer join so_asset_object o
+	    on c.assetId = o.assetId
+	    left outer join so_asset_car ca
+	    on ca.assetId = c.assetId
+	    left outer join pf_employee em
+	    on c.empId = em.employeeId
+      <include refid="carAddWaterCondition"></include>
+		<if test="pager != null">
+			order by o.${pager.orderSql} 
+			<if test="for_method_exportData != 'true'">
+			limit #{pager.first}, #{pager.pageSize}
+			</if>
+		</if>
+	</select> 
+	
+</mapper>

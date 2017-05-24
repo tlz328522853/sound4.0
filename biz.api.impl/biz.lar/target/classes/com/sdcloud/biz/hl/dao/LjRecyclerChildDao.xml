@@ -1,0 +1,374 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2017-05-18
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.hl.dao.LjRecyclerChildDao">
+	
+	<sql id="Base_Column_List">
+		lrc.id, lrc.mchid, lrc.nickname, lrc.potx, lrc.poty,
+		lrc.bottle_count, lrc.clothes_weight, lrc.status, lrc.status_bottle, lrc.status_clothes,
+		lrc.status_paper, lrc.status_door, lrc.use_number, lrc.flush_time, lrc.create_date
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, mchid, nickname, potx, poty,
+		bottle_count, clothes_weight, status, status_bottle, status_clothes,
+		status_paper, status_door, use_number, flush_time, create_date
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{mchid,jdbcType=VARCHAR},
+		#{nickname,jdbcType=VARCHAR}, #{potx,jdbcType=VARCHAR},
+		#{poty,jdbcType=VARCHAR}, #{bottleCount,jdbcType=INTEGER},
+		#{clothesWeight,jdbcType=INTEGER}, #{status,jdbcType=TINYINT},
+		#{statusBottle,jdbcType=TINYINT}, #{statusClothes,jdbcType=TINYINT},
+		#{statusPaper,jdbcType=TINYINT}, #{statusDoor,jdbcType=VARCHAR},
+		#{useNumber,jdbcType=INTEGER}, #{flushTime,jdbcType=TIMESTAMP},
+		#{createDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.mchid,jdbcType=VARCHAR},
+		#{item.nickname,jdbcType=VARCHAR}, #{item.potx,jdbcType=VARCHAR},
+		#{item.poty,jdbcType=VARCHAR}, #{item.bottleCount,jdbcType=INTEGER},
+		#{item.clothesWeight,jdbcType=INTEGER}, #{item.status,jdbcType=TINYINT},
+		#{item.statusBottle,jdbcType=TINYINT}, #{item.statusClothes,jdbcType=TINYINT},
+		#{item.statusPaper,jdbcType=TINYINT}, #{item.statusDoor,jdbcType=VARCHAR},
+		#{item.useNumber,jdbcType=INTEGER}, #{item.flushTime,jdbcType=TIMESTAMP},
+		#{item.createDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="mchid!=null &amp;&amp; mchid!=''">
+				lrc.mchid=#{mchid},
+			</if>
+			<if test="nickname!=null &amp;&amp; nickname!=''">
+				lrc.nickname=#{nickname},
+			</if>
+			<if test="potx!=null &amp;&amp; potx!=''">
+				lrc.potx=#{potx},
+			</if>
+			<if test="poty!=null &amp;&amp; poty!=''">
+				lrc.poty=#{poty},
+			</if>
+			<if test="bottleCount!=null">
+				lrc.bottle_count=#{bottleCount},
+			</if>
+			<if test="clothesWeight!=null">
+				lrc.clothes_weight=#{clothesWeight},
+			</if>
+			<if test="status!=null">
+				lrc.status=#{status},
+			</if>
+			<if test="statusBottle!=null">
+				lrc.status_bottle=#{statusBottle},
+			</if>
+			<if test="statusClothes!=null">
+				lrc.status_clothes=#{statusClothes},
+			</if>
+			<if test="statusPaper!=null">
+				lrc.status_paper=#{statusPaper},
+			</if>
+			<if test="statusDoor!=null &amp;&amp; statusDoor!=''">
+				lrc.status_door=#{statusDoor},
+			</if>
+			<if test="useNumber!=null">
+				lrc.use_number=#{useNumber},
+			</if>
+			<if test="flushTime!=null">
+				lrc.flush_time=#{flushTime},
+			</if>
+			<if test="createDate!=null">
+				lrc.create_date=#{createDate},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="ljRecyclerChild" type="com.sdcloud.api.hl.entity.LjRecyclerChild">
+        <id property="id" column="id"></id>
+		<result property="mchid" column="mchid"></result>
+		<result property="nickname" column="nickname"></result>
+		<result property="potx" column="potx"></result>
+		<result property="poty" column="poty"></result>
+		<result property="bottleCount" column="bottle_count"></result>
+		<result property="clothesWeight" column="clothes_weight"></result>
+		<result property="status" column="status"></result>
+		<result property="statusBottle" column="status_bottle"></result>
+		<result property="statusClothes" column="status_clothes"></result>
+		<result property="statusPaper" column="status_paper"></result>
+		<result property="statusDoor" column="status_door"></result>
+		<result property="useNumber" column="use_number"></result>
+		<result property="flushTime" column="flush_time"></result>
+		<result property="createDate" column="create_date"></result>
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="ljRecyclerChild">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_lj_recycler_child lrc
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND lrc.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(lrc.id)
+		FROM hl_lj_recycler_child lrc
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND lrc.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO hl_lj_recycler_child
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO hl_lj_recycler_child
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM hl_lj_recycler_child lrc
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM hl_lj_recycler_child lrc
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				lrc.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	
+	<update id="update">
+		UPDATE hl_lj_recycler_child lrc
+		<include refid="Update_Column"></include>
+		WHERE lrc.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE hl_lj_recycler_child lrc
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" lrc.mchid = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.mchid}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.nickname = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.nickname}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.potx = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.potx}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.poty = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.poty}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.bottle_count = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.bottleCount}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.clothes_weight = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.clothesWeight}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.status = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.status}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.status_bottle = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.statusBottle}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.status_clothes = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.statusClothes}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.status_paper = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.statusPaper}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.status_door = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.statusDoor}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.use_number = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.useNumber}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.flush_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.flushTime}
+               </foreach>
+            </trim>
+			<trim prefix=" lrc.create_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN lrc.id=#{i.id} THEN #{i.createDate}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			lrc.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="ljRecyclerChild">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_lj_recycler_child lrc
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				lrc.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(lrc.id) 
+		FROM hl_lj_recycler_child lrc
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND lrc.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND lrc.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="ljRecyclerChild">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_lj_recycler_child lrc
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND lrc.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND lrc.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY updateDate DESC,createDate DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="ljRecyclerChild">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_lj_recycler_child lrc
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND lrc.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="ljRecyclerChild">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_lj_recycler_child lrc
+        <where>
+            lrc.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND lrc.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+</mapper>

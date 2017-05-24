@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.OrderCheckDao">
+	<insert id="save">
+		insert into `lar_order_check`(
+		`id`,
+		`order_id`,
+		`check_man`,
+		`check_date`,
+		`overproof`,
+		`overproof_name`,
+		`trouble_type`,
+		`trouble_name`,
+		`check_remark`,
+		`create_user`,
+		`create_date`,
+		`update_user`,
+		`update_date`
+		) values(
+		#{id},
+		#{orderId},
+		#{checkMan},
+		#{checkDate},
+		#{overproof},
+		#{overproofName},
+		#{troubleType},
+		#{troubleName},
+		#{checkRemark},
+		#{createUser},
+		#{createDate},
+		#{updateUser},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		update `lar_order_check`
+			<set>
+				<if test="checkMan != null">
+					check_man = #{checkMan},
+				</if>
+				<if test="checkDate != null">
+					check_date = #{checkDate},
+				</if>
+				<if test="overproof !=null">
+					overproof = #{overproof},
+				</if>
+				<if test="overproofName !=null">
+					overproof_name = #{overproofName},
+				</if>
+				
+				<if test="troubleType !=null">
+					trouble_type = #{troubleType},
+				</if>
+				<if test="troubleName !=null">
+					trouble_name = #{troubleName},
+				</if>
+
+				<if test="checkRemark != null">
+					check_remark = #{checkRemark},
+				</if>
+			</set>
+			<where>
+				<if test="id !=null">
+					id=#{id}
+				</if>
+			</where>
+	</update>
+
+
+</mapper> 

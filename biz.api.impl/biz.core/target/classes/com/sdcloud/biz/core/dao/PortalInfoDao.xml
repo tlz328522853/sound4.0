@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.PortalInfoDao">
+	
+	<sql id="tableColumn">
+		orgId,project,employee,population,sweepArea,greenBeltArea,
+		mechOpRate,garbageCleanup,recycle,car,wc,station,dustbin,advertScreen,infoTime  
+	</sql>
+	
+	<select id="find" parameterType="map" resultType="PortalInfo">
+		SELECT portalId, <include refid="tableColumn"/> 
+		FROM 
+		(SELECT portalId, <include refid="tableColumn"/> 
+		FROM (SELECT portalId, <include refid="tableColumn"/> FROM pf_portal_info ORDER BY infoTime DESC) n 
+		GROUP BY n.orgId) n2 
+		<where>
+			<if test="orgId != null">
+				n2.orgId = #{orgId}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAll" parameterType="list" resultType="PortalInfo">
+		SELECT portalId, <include refid="tableColumn"/> 
+		FROM 
+		(SELECT portalId, <include refid="tableColumn"/> 
+		FROM (SELECT portalId, <include refid="tableColumn"/> FROM pf_portal_info ORDER BY infoTime DESC) n 
+		GROUP BY n.orgId) n2 
+		<choose>
+			<when test="orgIds != null &amp;&amp; orgIds.size() != 0">
+				where n2.orgId in
+				<foreach item="item" index="index" collection="orgIds" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+	</select>
+	
+</mapper>

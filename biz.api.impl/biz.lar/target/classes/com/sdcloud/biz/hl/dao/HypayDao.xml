@@ -1,0 +1,380 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+	author	:	jiazc
+	date	:	2017-05-15
+	version	:	1.0
+-->
+<mapper namespace="com.sdcloud.biz.hl.dao.HypayDao">
+	
+	<sql id="Base_Column_List">
+		h.id, h.pay_id, h.user_id, h.project_id, h.unit_name,
+		h.province, h.city, h.customer_name, h.customer_address, h.real_amount,
+		h.order_time, h.pay_time, h.ctime, h.create_date, h.update_date
+	</sql>
+	
+	<sql id="Insert_Column">
+		id, pay_id, user_id, project_id, unit_name,
+		province, city, customer_name, customer_address, real_amount,
+		order_time, pay_time, ctime, create_date, update_date
+	</sql>
+	
+	<sql id="Insert_Value">
+		#{id,jdbcType=BIGINT}, #{payId,jdbcType=INTEGER},
+		#{userId,jdbcType=INTEGER}, #{projectId,jdbcType=VARCHAR},
+		#{unitName,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR},
+		#{city,jdbcType=VARCHAR}, #{customerName,jdbcType=VARCHAR},
+		#{customerAddress,jdbcType=VARCHAR}, #{realAmount,jdbcType=DECIMAL},
+		#{orderTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP},
+		#{ctime,jdbcType=TIMESTAMP}, #{createDate,jdbcType=TIMESTAMP},
+		#{updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id,jdbcType=BIGINT}, #{item.payId,jdbcType=INTEGER},
+		#{item.userId,jdbcType=INTEGER}, #{item.projectId,jdbcType=VARCHAR},
+		#{item.unitName,jdbcType=VARCHAR}, #{item.province,jdbcType=VARCHAR},
+		#{item.city,jdbcType=VARCHAR}, #{item.customerName,jdbcType=VARCHAR},
+		#{item.customerAddress,jdbcType=VARCHAR}, #{item.realAmount,jdbcType=DECIMAL},
+		#{item.orderTime,jdbcType=TIMESTAMP}, #{item.payTime,jdbcType=TIMESTAMP},
+		#{item.ctime,jdbcType=TIMESTAMP}, #{item.createDate,jdbcType=TIMESTAMP},
+		#{item.updateDate,jdbcType=TIMESTAMP}
+	</sql>
+	
+	<sql id="Update_Column">
+		<set>
+			<if test="payId!=null">
+				h.pay_id=#{payId},
+			</if>
+			<if test="userId!=null">
+				h.user_id=#{userId},
+			</if>
+			<if test="projectId!=null &amp;&amp; projectId!=''">
+				h.project_id=#{projectId},
+			</if>
+			<if test="unitName!=null &amp;&amp; unitName!=''">
+				h.unit_name=#{unitName},
+			</if>
+			<if test="province!=null &amp;&amp; province!=''">
+				h.province=#{province},
+			</if>
+			<if test="city!=null &amp;&amp; city!=''">
+				h.city=#{city},
+			</if>
+			<if test="customerName!=null &amp;&amp; customerName!=''">
+				h.customer_name=#{customerName},
+			</if>
+			<if test="customerAddress!=null &amp;&amp; customerAddress!=''">
+				h.customer_address=#{customerAddress},
+			</if>
+			<if test="realAmount!=null &amp;&amp; realAmount!=''">
+				h.real_amount=#{realAmount},
+			</if>
+			<if test="orderTime!=null">
+				h.order_time=#{orderTime},
+			</if>
+			<if test="payTime!=null">
+				h.pay_time=#{payTime},
+			</if>
+			<if test="ctime!=null">
+				h.ctime=#{ctime},
+			</if>
+			<if test="createDate!=null">
+				h.create_date=#{createDate},
+			</if>
+			<if test="updateDate!=null">
+				h.update_date=#{updateDate},
+			</if>
+		</set>
+	</sql>
+    
+    <!-- 数据对象映射结果集，可以做关联查询等,主键只能使用小写id -->
+	<resultMap id="hypay" type="com.sdcloud.api.hl.entity.Hypay">
+        <id property="id" column="id"></id>
+		<result property="payId" column="pay_id"></result>
+		<result property="userId" column="user_id"></result>
+		<result property="projectId" column="project_id"></result>
+		<result property="unitName" column="unit_name"></result>
+		<result property="province" column="province"></result>
+		<result property="city" column="city"></result>
+		<result property="customerName" column="customer_name"></result>
+		<result property="customerAddress" column="customer_address"></result>
+		<result property="realAmount" column="real_amount" jdbcType="DECIMAL"></result>
+		<result property="orderTime" column="order_time"></result>
+		<result property="payTime" column="pay_time"></result>
+		<result property="ctime" column="ctime"></result>
+		<result property="createDate" column="create_date"></result>
+		<result property="updateDate" column="update_date"></result>
+	</resultMap>
+	
+	<select id="findAll" parameterType="com.sdcloud.framework.entity.LarPager" resultMap="hypay">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_hypay h
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND h.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			ORDER BY ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="countByPayId" resultType="int">
+		SELECT COUNT(h.id)
+		FROM hl_hypay h
+		WHERE h.pay_id=#{payId}
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		SELECT COUNT(h.id)
+		FROM hl_hypay h
+		<where>
+			1=1
+			<if test="larPager.params!=null ">
+				<if test="larPager.params.city != null">
+					AND h.city = #{larPager.params.city}
+				</if>
+			</if>
+			AND <![CDATA[ createDate < NOW() ]]>
+		</where>
+	</select>
+	
+	<insert id="save" >
+		INSERT INTO hl_hypay
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO hl_hypay
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		VALUES
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+	
+	<delete id="delete">
+		DELETE FROM hl_hypay h
+		WHERE id=#{id}
+	</delete>
+	
+	<delete id="batchDelete">
+		DELETE FROM hl_hypay h
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				h.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() == 0">
+				false
+			</if>
+		</where>
+	</delete>
+
+	
+	<update id="update">
+		UPDATE hl_hypay h
+		<include refid="Update_Column"></include>
+		WHERE h.id=#{id}
+	</update>
+	
+	<update id="updateBatch">
+		UPDATE hl_hypay h
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix=" h.pay_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.payId}
+               </foreach>
+            </trim>
+			<trim prefix=" h.user_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.userId}
+               </foreach>
+            </trim>
+			<trim prefix=" h.project_id = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.projectId}
+               </foreach>
+            </trim>
+			<trim prefix=" h.unit_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.unitName}
+               </foreach>
+            </trim>
+			<trim prefix=" h.province = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.province}
+               </foreach>
+            </trim>
+			<trim prefix=" h.city = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.city}
+               </foreach>
+            </trim>
+			<trim prefix=" h.customer_name = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.customerName}
+               </foreach>
+            </trim>
+			<trim prefix=" h.customer_address = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.customerAddress}
+               </foreach>
+            </trim>
+			<trim prefix=" h.real_amount = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.realAmount}
+               </foreach>
+            </trim>
+			<trim prefix=" h.order_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.orderTime}
+               </foreach>
+            </trim>
+			<trim prefix=" h.pay_time = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.payTime}
+               </foreach>
+            </trim>
+			<trim prefix=" h.ctime = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.ctime}
+               </foreach>
+            </trim>
+			<trim prefix=" h.create_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.createDate}
+               </foreach>
+            </trim>
+			<trim prefix=" h.update_date = case" suffix="end,">
+               <foreach collection="list" item="i">
+                   WHEN h.id=#{i.id} THEN #{i.updateDate}
+               </foreach>
+            </trim>
+		</trim>
+		<where>
+			h.id IN 
+            <foreach collection="list" open="(" close=")" item="i" separator=",">
+              #{i.id}
+            </foreach>
+		</where>
+	</update>
+	
+	<select id="findByIds" resultMap="hypay">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_hypay h
+		<where>
+			<if test="ids !=null &amp;&amp; ids.size() >0">
+				h.id IN
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					${id}
+				</foreach>
+			</if>
+			<if test="ids == null || ids.size() ==0">
+				false
+			</if>
+		</where>
+	</select>
+	
+
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		SELECT COUNT(h.id) 
+		FROM hl_hypay h
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                    AND h.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND h.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+	</select>
+	
+    <select id="findByOrgIds" resultMap="hypay">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_hypay h
+        <where>
+            1=1
+            <if test="larPager.params!=null ">
+                <foreach collection="larPager.params.keys" item="item" index="key" >
+                  AND h.${item}=#{larPager.params[${item}]}
+                </foreach>
+            </if>
+            <if test="ids !=null and ids.size() >0">
+                AND h.org IN
+                <foreach collection="ids" item="id" close=")" open="(" separator=",">
+                    ${id}
+                </foreach>
+            </if>
+        </where>
+        <choose>
+            <when test="larPager.orderBy != null and larPager.order!=null">
+                ORDER BY ${larPager.orderSql}
+            </when>
+            <otherwise>
+                 ORDER BY updateDate DESC,createDate DESC
+            </otherwise>
+        </choose>
+        <if test="larPager.first!=null and larPager.pageSize!=null">
+            LIMIT #{larPager.first}, #{larPager.pageSize}
+        </if>
+    </select>
+	
+    <select id="exist" resultMap="hypay">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_hypay h
+        <where>
+            <if test="map!=null ">
+                1=1
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND h.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="getById" resultMap="hypay">
+        SELECT
+		<include refid="Base_Column_List"/>
+		FROM hl_hypay h
+        <where>
+            h.id=#{id}
+            <if test="map!=null ">
+                <foreach collection="map.keys" item="item" index="key" >
+                    AND h.${item}=#{map[${item}]}
+                </foreach>
+            </if>
+        </where>
+    </select>
+	
+</mapper>

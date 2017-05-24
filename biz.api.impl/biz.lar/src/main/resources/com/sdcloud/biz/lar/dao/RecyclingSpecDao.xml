@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.RecyclingSpecDao">
+
+	<insert id="save" parameterType="RecyclingSpec">
+		insert into lar_recyclingspec(
+		 type_id,goods_id, spec_name,status,spec_company,create_user,create_date
+		)values(
+		#{typeId},#{goodsId},#{specName},#{status},#{specCompany},#{createUser},#{createDate}
+		)
+	</insert>
+	
+	<sql id="Base_Column_List">
+		a.id,type_id,goods_id, goodsName,spec_name,status,spec_company,create_user,create_date,update_user,update_date
+	</sql>
+	
+	<select id="findAll" resultType="RecyclingSpec">
+		select
+		<include refid="Base_Column_List" />
+		from lar_recyclingspec a
+		left join lar_recyclingmaterial b on a.goods_id=b.goodsId
+ 		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key" separator="and">
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+		
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+	</select>
+	
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(id)
+		from lar_recyclingspec
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item"
+					index="key" separator="and">
+					${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<update id="update" parameterType="RecyclingSpec">
+		update lar_recyclingspec
+		<set>
+			<if test="specCompany != null">
+				spec_company = #{specCompany},
+			</if>
+			<if test="specName != null">
+				spec_name = #{specName},
+			</if>
+			<if test="updateUser != null">
+				update_user = #{updateUser},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate},
+			</if>
+			<if test="status != null">
+				status = #{status},
+			</if>						
+		</set>
+		where id = #{id}
+	</update>
+	
+	
+	<select id="findPriceByOrgId" resultType="com.sdcloud.api.lar.entity.RecyclingSpec">
+		SELECT
+			DISTINCT
+			s.id,
+			s.type_id,
+			t.typeName,
+			s.goods_id,
+			m.goodsName,
+			s.spec_name,
+			s.spec_company,
+			p.id AS `price_id`,
+			p.org,
+			p.price,
+			p.sell_price,
+			p.enable,
+			p.create_date,
+			p.create_user_name,
+			p.create_user,
+			p.update_date,
+			p.update_user_name,
+			p.update_user
+		FROM
+			lar_recyclingspec s
+		LEFT JOIN (
+			SELECT
+				*
+			FROM
+				lar_recyclingprice	
+			<where>
+				<if test="ids !=null and ids.size() >0">
+					and org in
+					<foreach collection="ids" item="id" close=")" open="(" separator=",">
+						${id}
+					</foreach>
+				</if>
+			</where>	
+						
+		) p ON s.id = p.spec_id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			<if test="larPager.extendMap!=null  and larPager.extendMap.enable !=null ">				
+				AND p.`enable`= #{larPager.extendMap.enable}
+			</if>
+			AND m.`enable`=0
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id="countPricByOrgId" resultType="java.lang.Long">
+		SELECT count(*) from(
+			SELECT
+				DISTINCT
+				s.id,
+				s.type_id,
+				t.typeName,
+				s.goods_id,
+				m.goodsName,
+				s.spec_name,
+				s.spec_company,
+				p.id AS `price_id`,
+				p.org,
+				p.price,
+				p.sell_price,
+				p.enable,
+				p.create_date,
+				p.create_user_name,
+				p.create_user,
+				p.update_date,
+				p.update_user_name,
+				p.update_user
+			FROM
+				lar_recyclingspec s
+			LEFT JOIN (
+				SELECT
+					*
+				FROM
+					lar_recyclingprice	
+				<where>
+					<if test="ids !=null and ids.size() >0">
+						and org in
+						<foreach collection="ids" item="id" close=")" open="(" separator=",">
+							${id}
+						</foreach>
+					</if>
+				</where>	
+							
+			) p ON s.id = p.spec_id
+			LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+			LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+			<where>
+				<if test="larPager.params!=null ">
+					<foreach collection="larPager.params.keys" item="item" index="key" >
+						and ${item}=#{larPager.params[${item}]}
+					</foreach>
+				</if>
+				<if test="larPager.extendMap!=null  and larPager.extendMap.enable !=null ">				
+					AND p.`enable`= #{larPager.extendMap.enable}
+				</if>
+				AND m.`enable`=0
+			</where>
+			)aaa
+	</select>
+	
+	<insert id="savePrice" parameterType="RecyclingSpec">
+		insert into lar_recyclingprice(
+		 id,org,spec_id,price,sell_price,enable,create_user,create_user_name,create_date,update_user,update_user_name,update_date
+		)values(
+		#{priceId},#{org},#{id},#{price},#{sellPrice},#{enable},#{createUser},#{createUserName},#{createDate},#{updateUser},#{updateUserName},#{updateDate}
+		)
+	</insert>
+	
+	<update id="updatePrice" parameterType="RecyclingSpec">
+		update lar_recyclingprice
+		<set>
+			<if test="sellPrice != null">
+				sell_price = #{sellPrice},
+			</if>
+			<if test="price != null">
+				price = #{price},
+			</if>
+			<if test="enable != null">
+				enable = #{enable},
+			</if>
+			<if test="updateUser != null">
+				update_user = #{updateUser},
+			</if>
+			<if test="updateUserName != null">
+				update_user_name = #{updateUserName},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate},
+			</if>		
+		</set>
+		where id = #{priceId}
+	</update>
+	
+	<!-- 根据规格ID将所有 的价格置为停用 -->
+	<update id="stopPriceBySpec" parameterType="long">
+		update lar_recyclingprice
+		<set>	
+			enable = 0		
+		</set>
+		where spec_id = #{id}
+	</update>
+	
+	
+	<select id="findSpecByOrgId" resultType="com.sdcloud.api.lar.entity.RecyclingSpec">
+		SELECT
+			DISTINCT
+			s.id,
+			s.type_id,
+			t.typeName,
+			s.goods_id,
+			m.goodsName,
+			s.spec_name,
+			s.spec_company
+			
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					lar_recyclingprice	
+				<where>
+					<if test="ids !=null and ids.size() >0">
+						and org in
+						<foreach collection="ids" item="id" close=")" open="(" separator=",">
+							${id}
+						</foreach>
+					</if>
+				</where>	
+							
+			) p
+			
+		LEFT JOIN lar_recyclingspec s ON s.id = p.spec_id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			
+			AND m.`enable`=0
+			<if test="larPager.extendMap.priceEnable">
+				AND s.status=2
+				AND p.enable =1
+			</if>
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<!-- 查询全部 -->
+	<select id="findAllSpecByOrgId" resultType="com.sdcloud.api.lar.entity.RecyclingSpec">
+		SELECT
+			DISTINCT
+			s.id,
+			s.type_id,
+			t.typeName,
+			s.goods_id,
+			m.goodsName,
+			s.spec_name,
+			s.spec_company
+			
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					lar_recyclingprice	
+				<where>
+					<if test="ids !=null and ids.size() >0">
+						and org in
+						<foreach collection="ids" item="id" close=")" open="(" separator=",">
+							${id}
+						</foreach>
+					</if>
+				</where>	
+							
+			) p
+			
+		LEFT JOIN lar_recyclingspec s ON s.id = p.spec_id
+		LEFT JOIN lar_recyclingmaterial m ON s.goods_id = m.goodsId
+		LEFT JOIN lar_recyclingtype t ON t.id = s.type_id
+		<where>
+			<if test="larPager.params!=null ">
+				<foreach collection="larPager.params.keys" item="item" index="key" >
+					and ${item}=#{larPager.params[${item}]}
+				</foreach>
+			</if>
+			
+		</where>
+		<if test="larPager.orderBy != null and larPager.order!=null">
+			order by ${larPager.orderSql}
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<select id = "getSpecById" resultType="RecyclingSpec">
+		select
+			<include refid="Base_Column_List" />
+			from lar_recyclingspec a
+			left join lar_recyclingmaterial b on a.goods_id=b.goodsId
+	 		<where>
+				a.id = #{id}
+			</where>
+	</select>
+	
+	
+</mapper>

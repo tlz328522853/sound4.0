@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sdcloud.biz.lar.dao.ExchangeInfoDao">
+
+	<insert id="insertSelective" parameterType="com.sdcloud.api.lar.entity.ExchangeInfo">
+		insert into lar_exchangeinfo
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="orderId != null">
+				orderId,
+			</if>
+			<if test="appUserId != null">
+				appUserId,
+			</if>
+			<if test="mechanismId != null">
+				mechanismId,
+			</if>
+			<if test="larClientUserAddress != null and larClientUserAddress.id!=null">
+				larClientUserAddress,
+			</if>
+			<if test="maaDate != null">
+				maaDate,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="OrderStatus != null">
+				OrderStatus,
+			</if>
+			<if test="deliveryDate != null">
+				deliveryDate,
+			</if>
+			<if test="deliveryInfo != null">
+				deliveryInfo,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="cityId != null">
+				cityId,
+			</if>
+			<if test="remark != null">
+				remark,
+			</if>
+			<if test="confirmDate != null">
+				confirmDate,
+			</if>
+			<if test="loginUserId != null">
+				loginUserId,
+			</if>
+			<if test="loginUserName != null">
+				loginUserName,
+			</if>
+			<if test="money != null">
+				money,
+			</if>
+			<if test="integral != null">
+				integral,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="orderId != null">
+				#{orderId},
+			</if>
+			<if test="appUserId != null">
+				#{appUserId},
+			</if>
+			<if test="mechanismId != null">
+				#{mechanismId},
+			</if>
+			<if test="larClientUserAddress != null and larClientUserAddress.id!=null">
+				#{larClientUserAddress.id},
+			</if>
+			<if test="maaDate != null">
+				#{maaDate},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="OrderStatus != null">
+				#{OrderStatus},
+			</if>
+			<if test="deliveryDate != null">
+				#{deliveryDate},
+			</if>
+			<if test="deliveryInfo != null">
+				#{deliveryInfo},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="cityId != null">
+				#{cityId},
+			</if>
+			<if test="remark != null">
+				#{remark},
+			</if>
+			<if test="confirmDate != null">
+				#{confirmDate},
+			</if>
+			<if test="loginUserId != null">
+				#{loginUserId},
+			</if>
+			<if test="loginUserName != null">
+				#{loginUserName},
+			</if>
+			<if test="money != null">
+				#{money},
+			</if>
+			<if test="integral != null">
+				#{integral},
+			</if>
+
+		</trim>
+	</insert>
+
+	<insert id="insertSelectiveChild" parameterType="com.sdcloud.api.lar.entity.ExchangeOrders">
+		insert into lar_exchangeorders
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="commodity != null and commodity.id!=null">
+				commodity,
+			</if>
+			<if test="number != null">
+				number,
+			</if>
+			<if test="exchangeInfo != null and exchangeInfo.id!=null">
+				exchangeInfo,
+			</if>
+			<if test="enable != null">
+				enable,
+			</if>
+			<if test="createDate != null">
+				createDate,
+			</if>
+			<if test="confirmOrder != null">
+				confirmOrder,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="commodity != null and commodity.id!=null">
+				#{commodity.id},
+			</if>
+			<if test="number != null">
+				#{number},
+			</if>
+			<if test="exchangeInfo != null and exchangeInfo.id!=null">
+				#{exchangeInfo.id},
+			</if>
+			<if test="enable != null">
+				#{enable},
+			</if>
+			<if test="createDate != null">
+				#{createDate},
+			</if>
+			<if test="confirmOrder != null">
+				#{confirmOrder},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="updateBySelect" parameterType="com.sdcloud.api.lar.entity.ExchangeInfo">
+		update lar_exchangeinfo
+		<set>
+			<if test="remark != null">
+				remark=#{remark},
+			</if>
+			<if test="confirmDate != null">
+				confirmDate=#{confirmDate},
+			</if>
+			<if test="loginUserId != null">
+				loginUserId=#{loginUserId},
+			</if>
+			<if test="loginUserName != null">
+				loginUserName=#{loginUserName},
+			</if>
+			<if test="OrderStatus != null">
+				OrderStatus=#{OrderStatus},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="totalCount" resultType="java.lang.Long">
+		select count(e.id) from
+		`lar_exchangeinfo` e
+		LEFT OUTER JOIN `lar_ordermanager` om ON(om.orderId=e.orderId)
+		LEFT OUTER JOIN lar_address a ON(a.id = e.larClientUserAddress)
+		<where>
+			e.enable = 0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and e.mechanismId=#{larPager.params.mechanismId}
+				</if>
+				<if test="larPager.params.orderId!=null">
+					and e.orderId like '%${larPager.params.orderId}%'
+				</if>
+				<if test="larPager.params.appUserId!=null">
+					and e.appUserId like '%${larPager.params.appUserId}%'
+				</if>
+				<if test="larPager.params.contact!=null">
+					and a.contact = #{larPager.params.contact}
+				</if>
+				<if
+					test="larPager.params.OrderStatus!=null and larPager.params.OrderStatus!=''">
+					and e.OrderStatus=#{larPager.params.OrderStatus}
+				</if>
+
+				<if
+					test="larPager.params.endDate==null and larPager.params.createDate!=null">
+						<![CDATA[
+							and e.createDate>= #{larPager.params.createDate}
+						]]>
+				</if>
+				<if
+					test="larPager.params.createDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and e.createDate <= #{larPager.params.endDate}
+					]]>
+				</if>
+				<if
+					test="larPager.params.endDate!=null and larPager.params.createDate!=null">
+					<![CDATA[
+						and e.createDate <= #{larPager.params.endDate} and e.createDate>= #{larPager.params.createDate}
+					]]>
+				</if>
+
+			</if>
+			<if test="ids != null and ids.size>0">
+				and e.mechanismId in
+				<foreach collection="ids" item="id" open="(" close=")"
+					separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+		<if
+			test="larPager.order!=null &amp;&amp; larPager.orderBy != null &amp;&amp; larPager.orderBy !='' ">
+			order by e.${larPager.orderSql},e.id
+		</if>
+	</select>
+
+	<select id="selectByExample" resultMap="queryMap"
+		parameterType="com.sdcloud.framework.entity.LarPager">
+		select
+		e.`id` as "e_id",e.`orderId`,e.createDate as "e_createDate",
+		e.mechanismId,e.OrderStatus,e.appUserId,e.maaDate,e.money,e.integral,e.deliveryDate,e.larClientUserAddress,remark,confirmDate,loginUserId,loginUserName,o.`orderStatusName`
+		,e.cancelOrderPersonId,e.cancelOrderPersonName,
+		e.cancelOrderIllustrate,e.cancelDate,TIMESTAMPDIFF(HOUR,
+		e.createDate,e.confirmDate) as serverLong,d.phone as phone,d.name as
+		name,d.address as address,
+		CASE
+		WHEN TIMESTAMPDIFF(HOUR, e.createDate,e.confirmDate )>=24 THEN '[24小时以上]'
+		WHEN TIMESTAMPDIFF(HOUR, e.createDate,e.confirmDate)>=12 THEN '[12~24小时]'
+		WHEN TIMESTAMPDIFF(HOUR, e.createDate,e.confirmDate)>=6 THEN '[6~12小时]'
+		WHEN TIMESTAMPDIFF(HOUR, e.createDate,e.confirmDate)>=1 THEN '[1~6小时]'
+		WHEN TIMESTAMPDIFF(HOUR, e.createDate,e.confirmDate)>=0 THEN '[0~1小时]'
+		END as timeType FROM
+		`lar_exchangeinfo` e
+		LEFT OUTER JOIN `lar_ordermanager` o ON(o.orderId=e.orderId) 
+		LEFT OUTER JOIN `lar_clientuser` d ON(d.customerId=e.appUserId)
+		LEFT OUTER JOIN lar_address a ON(a.id = e.larClientUserAddress)
+		
+		<where>
+			e.enable = 0
+			<if test="larPager.params!=null and larPager.params.size>0">
+				<if test="larPager.params.mechanismId!=null">
+					and e.mechanismId=#{larPager.params.mechanismId}
+				</if>
+				<if test="larPager.params.orderId!=null">
+					and e.orderId like '%${larPager.params.orderId}%'
+				</if>
+				<if test="larPager.params.appUserId!=null">
+					and e.appUserId like '%${larPager.params.appUserId}%'
+				</if>
+				<if test="larPager.params.contact!=null">
+					and a.contact = #{larPager.params.contact}
+				</if>
+				<if
+					test="larPager.params.OrderStatus!=null and larPager.params.OrderStatus!=''">
+					and e.OrderStatus=#{larPager.params.OrderStatus}
+				</if>
+
+				<if
+					test="larPager.params.endDate==null and larPager.params.createDate!=null">
+						<![CDATA[
+							and e.createDate>= #{larPager.params.createDate}
+						]]>
+				</if>
+				<if
+					test="larPager.params.createDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and e.createDate <= #{larPager.params.endDate}
+					]]>
+				</if>
+				<if
+					test="larPager.params.endDate!=null and larPager.params.createDate!=null">
+					<![CDATA[
+						and e.createDate <= #{larPager.params.endDate} and e.createDate >= #{larPager.params.createDate}
+					]]>
+				</if>
+
+			</if>
+			<if test="ids != null and ids.size>0">
+				and e.mechanismId in
+				<foreach collection="ids" item="id" open="(" close=")"
+					separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+		<if
+			test="larPager.order!=null &amp;&amp; larPager.orderBy != null &amp;&amp; larPager.orderBy !='' ">
+			order by e.${larPager.orderSql},e.id
+		</if>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+
+	<select id="selectByExampleByOrderId" resultMap="queryMap"
+		parameterType="map">
+		select
+		e.`id` as "e_id",e.`orderId`,e.createDate as "e_createDate",d.phone as
+		phone,
+		e.mechanismId,e.OrderStatus,e.appUserId,e.maaDate,e.money,e.integral,e.deliveryDate,e.larClientUserAddress,remark,confirmDate,loginUserId,loginUserName,o.`orderStatusName`
+		,e.serverLong,e.timeType FROM
+		`lar_exchangeinfo` e
+		LEFT OUTER JOIN `lar_ordermanager` o ON(o.orderId=e.orderId) LEFT OUTER
+		JOIN `lar_clientuser` d ON(d.customerId=e.appUserId)
+		<where>
+			e.enable = 0
+			<if test="params.id!=null">
+				and e.id = '${params.id}'
+			</if>
+		</where>
+	</select>
+
+	<resultMap type="com.sdcloud.api.lar.entity.ExchangeInfo" id="queryMap">
+		<id property="id" column="e_id" />
+		<result property="orderId" column="orderId" />
+		<result property="createDate" column="e_createDate" />
+		<result property="mechanismId" column="mechanismId" />
+		<result property="OrderStatus" column="OrderStatus" />
+		<result property="appUserId" column="appUserId" />
+		<result property="deliveryDate" column="deliveryDate" />
+		<result property="remark" column="remark" />
+		<result property="confirmDate" column="confirmDate" />
+		<result property="loginUserId" column="loginUserId" />
+		<result property="loginUserName" column="loginUserName" />
+		<result property="money" column="money" />
+		<result property="integral" column="integral" />
+		<association property="larClientUserAddress" column="larClientUserAddress"
+			javaType="com.sdcloud.api.lar.entity.LarClientUserAddress" select="selectAddress"></association>
+		<collection property="shoppingCarts" column="e_id"
+			javaType="java.util.ArrayList" ofType="com.sdcloud.api.lar.entity.ShoppingCart"
+			select="selectOrders">
+		</collection>
+	</resultMap>
+	<select id="selectAddress" resultType="com.sdcloud.api.lar.entity.LarClientUserAddress">
+		select a.id
+		,CONCAT(a.address,a.detail) AS "address", a.userName,a.contact,
+		c.phone as "larClientUser.phone" ,c.name as
+		"larClientUser.name",c.addressDetail as "larClientUser.addressDetail"
+		from lar_address a
+		LEFT OUTER JOIN lar_clientuser c on
+		a.larClientUser=c.id
+		where a.id = #{larClientUserAddress}
+	</select>
+	<select id="selectOrders" resultType="com.sdcloud.api.lar.entity.ShoppingCart">
+		SELECT
+		o.id AS "id",number,c.id AS "commodity.id",typeName AS
+		"commodity.commodityType.typeName",
+		shopId AS
+		"commodity.shopId",shopName AS "commodity.shopName",shopDescribe AS
+		"commodity.shopDescribe",
+		brand AS "commodity.brand",specifications AS
+		"commodity.specifications",shopImg AS
+		"commodity.shopImg",paymentMethod AS "commodity.paymentMethod",
+		unitPrice AS "commodity.unitPrice",moneyUnit AS
+		"commodity.moneyUnit",t.id AS "commodity.commodityType.id",c.shelfLife
+		as "commodity.shelfLife",
+		c.shelfTime as "commodity.shelfTime"
+		FROM
+		lar_exchangeorders o
+		LEFT OUTER JOIN `lar_commodity` c ON(o.commodity=c.id)
+		LEFT OUTER JOIN `lar_commoditytype` t ON(c.`commodityType`=t.id)
+		where
+		o.exchangeInfo = #{e_id}
+	</select>
+
+	<select id="getExchangeInfoByUserId" resultMap="queryOrders">
+		SELECT e.`id` as
+		"e_id",`orderId`,e.createDate as "e_createDate",o.id AS
+		"o_id",number,c.id AS "c_id",
+		shopId,shopName,shopDescribe,brand,specifications,shopImg,paymentMethod,unitPrice,moneyUnit,t.id
+		AS "t_id",
+		typeName FROM `lar_exchangeinfo` e LEFT OUTER JOIN
+		`lar_exchangeorders` o ON(e.id=o.exchangeInfo)
+		LEFT OUTER JOIN `lar_commodity` c ON(o.commodity=c.id)
+		LEFT OUTER JOIN `lar_commoditytype` t ON(c.`commodityType`=t.id)
+		where e.enable = 0 and appUserId=#{userId} ORDER BY e.id
+	</select>
+	<resultMap type="com.sdcloud.api.lar.entity.ExchangeInfo" id="queryOrders">
+		<id property="id" column="e_id" />
+		<result property="orderId" column="orderId" />
+		<result property="createDate" column="e_createDate" />
+		<collection property="shoppingCarts" javaType="java.util.ArrayList"
+			ofType="com.sdcloud.api.lar.entity.ShoppingCart">
+			<id column="o_id" property="id" />
+			<result column="number" property="number" />
+			<result column="c_id" property="commodity.id" />
+			<result column="shopId" property="commodity.shopId" />
+			<result column="shopName" property="commodity.shopName" />
+			<result column="shopDescribe" property="commodity.shopDescribe" />
+			<result column="brand" property="commodity.brand" />
+			<result column="specifications" property="commodity.specifications" />
+			<result column="shopImg" property="commodity.shopImg" />
+			<result column="paymentMethod" property="commodity.paymentMethod" />
+			<result column="unitPrice" property="commodity.unitPrice" />
+			<result column="moneyUnit" property="commodity.moneyUnit" />
+			<result column="t_id" property="commodity.commodityType.id" />
+			<result column="typeName" property="commodity.commodityType.typeName" />
+		</collection>
+	</resultMap>
+</mapper>

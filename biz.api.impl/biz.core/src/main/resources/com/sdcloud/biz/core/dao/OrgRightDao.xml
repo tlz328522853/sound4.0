@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.core.dao.OrgRightDao">
+	
+	<sql id="moduleColumn">
+		ownerId,ownerType,orgId,orgCode,rightValue,ownerCode,tenantId 
+	</sql>
+	
+	<select id="findOrgIds" parameterType="long" resultType="long">
+		select orgId from pf_org_right 
+		where ownerId = #{ownerId}
+	</select>
+	
+	<insert id="insert" parameterType="list">
+		insert into pf_org_right(
+			orgRightId, <include refid="moduleColumn"/>
+		)values
+		<foreach item="item" index="index" collection="orgRights" separator=",">
+			(#{item.orgRightId}, #{item.ownerId}, #{item.ownerType}, #{item.orgId},
+			 #{item.orgCode}, #{item.rightValue}, #{item.ownerCode},#{item.tenantId})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteUserRoleRight" parameterType="long" >
+		DELETE from pf_org_right  
+		where  
+		<choose>
+			<when test="roleIds != null &amp;&amp; roleIds.size()>0">
+			(pf_org_right.orgId=#{orgId} and 
+			(pf_org_right.ownerType=1 and pf_org_right.ownerId in
+			<foreach collection="roleIds" item="item" index="index"
+				separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			))
+		    </when>
+		</choose> 
+		<choose>
+			<when test="roleIds != null &amp;&amp; roleIds.size()>0">
+			 OR
+		    </when>
+		</choose> 
+		<choose>
+			<when test="userIds != null &amp;&amp; userIds.size()>0">
+			(pf_org_right.orgId=#{orgId} and 
+			(pf_org_right.ownerType=2 and pf_org_right.ownerId in
+			<foreach collection="userIds" item="item" index="index"
+				separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			))
+		    </when>
+		</choose>
+		<choose>
+			<when test="userIds != null &amp;&amp; userIds.size()>0">
+			 OR
+		    </when>
+		</choose> 
+		<choose>
+			<when test="groupIds != null &amp;&amp; groupIds.size()>0">
+			(pf_org_right.orgId=#{orgId} and 
+			(pf_org_right.ownerType=3 and pf_org_right.ownerId in
+			<foreach collection="groupIds" item="item" index="index"
+				separator="," open="(" close=")">
+				#{item}
+			</foreach>
+			))
+		    </when>
+		</choose>  
+		<choose>
+			<when test="userIds.size()&lt;1 &amp;&amp; roleIds.size()&lt;1 &amp;&amp; groupIds.size()&lt;1">
+				1>3
+		    </when>
+		</choose> 
+	</delete>
+	<delete id="deleteByOwnerId" parameterType="long" >
+		delete from 
+			pf_org_right
+		where 
+			ownerId = #{ownerId}
+	</delete>
+	<delete id="deleteById" parameterType="List" >
+		delete from 
+			pf_org_right
+		where orgRightId in
+		<foreach collection="orgRightIds" item="item" index="index"
+			separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<select id="findOrgRight" parameterType="map" resultType="OrgRight">
+		select * from pf_org_right
+		<where>
+			<if test="userId != null">
+				( ownerType = 2
+				AND ownerId=#{userId})
+		    </if>
+		    <if test="roleIds != null">
+		       or (ownerType = 1
+				AND ownerId in
+				<foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+			      		#{item}
+			     </foreach>
+				
+				)
+		    </if>
+		     <if test="groupId != null">
+		       or (ownerType = 3
+				AND ownerId=#{groupId})
+		    </if>
+		</where>
+	</select>
+	
+	<select id="findOrgIdsByGroup"  resultType="Long">
+		select orgId from pf_org_right
+		<where>
+		     <if test="groupId != null">
+		       or (ownerType = 3
+				AND ownerId=#{groupId})
+		    </if>
+		</where>
+	</select>
+	<select id="findAuthenOrgIds" resultType="long">
+		SELECT por.orgId from pf_org_right por
+		<choose>
+			<when test="includeDepartment != null&amp;&amp;includeDepartment==true">
+				INNER JOIN pf_org po 
+				on po.orgId= por.orgId
+		    </when>
+		</choose> 
+		<where>
+		(
+		 <if test="userId != null">
+			  (por.ownerType=2
+			  and por.ownerId=#{userId}) 
+		 </if>
+		 <if test="includeRole != null&amp;&amp;includeRole==true">
+			    OR
+				(por.ownerType=1 and por.ownerId in (SELECT 
+				pur.roleId from pf_user_role pur
+				INNER JOIN pf_role prt
+				on prt.roleId=pur.roleId 
+				where pur.userId=#{userId} and prt.roleType !=2
+				))
+		 </if>
+		 )
+		<if test="includeDepartment != null&amp;&amp;includeDepartment==true">
+			and po.isSubCompany=1
+		</if>
+		</where>
+		<choose>
+			<when test="includeRole != null&amp;&amp;includeRole==true &amp;&amp; userId != null">
+				union
+				SELECT pfor.orgId from pf_org_right pfor
+				<choose>
+					<when test="includeDepartment != null&amp;&amp;includeDepartment==true">
+						INNER JOIN pf_org po 
+						on po.orgId= pfor.orgId
+				    </when>
+				</choose> 
+					INNER JOIN (SELECT pur.roleId from pf_user_role  pur
+					INNER JOIN pf_role pr
+					on pr.roleId=pur.roleId
+					where pur.userId=#{userId} and pr.roleType=2) trole
+					on trole.roleId=pfor.ownerId
+					INNER JOIN (
+					SELECT pfor2.orgId from pf_org_right  pfor2 
+					INNER JOIN pf_group_user pgu
+					on pgu.groupId=pfor2.ownerId
+					where pgu.userId=#{userId} and pfor2.ownerType=3
+					) as groupOrg
+					on groupOrg.orgId=pfor.orgId
+					where pfor.ownerType=1
+				 <choose>
+					<when test="includeDepartment != null&amp;&amp;includeDepartment==true">
+						and po.isSubCompany=1
+				    </when>
+				</choose> 
+			 </when>
+		</choose> 
+		
+	</select>
+	<select id="hasAuthen" resultType="long">
+		SELECT p_org.orgId from (SELECT por.orgId from pf_org_right por
+		<where>
+		(
+		 <if test="userId != null">
+			  (por.ownerType=2
+			  and por.ownerId=#{userId}) 
+		 </if>
+		 <if test="includeRole != null&amp;&amp;includeRole==true">
+			    OR
+				(por.ownerType=1 and por.ownerId in (SELECT 
+				pur.roleId from pf_user_role pur
+				INNER JOIN pf_role prt
+				on prt.roleId=pur.roleId 
+				where pur.userId=#{userId} and prt.roleType !=2
+				))
+		 </if>
+		 )
+		</where>
+		<choose>
+			<when test="includeRole != null&amp;&amp;includeRole==true &amp;&amp; userId != null">
+				union
+				SELECT pfor.orgId from pf_org_right pfor
+				INNER JOIN (SELECT pur.roleId from pf_user_role  pur
+				INNER JOIN pf_role pr
+				on pr.roleId=pur.roleId
+				where pur.userId=#{userId} and pr.roleType=2) trole
+				on trole.roleId=pfor.ownerId
+				INNER JOIN (
+				SELECT pfor2.orgId from pf_org_right  pfor2 
+				INNER JOIN pf_group_user pgu
+				on pgu.groupId=pfor2.ownerId
+				where pgu.userId=#{userId} and pfor2.ownerType=3
+				) as groupOrg
+				on groupOrg.orgId=pfor.orgId
+				where pfor.ownerType=1
+				 
+			 </when>
+		</choose> 
+		) p_org where  p_org.orgId=#{orgId}
+	</select>
+	<select id="findChildById" resultType="Long">
+	    select  orgId	 from pf_org
+	    where 	
+	    <if test="orgIds != null">
+	        parentId in 
+	    	<foreach item="item" index="index" collection="orgIds"
+			      open="(" separator="," close=")">
+			        #{item}
+			</foreach>
+	    </if>
+	   <if test="includeDepartment != null&amp;&amp;includeDepartment==true">
+			and isSubCompany=1
+		</if>
+		<if test="1==1">
+			and orgId not in
+			 <foreach item="item" index="index" collection="orgIds"
+				      open="(" separator="," close=")">
+				        #{item}
+			 </foreach>
+		</if>
+		 
+	</select>
+</mapper>

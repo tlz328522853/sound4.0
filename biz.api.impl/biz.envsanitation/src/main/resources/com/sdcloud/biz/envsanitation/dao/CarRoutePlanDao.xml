@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sdcloud.biz.envsanitation.dao.CarRoutePlanDao">
+	<insert id="insert" parameterType="CarRoutePlan">
+		insert into
+		so_car_route_plan(carRoutePlanId,assetId,empId,workTime,workTimeStart,workTimeEnd,workRouteName,workPlanLength,workRoutePosition,maxSpeed,maxStopTime,startTime,endTime,bounds,remark,creator,createTime,ownerCode,tenantId,extStr1,extStr2,extStr3,extStr4,extStr5,extStr6,extStr7,extDate1,extDate2,extDate3)
+		values(#{carRoutePlanId},#{assetId},#{empId},#{workTime},#{workTimeStart},#{workTimeEnd},#{workRouteName},#{workPlanLength},#{workRoutePosition},#{maxSpeed},#{maxStopTime},#{startTime},#{endTime},#{bounds},#{remark},#{creator},now(),#{ownerCode},#{tenantId},#{extStr1},#{extStr2},#{extStr3},#{extStr4},#{extStr5},#{extStr6},#{extStr7},#{extDate1},#{extDate2},#{extDate3})
+	</insert>
+ <sql id="carCondition">
+ <where>
+		 <if test="orgId != null &amp;&amp; includeSub != 'true'" >
+			and o.companyId = #{orgId}
+		</if>
+		<if test="orgId != null &amp;&amp; includeSub == 'true'">
+			and o.ownerCode like  concat('',(select ownerCode from pf_org where ownerCode is not null and orgId = #{orgId}),'%')
+		</if>
+		<if test="empName != null">
+			and b.name LIKE '%${empName}%'
+		</if>
+				<if test="carNumber != null">
+			and c.carNumber LIKE '%${carNumber}%'
+		</if>
+				<if test="carName != null">
+			and c.carName LIKE '%${carName}%'
+		</if>
+		<if test="assetId != null">
+			and c.assetId = #{assetId}
+		</if>
+		<if test="workRouteName !=null">
+		and a.workRouteName LIKE '%${workRouteName}%'
+		</if>
+		
+		<if test="startTimeFrom !=null">
+		and a.startTime >=#{startTimeFrom}
+		</if>
+		
+		<if test="startTimeTo !=null">
+		<![CDATA[
+		and a.startTime <=#{startTimeTo}
+		]]>
+		</if>
+		
+		<if test="endTimeFrom !=null">
+		and a.endTime >=#{endTimeFrom}
+		</if>
+		
+		<if test="endTimeTo !=null">
+		<![CDATA[
+		and a.endTime <=#{endTimeTo}
+		]]>
+		</if>
+		
+		<if test="workPlanLengthFrom !=null">
+		and a.workPlanLength >=#{workPlanLengthFrom}
+		</if>
+		
+		<if test="workPlanLengthTo !=null">
+		<![CDATA[
+		and a.workPlanLength <=#{workPlanLengthTo}
+		]]>
+		</if>
+		
+		<if test="bounds !=null">
+		and a.bounds=#{bounds}
+		</if>
+
+ </where>
+ 
+ </sql>
+	<select id="findAll" resultType="CarRoutePlan">
+		select a.carRoutePlanId,a.assetId,c.carName, c.carNumber, c.cardNumber,a.empId,
+		b.name as empName, b.telephone as empMobile,
+		a.workTime,
+		a.workTimeStart,a.workTimeEnd,a.workRouteName,a.workPlanLength,
+		a.workRoutePosition,a.maxSpeed,a.maxStopTime,a.startTime,a.endTime,
+		a.bounds,a.remark,a.creator,a.editor,a.ownerCode,a.tenantId,a.extStr1,
+		a.extStr2,a.extStr3,a.extStr4,a.extStr5,a.extStr6,a.extStr7,a.extDate1,a.extDate2,a.extDate3, o.name as orgName
+		from so_car_route_plan a 
+		LEFT OUTER JOIN pf_employee b ON a.empId = b.employeeId 
+		LEFT OUTER JOIN so_asset_car c ON a.assetId = c.assetId 
+		LEFT OUTER JOIN so_asset_object d ON a.assetId = d.assetId 
+		LEFT OUTER JOIN pf_org o ON d.newOrgId = o.orgId
+		<!-- <if test="orgIds != null &amp;&amp; orgIds.size() != 0">
+			and d.newOrgId in
+			<foreach item="item" index="index" collection="orgIds" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="empIds != null &amp;&amp; empIds.size() != 0">
+			and a.empId in
+			<foreach item="item" index="index" collection="empIds" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="assetIds != null &amp;&amp; assetIds.size() != 0">
+			and c.assetId in
+			<foreach item="item" index="index" collection="assetIds"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if> -->
+		<include refid="carCondition" />
+		
+			<if test="pager != null">
+				<if test="pager.orderSql != null &amp;&amp; pager.orderSql != ''">
+					order by a.${pager.orderSql}
+				</if>
+				<if test="for_method_exportData != 'true'">
+				limit #{pager.first}, #{pager.pageSize} 
+				</if>
+				<!-- limit #{pager.first}, #{pager.pageSize} -->
+			</if>
+			<!-- <if test="pager != null">
+				order by ${pager.orderSql}
+				limit #{pager.first}, #{pager.pageSize}
+			</if> -->
+	</select>
+	
+	<select id="getTotalNum" resultType="java.lang.Long">
+		select count(a.carRoutePlanId)
+		from so_car_route_plan a 
+		LEFT OUTER JOIN pf_employee b ON a.empId = b.employeeId 
+		LEFT OUTER JOIN so_asset_car c ON a.assetId = c.assetId 
+		LEFT OUTER JOIN so_asset_object d ON a.assetId = d.assetId 
+		LEFT OUTER JOIN pf_org o ON d.newOrgId = o.orgId
+		<!-- <if test="orgIds != null &amp;&amp; orgIds.size() != 0">
+		    and b.orgId in
+		    <foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		   		#{item}
+		    </foreach>
+		</if>
+		<if test="empIds != null &amp;&amp; empIds.size() != 0">
+		    and a.empId in
+		    <foreach item="item" index="index" collection="empIds" open="(" separator="," close=")">
+		   		#{item}
+		    </foreach>
+		</if>
+		<if test="assetIds != null &amp;&amp; assetIds.size() != 0">
+			and c.assetId in
+			<foreach item="item" index="index" collection="assetIds"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if> -->
+    <include refid="carCondition" />
+	</select>
+
+	<update id="update">
+		update so_car_route_plan
+		<set>
+			assetId = #{assetId},
+			empId = #{empId},
+			workTime = #{workTime},
+			workTimeStart = #{workTimeStart},
+			workTimeEnd = #{workTimeEnd},
+			workRouteName = #{workRouteName},
+			workPlanLength = #{workPlanLength},
+			workRoutePosition = #{workRoutePosition},
+			maxSpeed = #{maxSpeed},
+			maxStopTime = #{maxStopTime},
+			startTime = #{startTime},
+			endTime = #{endTime},
+			bounds = #{bounds},
+			remark = #{remark},
+			editor = #{editor},
+			editTime = now()
+		</set>
+		where carRoutePlanId = #{carRoutePlanId}
+	</update>
+
+	<delete id="delete">
+		delete from so_car_route_plan
+		<choose>
+			<when
+				test="carRoutePlanIds != null &amp;&amp; carRoutePlanIds.size() != 0">
+				where carRoutePlanId in
+				<foreach item="item" index="index" collection="carRoutePlanIds"
+					open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				where 1 = 2
+			</otherwise>
+		</choose>
+	</delete>
+
+</mapper>

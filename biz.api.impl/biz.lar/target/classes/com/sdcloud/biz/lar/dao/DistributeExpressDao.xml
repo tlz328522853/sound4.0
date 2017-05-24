@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.DistributeExpressDao">
+	<sql id="Base_Column_List">
+		id, order_no as `orderNo`, org, org_name as orgName, receiver, reveiver_name as reveiverName, reveive_time as reveiveTime, 
+		sign_status as signStatus, distributer,distributer_name as distributerName, distribute_time as distributeTime, to_pay as toPay,
+		express, express_name as expressName, pic, remark, update_reason as updateReason, sign_time as signTime,    
+		create_user as createUser,create_date as createDate,
+		update_user as updateUser, update_username as updateUserName, update_time as updateDate
+	</sql>
+	<sql id="Insert_Column">
+		id, order_no, org, org_name, receiver, reveiver_name, reveive_time, 
+		sign_status, distributer, distributer_name, distribute_time, to_pay,
+		express, express_name ,pic,remark, update_reason, sign_time,    
+		create_user, create_date, update_user, update_username, update_time
+	</sql>
+	<sql id="Insert_Value">
+		#{id}, #{orderNo}, #{org}, #{orgName}, #{receiver}, #{reveiverName}, #{reveiveTime}, 
+		#{signStatus}, #{distributer}, #{distributerName}, #{distributeTime}, #{toPay},
+		#{express}, #{expressName}, #{pic}, #{remark}, #{updateReason}, #{signTime},    
+		#{createUser}, #{createDate}, #{updateUser}, #{updateUserName}, #{updateDate}
+	</sql>
+	
+	<sql id="Insert_Batch_Value">
+		#{item.id}, #{item.orderNo}, #{item.org}, #{item.orgName}, #{item.receiver}, #{item.reveiverName}, #{item.reveiveTime}, 
+		#{item.signStatus}, #{item.distributer}, #{item.distributerName}, #{item.distributeTime}, #{item.toPay},
+		#{item.express}, #{item.expressName}, #{item.pic}, #{item.remark}, #{item.updateReason}, #{item.signTime},    
+		#{item.createUser}, #{item.createDate}, #{item.updateUser}, #{item.updateUserName}, #{item.updateDate}
+	</sql>
+	
+	<sql id="Where_Value">
+		<if test="larPager.params!=null and larPager.params.size>0">
+			<if test="larPager.params.org!=null">
+				and org=#{larPager.params.org}
+			</if>
+			<if test="larPager.params.signStatus!=null">
+				and sign_status=#{larPager.params.signStatus} 
+			</if>
+			<if test="larPager.params.orderNo != null">
+				and order_no like '%${larPager.params.orderNo}%'
+			</if>
+			<if test="larPager.params.upOrder !=null and larPager.params.upOrder=='true'">
+				<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and reveive_time > #{larPager.params.firstDate}
+					]]>
+				</if>
+				<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and reveive_time < #{larPager.params.endDate}
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and reveive_time < #{larPager.params.endDate} and reveive_time > #{larPager.params.firstDate}
+					]]>
+				</if>
+			</if>
+			<if test="larPager.params.signOrder !=null and larPager.params.signOrder=='true'">
+				<if test="larPager.params.endDate==null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and sign_time > #{larPager.params.firstDate}
+					]]>
+				</if>
+				<if test="larPager.params.firstDate==null and larPager.params.endDate!=null">
+					<![CDATA[
+						and sign_time < #{larPager.params.endDate}
+					]]>
+				</if>
+				<if test="larPager.params.endDate!=null and larPager.params.firstDate!=null">
+					<![CDATA[
+						and sign_time < #{larPager.params.endDate} and sign_time > #{larPager.params.firstDate}
+					]]>
+				</if>
+			</if>
+			<if test="larPager.params.receiver !=null">
+				and receiver = #{larPager.params.receiver}
+			</if>
+			<if test="larPager.params.distributer !=null">
+				and distributer = #{larPager.params.distributer}
+			</if>
+			<if test="larPager.params.express !=null">
+				and express = #{larPager.params.express}
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="Update_Column">
+		<if test="orderNo != null">
+			order_no=#{orderNo},
+		</if>
+		<if test="org != null">
+			org=#{org},
+		</if>
+		<if test="orgName != null">
+			org_name=#{orgName},
+		</if>
+		<if test="receiver != null">
+			receiver=#{receiver},
+		</if>
+		<if test="reveiverName != null">
+			reveiver_name=#{reveiverName},
+		</if>
+		<if test="reveiveTime != null">
+			reveive_time=#{reveiveTime},
+		</if>
+		<if test="signStatus != null">
+			sign_status=#{signStatus},
+		</if>
+		<if test="signTime != null">
+			sign_time=#{signTime},
+		</if>
+		<if test="distributer != null">
+			distributer=#{distributer},
+		</if>
+		<if test="distributerName != null">
+			distributer_name=#{distributerName},
+		</if>
+		<if test="distributeTime != null">
+			distribute_time= #{distributeTime},
+		</if>
+		<if test="toPay != null">
+			to_pay=#{toPay},
+		</if>
+		<if test="express != null and express !=0 ">
+			express=#{express},
+		</if>
+		<if test="expressName != null">
+			express_name=#{expressName},
+		</if>
+		<if test="pic != null">
+			pic=#{pic},
+		</if>
+		<if test="remark != null">
+			remark=#{remark},
+		</if>
+		<if test="updateReason != null">
+			update_reason=#{updateReason},
+		</if>
+		<if test="deleteFlag != null">
+			delete_flag = #{deleteFlag},
+		</if>
+		<if test="updateUserName != null">
+			update_username = #{updateUserName},
+		</if>
+		<if test="createUser !=null and createUser !=''">
+			create_user=#{createUser},
+		</if>
+		<if test="createDate !=null and createDate !=''">
+			create_date=#{createDate},
+		</if>
+		<if test="updateUser !=null and updateUser !=''">
+			update_user=#{updateUser},
+		</if>
+		<if test="updateDate !=null and updateDate !=''">
+			update_time=#{updateDate},
+		</if>
+	</sql>
+	
+	<select id="findByOrderNos" resultType="com.sdcloud.api.lar.entity.DistributeExpress">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_ship_distribute_express
+		<where>
+			order_no in
+			<foreach collection="orderNos" item="orderNo" open="(" close=")" separator=",">
+				#{orderNo}
+			</foreach>
+		</where>
+	</select>
+	
+	<select id="findByOrderNo" resultType="com.sdcloud.api.lar.entity.DistributeExpress">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_ship_distribute_express
+		<where>
+			order_no=#{orderNo}
+		</where>
+	</select>
+	
+	<update id="updateByOrderNo" parameterType="com.sdcloud.api.lar.entity.DistributeExpress">
+		update lar_ship_distribute_express
+		<set>
+			<include refid="Update_Column"></include>
+		</set>
+		where order_no=#{orderNo}
+	</update>
+	
+	<insert id="save" parameterType="com.sdcloud.api.lar.entity.DistributeExpress">
+		insert into lar_ship_distribute_express
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.DistributeExpress">
+		update lar_ship_distribute_express
+		<set>
+			<include refid="Update_Column"></include>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from lar_ship_distribute_express
+		where id=#{id}
+	</delete>
+	
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select count(id) from lar_ship_distribute_express
+		<where>
+			delete_flag = 0
+			<include refid="Where_Value"/>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<select id="getById" parameterType="java.lang.Long" resultType="com.sdcloud.api.lar.entity.DistributeExpress">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_ship_distribute_express
+		where id = #{id}
+	</select>
+	
+	<select id="getByIds" parameterType="java.lang.Long" resultType="com.sdcloud.api.lar.entity.DistributeExpress">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_ship_distribute_express
+		<where>
+			id in
+			<foreach collection="list" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</select>
+	
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.DistributeExpress">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_ship_distribute_express
+		<where>
+			delete_flag = 0
+			<include refid="Where_Value"/>
+			<if test="ids !=null and ids.size() >0">
+				and org in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by reveive_time desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<delete id="batchDelete">
+		delete from lar_ship_distribute_express
+		<where>
+			<if test="ids !=null and ids.size() >0">
+				id in
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	
+	<insert id="batchSave">
+		insert into lar_ship_distribute_express
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		values
+        <foreach collection="list" item="item" separator=",">
+            (<include refid="Insert_Batch_Value"/>)
+        </foreach>
+    </insert>
+    
+    <insert id="batchExportSave">
+		insert into lar_ship_distribute_express
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id, order_no, org, org_name, 
+			sign_status, distributer, distributer_name, to_pay,
+			express, express_name, sign_time,reveive_time,    
+			create_user, create_date,source_type
+		</trim>
+		values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id}, #{item.orderNo}, #{item.org}, #{item.orgName},
+			#{item.signStatus}, #{item.distributer}, #{item.distributerName},#{item.toPay},
+			#{item.express}, #{item.expressName}, #{item.signTime}, #{item.signTime},   
+			#{item.createUser}, #{item.createDate}, #{item.sourceType}
+            )
+        </foreach>
+    </insert>
+    
+    <select id="queryByOrderNos" resultType="java.lang.String">
+		select
+		order_no
+		from lar_ship_distribute_express
+		<where>
+			order_no in
+			<foreach collection="orderNos" item="orderNo" open="(" close=")" separator=",">
+				#{orderNo}
+			</foreach>
+		</where>
+	</select>
+	
+</mapper> 

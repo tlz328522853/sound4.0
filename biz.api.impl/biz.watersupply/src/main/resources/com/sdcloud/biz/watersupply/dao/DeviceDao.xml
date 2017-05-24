@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.watersupply.dao.DeviceDao">
+  <resultMap id="BaseResultMap" type="com.sdcloud.api.watersupply.entity.Device">
+    <id column="id" jdbcType="OTHER" property="id" />
+    <result column="code" jdbcType="OTHER" property="code" />
+    <result column="device_no" jdbcType="OTHER" property="deviceNo" />
+    <result column="org_id" jdbcType="OTHER" property="orgId" />
+    <result column="manufacturer_id" jdbcType="OTHER" property="manufacturerId" />
+    <result column="invoice_no" jdbcType="OTHER" property="invoiceNo" />
+    <result column="production_date" jdbcType="OTHER" property="productionDate" />
+    <result column="working_life" jdbcType="OTHER" property="workingLife" />
+    <result column="maintenance_interval" jdbcType="OTHER" property="maintenanceInterval" />
+    <result column="remark" jdbcType="OTHER" property="remark" />
+    <result column="create_time" jdbcType="OTHER" property="createTime" />
+    <result column="creator" jdbcType="OTHER" property="creator" />
+    <result column="update_time" jdbcType="OTHER" property="updateTime" />
+    <result column="update_user" jdbcType="OTHER" property="updateUser" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, code, device_no, org_id, manufacturer_id, invoice_no, production_date, working_life, 
+    maintenance_interval, remark, create_time, creator, update_time, update_user
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from tw_device
+    where id = #{id,jdbcType=OTHER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from tw_device
+    where id = #{id,jdbcType=OTHER}
+  </delete>
+  <insert id="insert" keyProperty="id" parameterType="com.sdcloud.api.watersupply.entity.Device" useGeneratedKeys="true">
+    insert into tw_device (code, device_no, org_id, 
+      manufacturer_id, invoice_no, production_date, 
+      working_life, maintenance_interval, remark, 
+      create_time, creator, update_time, 
+      update_user)
+    values (#{code,jdbcType=OTHER}, #{deviceNo,jdbcType=OTHER}, #{orgId,jdbcType=OTHER}, 
+      #{manufacturerId,jdbcType=OTHER}, #{invoiceNo,jdbcType=OTHER}, #{productionDate,jdbcType=OTHER}, 
+      #{workingLife,jdbcType=OTHER}, #{maintenanceInterval,jdbcType=OTHER}, #{remark,jdbcType=OTHER}, 
+      #{createTime,jdbcType=OTHER}, #{creator,jdbcType=OTHER}, #{updateTime,jdbcType=OTHER}, 
+      #{updateUser,jdbcType=OTHER})
+  </insert>
+  <insert id="insertSelective" keyProperty="id" parameterType="com.sdcloud.api.watersupply.entity.Device" useGeneratedKeys="true">
+    insert into tw_device
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="code != null">
+        code,
+      </if>
+      <if test="deviceNo != null">
+        device_no,
+      </if>
+      <if test="orgId != null">
+        org_id,
+      </if>
+      <if test="manufacturerId != null">
+        manufacturer_id,
+      </if>
+      <if test="invoiceNo != null">
+        invoice_no,
+      </if>
+      <if test="productionDate != null">
+        production_date,
+      </if>
+      <if test="workingLife != null">
+        working_life,
+      </if>
+      <if test="maintenanceInterval != null">
+        maintenance_interval,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="creator != null">
+        creator,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="updateUser != null">
+        update_user,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="code != null">
+        #{code,jdbcType=OTHER},
+      </if>
+      <if test="deviceNo != null">
+        #{deviceNo,jdbcType=OTHER},
+      </if>
+      <if test="orgId != null">
+        #{orgId,jdbcType=OTHER},
+      </if>
+      <if test="manufacturerId != null">
+        #{manufacturerId,jdbcType=OTHER},
+      </if>
+      <if test="invoiceNo != null">
+        #{invoiceNo,jdbcType=OTHER},
+      </if>
+      <if test="productionDate != null">
+        #{productionDate,jdbcType=OTHER},
+      </if>
+      <if test="workingLife != null">
+        #{workingLife,jdbcType=OTHER},
+      </if>
+      <if test="maintenanceInterval != null">
+        #{maintenanceInterval,jdbcType=OTHER},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=OTHER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=OTHER},
+      </if>
+      <if test="creator != null">
+        #{creator,jdbcType=OTHER},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=OTHER},
+      </if>
+      <if test="updateUser != null">
+        #{updateUser,jdbcType=OTHER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.sdcloud.api.watersupply.entity.Device">
+    update tw_device
+    <set>
+      <if test="code != null">
+        code = #{code,jdbcType=OTHER},
+      </if>
+      <if test="deviceNo != null">
+        device_no = #{deviceNo,jdbcType=OTHER},
+      </if>
+      <if test="orgId != null">
+        org_id = #{orgId,jdbcType=OTHER},
+      </if>
+      <if test="manufacturerId != null">
+        manufacturer_id = #{manufacturerId,jdbcType=OTHER},
+      </if>
+      <if test="invoiceNo != null">
+        invoice_no = #{invoiceNo,jdbcType=OTHER},
+      </if>
+      <if test="productionDate != null">
+        production_date = #{productionDate,jdbcType=OTHER},
+      </if>
+      <if test="workingLife != null">
+        working_life = #{workingLife,jdbcType=OTHER},
+      </if>
+      <if test="maintenanceInterval != null">
+        maintenance_interval = #{maintenanceInterval,jdbcType=OTHER},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=OTHER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=OTHER},
+      </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=OTHER},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=OTHER},
+      </if>
+      <if test="updateUser != null">
+        update_user = #{updateUser,jdbcType=OTHER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=OTHER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.sdcloud.api.watersupply.entity.Device">
+    update tw_device
+    set code = #{code,jdbcType=OTHER},
+      device_no = #{deviceNo,jdbcType=OTHER},
+      org_id = #{orgId,jdbcType=OTHER},
+      manufacturer_id = #{manufacturerId,jdbcType=OTHER},
+      invoice_no = #{invoiceNo,jdbcType=OTHER},
+      production_date = #{productionDate,jdbcType=OTHER},
+      working_life = #{workingLife,jdbcType=OTHER},
+      maintenance_interval = #{maintenanceInterval,jdbcType=OTHER},
+      remark = #{remark,jdbcType=OTHER},
+      create_time = #{createTime,jdbcType=OTHER},
+      creator = #{creator,jdbcType=OTHER},
+      update_time = #{updateTime,jdbcType=OTHER},
+      update_user = #{updateUser,jdbcType=OTHER}
+    where id = #{id,jdbcType=OTHER}
+  </update>
+  <sql id="MysqlDialectSuffix">
+    <if test="page != null">
+      <![CDATA[ limit #{page.begin} , #{page.length} ]]>
+    </if>
+  </sql>
+</mapper>

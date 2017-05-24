@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC   
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sdcloud.biz.lar.dao.ShipCostDao">
+	<sql id="Base_Column_List">
+		id, recordDate, orgId, salary, bonus, managerSalary, placeCost, 
+		carCost, documentCost, transferCost, otherCost, remark,
+		createDate, createUser,createUserName
+	</sql>
+	<sql id="Insert_Column">
+		id, recordDate, orgId, salary, bonus, managerSalary, placeCost, 
+		carCost, documentCost, transferCost, otherCost, remark,
+		createDate, createUser,createUserName
+	</sql>
+	<sql id="Insert_Value">
+		#{id}, #{recordDate}, #{orgId}, #{salary}, #{bonus}, #{managerSalary}, #{placeCost}, 
+		#{carCost}, #{documentCost}, #{transferCost}, #{otherCost}, #{remark},
+		#{createDate}, #{createUser}, #{createUserName}
+	</sql>
+	
+	<sql id="Where_Value">
+		1=1
+		<if test="larPager.params!=null and larPager.params.size>0">
+			<if test="larPager.params.startDate != null and larPager.params.endDate == null">
+				<![CDATA[
+					and #{larPager.params.startDate} < createDate
+				]]>
+			</if>
+			<if test="larPager.params.startDate == null and larPager.params.endDate != null">
+				<![CDATA[
+					and createDate < #{larPager.params.endDate}
+				]]>
+			</if>
+			<if test="larPager.params.startDate != null and larPager.params.endDate != null">
+				<![CDATA[
+					and #{larPager.params.startDate} < createDate and createDate < #{larPager.params.endDate}
+				]]>
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="Update_Column">
+		<if test="recordDate != null">
+			recordDate=#{recordDate},
+		</if>
+		<if test="orgId != null">
+			orgId=#{orgId},
+		</if>
+		<if test="salary != null">
+			salary=#{salary},
+		</if>
+		<if test="bonus != null">
+			bonus=#{bonus},
+		</if>
+		<if test="managerSalary != null">
+			managerSalary=#{managerSalary},
+		</if>
+		<if test="placeCost != null">
+			placeCost=#{placeCost},
+		</if>
+		<if test="carCost != null">
+			carCost=#{carCost},
+		</if>
+		<if test="documentCost != null">
+			documentCost=#{documentCost},
+		</if>
+		<if test="transferCost != null">
+			transferCost=#{transferCost},
+		</if>
+		<if test="otherCost != null">
+			otherCost=#{otherCost},
+		</if>
+		<if test="remark != null">
+			remark= #{remark},
+		</if>
+		<if test="createDate != null">
+			createDate=#{createDate},
+		</if>
+		<if test="createUser != null">
+			createUser=#{createUser},
+		</if>
+		<if test="createUserName != null">
+			createUserName=#{createUserName},
+		</if>
+	</sql>
+	
+	<insert id="save" parameterType="com.sdcloud.api.lar.entity.ShipCost">
+		insert into lar_ship_cost
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Column"></include>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<include refid="Insert_Value"></include>
+		</trim>
+	</insert>
+	
+	<update id="update" parameterType="com.sdcloud.api.lar.entity.ShipCost">
+		update lar_ship_cost
+		<set>
+			<include refid="Update_Column"></include>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from lar_ship_cost
+		where id=#{id}
+	</delete>
+	
+	<select id="countByOrgIds" resultType="java.lang.Long">
+		select count(id) from lar_ship_cost
+		<where>
+			<include refid="Where_Value"/>
+			<if test="ids !=null and ids.size() >0">
+				and orgId in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findByOrgIds" resultType="com.sdcloud.api.lar.entity.ShipCost">
+		select
+		<include refid="Base_Column_List"/>
+		from lar_ship_cost
+		<where>
+			<include refid="Where_Value"/>
+			<if test="ids !=null and ids.size() >0">
+				and orgId in
+				<foreach collection="ids" item="id" close=")" open="(" separator=",">
+					${id}
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="larPager.orderBy != null and larPager.order!=null">
+				order by ${larPager.orderSql}
+			</when>
+			<otherwise>
+				order by createDate desc
+			</otherwise>
+		</choose>
+		<if test="larPager.first!=null and larPager.pageSize!=null">
+			limit #{larPager.first}, #{larPager.pageSize}
+		</if>
+	</select>
+	
+	<delete id="batchDelete">
+		delete from lar_ship_cost
+		<where>
+			<if test="ids !=null and ids.size() >0">
+				id in
+				<foreach collection="ids" item="id" open="(" close=")" separator=",">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	
+</mapper> 

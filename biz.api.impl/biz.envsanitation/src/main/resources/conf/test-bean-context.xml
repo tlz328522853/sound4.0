@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation=" http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+      http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- Database config -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://192.168.2.222:3306/cloud?characterEncoding=utf-8&amp;autoReconnect=true" />
+		<property name="username" value="jira" />
+		<property name="password" value="" />
+	</bean>
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.sdcloud.api.envsanitation.entity"></property>
+		<property name="configLocation" value="" />
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"> 
+		<property name="basePackage" value="com.sdcloud.biz.envsanitation.dao" /> 
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property> 
+	</bean> 
+	
+	<!-- bean 
+	<bean id="assetCarService" class="com.sdcloud.biz.envsanitation.service.impl.AssetCarServciceImpl"/>
+	<bean id="assetDustbinService" class="com.sdcloud.biz.envsanitation.service.impl.AssetDustbinServciceImpl"/>
+	<bean id="assetStationService" class="com.sdcloud.biz.envsanitation.service.impl.AssetStationServciceImpl"/>
+	<bean id="assetWcService" class="com.sdcloud.biz.envsanitation.service.impl.AssetWcServciceImpl"/>
+	<bean id="empRoutePlanService" class="com.sdcloud.biz.envsanitation.service.impl.EmpRoutePlanServiceImpl"/>
+	<bean id="empInspecPlanService" class="com.sdcloud.biz.envsanitation.service.impl.EmpInspecPlanServiceImpl"/>
+	<bean id="carRoutePlanService" class="com.sdcloud.biz.envsanitation.service.impl.CarRoutePlanServiceImpl"/>
+	<bean id="eventService" class="com.sdcloud.biz.envsanitation.service.impl.EventServiceImpl"/>-->
+	<bean id="advertisementService" class="com.sdcloud.biz.envsanitation.service.impl.AdvertisementServiceImpl"/>
+	<bean id="deviceAdvertisementService" class="com.sdcloud.biz.envsanitation.service.impl.DeviceAdvertisementServiceImpl"/>
+</beans>
